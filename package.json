@@ -1,0 +1,40 @@
+{
+  "name": "CTcUMLS",
+  "version": "0.0.1",
+  "description": "Autocomplete and expander api for UMLS terms",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon --harmony app.js",
+    "production": "forever start --spinSleepTime 5000 -w -c \"node --harmony\" app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  ***REMOVED***,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CTcue/CTcUMLS.git"
+  ***REMOVED***,
+  "keywords": [
+    "umls",
+    "autosuggest",
+    "autocomplete",
+    "suggest",
+    "complete",
+    "expander",
+    "ctcue"
+  ],
+  "author": "CTcue",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CTcue/CTcUMLS/issues"
+  ***REMOVED***,
+  "homepage": "https://github.com/CTcue/CTcUMLS",
+  "dependencies": {
+    "koa": "^0.12.1",
+    "koa-cors": "0.0.13",
+    "koa-helmet": "0.0.1",
+    "koa-json": "^1.1.1",
+    "koa-parse-json": "^1.0.0",
+    "koa-trail": "0.0.2",
+    "lodash": "^2.4.1",
+    "request-json": "^0.4.12"
+  ***REMOVED***
+***REMOVED***
