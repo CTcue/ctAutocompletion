@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon --harmony app.js",
-    "production": "forever start --spinSleepTime 5000 -w -c \"node --harmony\" app.js",
+    "production": "forever start --spinSleepTime 5000 --minUptime 1000 -w -c \"node --harmony\" app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
