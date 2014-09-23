@@ -5,7 +5,7 @@ config.host = process.env.NODE_ENV === 'production'
               : 'localhost';
 
 config.port = process.env.NODE_ENV === 'production'
-              ? 80
+              ? 4050
               : 4050;
 
 config.path = 'http://'
