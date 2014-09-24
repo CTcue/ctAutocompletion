@@ -14,7 +14,7 @@ function autocomplete(searchQuery) {
       "result" : {
         "text" : searchQuery,
         "completion" : {
-          "size"  : 150,
+          "size"  : 8,
           "field" : "title",
           "fuzzy" : {
             "min_length"    : 3,
