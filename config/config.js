@@ -16,9 +16,7 @@ config.path = 'http://'
 
 config.elastic = {
   db : {
-    "host"  : "http://"
-              + config.host
-              + ":9200"
+    "host"  : "http://localhost:9200"
   }
 };
 
