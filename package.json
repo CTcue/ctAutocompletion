@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon --harmony app.js",
-    "production": "forever start --spinSleepTime 5000 --minUptime 1000 -w -c \"node --harmony\" app.js",
+    "production": "forever start -l $(date +%g_%m_%d_%H_%M_%S).log -o $(date +%g_%m_%d_%H_%M_%S).log -e $(date +%g_%m_%d_%H_%M_%S).log --spinSleepTime 10000 --minUptime 5000 -c \"node --harmony\" app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   ***REMOVED***,
   "repository": {
