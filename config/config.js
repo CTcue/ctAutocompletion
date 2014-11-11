@@ -1,7 +1,7 @@
 var config = {}
 
 config.host = process.env.NODE_ENV === 'production'
-              ? '188.226.214.70'
+              ? '178.62.230.23'
               : 'localhost';
 
 config.port = process.env.NODE_ENV === 'production'
