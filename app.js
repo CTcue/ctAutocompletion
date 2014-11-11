@@ -14,7 +14,7 @@ var json          = require('koa-json');
 var helmet        = require('koa-helmet');
 
 var autocomplete  = require('./controllers/autocompleteController.js');
-var elasticQuery = require('./lib/elasticQuery.js');
+var elasticQuery  = require('./lib/elasticQuery.js');
 
 // JSON output
 app.use(json({ pretty: true, param: 'pretty' }));

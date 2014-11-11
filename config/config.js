@@ -13,11 +13,13 @@ config.path = 'http://'
               + ':'
               + config.port;
 
+config.elastic = "http://localhost:9200"
 
-config.elastic = {
-  db : {
-    "host"  : "http://localhost:9200"
-  }
+config.mysql = {
+  host      : 'localhost',
+  user      : 'cumls',
+  password  : 'b7B5mDNu',
+  database  : 'umls'
 };
 
 module.exports = config;
