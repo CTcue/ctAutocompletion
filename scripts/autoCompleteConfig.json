@@ -1,0 +1,31 @@
+{
+
+  "semanticTypes" : [
+    "Sign or Symptom",
+    "Pathologic Function",
+    "Disease or Syndrome",
+    "Mental or Behavioral Dysfunction",
+    "Neoplastic Process",
+    "Cell or Molecular Dysfunction",
+    "Experimental Model of Disease",
+    "Injury or Poisoning",
+    "Clinical Drug"
+  ],
+
+  "index"   : "test_complete",
+
+  "indexSettings"  : {
+    "number_of_shards"  : 1,
+    "number_of_replicas"  : 0
+  ***REMOVED***,
+
+  "typeMapping" : {
+    "properties"  : {
+      "atom"  : {
+        "type"      : "completion",
+        "payloads"  : true
+  ***REMOVED***
+***REMOVED***
+  ***REMOVED***
+
+***REMOVED***
