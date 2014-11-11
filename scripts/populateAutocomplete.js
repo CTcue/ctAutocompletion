@@ -4,17 +4,20 @@
 * Module dependencies
 */
 
-var config        = require('../config/config.js');
-var mysql         = require('mysql').createConnection(config.mysql);
-var reqClient     = require('request-json').newClient(config.elastic);
-var elastic       = require('elasticsearch');
-var async         = require('async');
-var ProgressBar   = require('progress');
+var config          = require('../config/config.js');
+var mysql           = require('mysql').createConnection(config.mysql);
+var reqClient       = require('request-json').newClient(config.elastic);
+var elastic         = require('elasticsearch');
+var async           = require('async');
+var utf8            = require('utf8');
+var ascii           = require('diacritics').remove;
+var _               = require('underscore');
+var ProgressBar     = require('progress');
 
-var acConfig      = require('./autoCompleteConfig.json');
-var stopWords     = require('./stopwords.json');
+var acConfig        = require('./autoCompleteConfig.json');
+var stopWords       = require('./stopwords.json');
 
-var elasticOptions = {
+var elasticOptions  = {
   host  : 'localhost:9200',
   log   : [
     {
@@ -54,17 +57,8 @@ var umlsRetrieveQuery = [
   "FROM MRSTY a, MRCONSO b",
   "WHERE a.STY IN ('"
   + acConfig.semanticTypes.join("', '") + "')",
-  "AND a.CUI = b.CUI LIMIT 40000"
+  "AND a.CUI = b.CUI"
 ].join(' ');
-
-var transformBar = new ProgressBar(' [:bar] :percent :etas Transforming atoms to documents', {
-          complete: '*'
-        , incomplete: '.'
-        , width: 50
-        , total: 100
-***REMOVED***);
-
-var transformChunk = 0;
 
 var uploadBar = new ProgressBar(' [:bar] :percent :etas Uploading documents', {
           complete: '*'
@@ -83,7 +77,10 @@ var uploadChunk = 0;
 
 function deleteIndex(index, callback) {
   reqClient.del(index, function (err, response, body) {
-    if (body.error
+    if (err && err.code === "ECONNREFUSED") {
+        console.log("Please start elasticsearch!");
+        process.exit(1);
+***REMOVED*** else if (body.error
       && body.error === 'IndexMissingException[[' + index + '] missing]') {
       console.log('\n Index\'' + index + '\' does not exist');
       callback(null, 'success');
@@ -145,7 +142,6 @@ function retrieveAtoms(atomCount, callback) {
     if (err) {
       callback(err);
 ***REMOVED*** ***REMOVED***
-      transformChunk  = 100 / records.length;
       uploadChunk     = 100 / records.length;
       console.log(' Atoms retrieved: ' + records.length);
       console.log(' All atoms accounted for: '
@@ -177,9 +173,9 @@ function uploadDocument(document, callback) {
     uploadBar.tick(uploadChunk);
     if (error) {
       console.error(error);
-      setImmediate(callback);
+      callback();
 ***REMOVED*** ***REMOVED***
-      setImmediate(callback);
+      callback();
 ***REMOVED***;
   ***REMOVED***);
 
@@ -216,8 +212,6 @@ function transformAtom(atom, callback) {
              .replace(/\W+/g, " ")
              .replace(/\s+/g, " ")
              .trim());
-
-  // transformBar.tick(transformChunk);
 
   uploadDocument(document, function () {
     callback();
