@@ -12,7 +12,7 @@
     "Clinical Drug"
   ],
 
-  "index"   : "test_complete",
+  "index"   : "autocomplete",
 
   "indexSettings"  : {
     "number_of_shards"  : 1,
