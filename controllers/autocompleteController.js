@@ -3,7 +3,7 @@
 /** Module dependencies. */
 var config    = require('../config/config.js');
 var _         = require('lodash');
-var reqClient = require('request-json').newClient(config.elastic.db.host);
+var reqClient = require('request-json').newClient(config.elastic);
 
 function autocomplete(searchQuery) {
   return function(callback) {
