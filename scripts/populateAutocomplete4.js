@@ -4,20 +4,17 @@
 * Module dependencies
 */
 
-var config          = require('../config/config.js');
-var mysql           = require('mysql').createConnection(config.mysql);
-var reqClient       = require('request-json').newClient(config.elastic);
-var elastic         = require('elasticsearch');
-var async           = require('async');
-var utf8            = require('utf8');
-var ascii           = require('diacritics').remove;
-var _               = require('underscore');
-var ProgressBar     = require('progress');
+var config        = require('../config/config.js');
+var mysql         = require('mysql').createConnection(config.mysql);
+var reqClient     = require('request-json').newClient(config.elastic);
+var elastic       = require('elasticsearch');
+var async         = require('async');
+var ProgressBar   = require('progress');
 
-var acConfig        = require('./autoCompleteConfig.json');
-var stopWords       = require('./stopwords.json');
+var acConfig      = require('./autoCompleteConfig.json');
+var stopWords     = require('./stopwords.json');
 
-var elasticOptions  = {
+var elasticOptions = {
   host  : 'localhost:9200',
   log   : [
     {
@@ -57,7 +54,7 @@ var umlsRetrieveQuery = [
   "FROM MRSTY a, MRCONSO b",
   "WHERE a.STY IN ('"
   + acConfig.semanticTypes.join("', '") + "')",
-  "AND a.CUI = b.CUI"
+  "AND a.CUI = b.CUI LIMIT 40000"
 ].join(' ');
 
 var uploadBar = new ProgressBar(' [:bar] :percent :etas Uploading documents', {
@@ -67,7 +64,11 @@ var uploadBar = new ProgressBar(' [:bar] :percent :etas Uploading documents', {
         , total: 100
 });
 
-var uploadChunk = 0;
+var atomCount           = 0;
+var uploadChunk         = 0;
+var totalProcessedAtoms = 0;
+var processedAtoms      = 0;
+var allProcessed        = false;
 
 /*
 * Functions
@@ -77,10 +78,7 @@ var uploadChunk = 0;
 
 function deleteIndex(index, callback) {
   reqClient.del(index, function (err, response, body) {
-    if (err && err.code === "ECONNREFUSED") {
-        console.log("Please start elasticsearch!");
-        process.exit(1);
-    } else if (body.error
+    if (body.error
       && body.error === 'IndexMissingException[[' + index + '] missing]') {
       console.log('\n Index\'' + index + '\' does not exist');
       callback(null, 'success');
@@ -129,29 +127,149 @@ function countAtoms(callback) {
       callback(err);
     } else {
       console.log(' Atom Count: ' + counts[0]['COUNT(*)']);
-      callback(null, counts[0]['COUNT(*)']);
+      atomCount = counts[0]['COUNT(*)'];
+      callback();
     };
   });
 };
 
 // Retrieve atoms from MYSQL UMLS database
 
-function retrieveAtoms(atomCount, callback) {
-  console.log(' Retrieving all atoms. This can take up to 5 minutes...\n');
-  mysql.query(umlsRetrieveQuery, function (err, records) {
-    if (err) {
-      callback(err);
-    } else {
-      uploadChunk     = 100 / records.length;
-      console.log(' Atoms retrieved: ' + records.length);
-      console.log(' All atoms accounted for: '
-                  + (atomCount === records.length)
-                  + '\n');
-      console.log(' Uploading all atoms');
-      callback(null, records);
+// function retrieveAtoms(atomCount, callback) {
+//   console.log(' Retrieving all atoms. This can take up to 5 minutes...\n');
+//   mysql.query(umlsRetrieveQuery, function (err, records) {
+//     if (err) {
+//       callback(err);
+//     } else {
+//       uploadChunk     = 100 / records.length;
+//       console.log(' Atoms retrieved: ' + records.length);
+//       console.log(' All atoms accounted for: '
+//                   + (atomCount === records.length)
+//                   + '\n');
+//       console.log(' Uploading all atoms');
+//       callback(null, records);
+//     };
+//   });
+// };
+
+function retrieveAtoms(callback) {
+
+  console.log("\n  Custom amount of atoms:", atomCount = 101);
+  var batch     = Math.floor(atomCount / 50);
+
+  var limit               = [0, batch];
+
+  while (true) {
+
+    var umlsRetrieveQuery = [
+      "SELECT b.CUI, b.AUI, a.STY, b.STR",
+      "FROM MRSTY a, MRCONSO b",
+      "WHERE a.STY IN ('"
+      + acConfig.semanticTypes.join("', '")
+      + "')",
+      "AND a.CUI = b.CUI LIMIT"
+      + " "
+      + limit.join(", ")
+      + ";"
+    ].join(' ');
+
+    
+
+    mysql.query(umlsRetrieveQuery, function (err, records) {
+      console.log("  Current limit: ", limit)
+
+      totalProcessedAtoms++;
+      console.log("  Amount of records retrieved:", records.length);
+
+      if (totalProcessedAtoms >= atomCount) {
+        allProcessed = true;
+      };
+
+      limit[0] += batch;
+
+    });
+
+    
+    
+    
+    if (allProcessed === true) {
+      console.log('done')
+      callback();
+      break
     };
-  });
-};
+  };
+
+  // async.until(function () {
+  //   return allProcessed === true;
+  // },
+
+  // function (nextRetrieve) {
+
+
+
+    // 
+
+
+
+    // 
+    //   
+    //   processedAtoms  = 0;
+
+  //     // if (totalProcessedAtoms >= atomCount) {
+  //     //   allProcessed = true;
+  //     //   // callback();
+  //     // } else {
+  //     //   nextRetrieve();
+  //     // }
+
+  //     // uploadChunk         = 100 / records.length;
+
+      // for (var i = 0; i < records.length; i++) {
+
+  //     //   transformAtom(records[i], function (document) {
+  //     //     uploadDocument(document, function (err) {
+            // totalProcessedAtoms++;
+            // processedAtoms++;
+
+            // console.log(processedAtoms)
+
+  //     //       if (err) {
+  //     //         console.log(err);
+  //     //       }
+  //     //     });
+  //     //   });
+
+  //     //   if (totalProcessedAtoms >= atomCount) {
+  //     //     allProcessed = true;
+  //     //   };
+
+        // if (processedAtoms >= records.lenth) {
+        //   
+        //   console.log('totalProcessedAtoms:', totalProcessedAtoms)
+          // nextRetrieve();
+      //   }
+      // };
+
+      // while(true) {
+      //   if (processedAtoms >= records.length) {
+      //     nextRetrieve();
+      //     break
+      //   };
+      // };
+
+    // });
+  // },
+
+  // function (err) {
+  //   if (err) {
+  //     callback(err);
+  //   } else {
+  //     // console.log("atoms processed: ", totalProcessedAtoms)
+  //     callback(null, 'success');
+  //   }
+  // });
+
+}
 
 // Transform MYSQL atoms into JSON atoms
 
@@ -172,10 +290,13 @@ function uploadDocument(document, callback) {
   elasticClient.index(document, function (error, response) {
     uploadBar.tick(uploadChunk);
     if (error) {
-      console.error(error);
-      callback();
+      callback(error);
+      // setImmediate(callback);
     } else {
-      callback();
+      // setTimeout(function() {
+        callback();
+      // }, 5000);
+      // setImmediate(callback);
     };
   });
 
@@ -213,34 +334,23 @@ function transformAtom(atom, callback) {
              .replace(/\s+/g, " ")
              .trim());
 
-  uploadDocument(document, function () {
-    callback();
-  });
+  // uploadDocument(document, function () {
+    callback(document);
+  // });
 };
 
 // Execute count, retrieve, transform and upload atoms
 
 function retrieveTransformUploadAtoms(semanticTypes, callback) {
-  countAtoms(function (err, atomCount) {
+  countAtoms(function (err) {
     if (err) {
       callback(err);
     } else {
-
-      retrieveAtoms(atomCount, function (err, records) {
+      retrieveAtoms(function (err) {
         if (err) {
           callback(err);
         } else {
-
-          async.eachSeries(records, transformAtom, function (err) {
-            if (err) {
-              callback(err);
-            } else {
-
-              callback();
-
-            };
-          });
-
+          callback(null, 'success');
         };
       });
     };
@@ -275,8 +385,8 @@ async.series({
       if (err) {
         nextFunction(err);
       } else {
-        nextFunction(null, 'success');
-      };
+        nextFunction(null, success);
+      }
     });
   },
 
