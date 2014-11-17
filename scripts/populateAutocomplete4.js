@@ -4,20 +4,17 @@
 * Module dependencies
 */
 
-var config          = require('../config/config.js');
-var mysql           = require('mysql').createConnection(config.mysql);
-var reqClient       = require('request-json').newClient(config.elastic);
-var elastic         = require('elasticsearch');
-var async           = require('async');
-var utf8            = require('utf8');
-var ascii           = require('diacritics').remove;
-var _               = require('underscore');
-var ProgressBar     = require('progress');
+var config        = require('../config/config.js');
+var mysql         = require('mysql').createConnection(config.mysql);
+var reqClient     = require('request-json').newClient(config.elastic);
+var elastic       = require('elasticsearch');
+var async         = require('async');
+var ProgressBar   = require('progress');
 
-var acConfig        = require('./autoCompleteConfig.json');
-var stopWords       = require('./stopwords.json');
+var acConfig      = require('./autoCompleteConfig.json');
+var stopWords     = require('./stopwords.json');
 
-var elasticOptions  = {
+var elasticOptions = {
   host  : 'localhost:9200',
   log   : [
     {
@@ -57,7 +54,7 @@ var umlsRetrieveQuery = [
   "FROM MRSTY a, MRCONSO b",
   "WHERE a.STY IN ('"
   + acConfig.semanticTypes.join("', '") + "')",
-  "AND a.CUI = b.CUI"
+  "AND a.CUI = b.CUI LIMIT 40000"
 ].join(' ');
 
 var uploadBar = new ProgressBar(' [:bar] :percent :etas Uploading documents', {
@@ -67,7 +64,11 @@ var uploadBar = new ProgressBar(' [:bar] :percent :etas Uploading documents', {
         , total: 100
 ***REMOVED***);
 
-var uploadChunk = 0;
+var atomCount           = 0;
+var uploadChunk         = 0;
+var totalProcessedAtoms = 0;
+var processedAtoms      = 0;
+var allProcessed        = false;
 
 /*
 * Functions
@@ -77,10 +78,7 @@ var uploadChunk = 0;
 
 function deleteIndex(index, callback) {
   reqClient.del(index, function (err, response, body) {
-    if (err && err.code === "ECONNREFUSED") {
-        console.log("Please start elasticsearch!");
-        process.exit(1);
-***REMOVED*** else if (body.error
+    if (body.error
       && body.error === 'IndexMissingException[[' + index + '] missing]') {
       console.log('\n Index\'' + index + '\' does not exist');
       callback(null, 'success');
@@ -129,29 +127,149 @@ function countAtoms(callback) {
       callback(err);
 ***REMOVED*** ***REMOVED***
       console.log(' Atom Count: ' + counts[0]['COUNT(*)']);
-      callback(null, counts[0]['COUNT(*)']);
+      atomCount = counts[0]['COUNT(*)'];
+      callback();
 ***REMOVED***;
   ***REMOVED***);
 ***REMOVED***;
 
 // Retrieve atoms from MYSQL UMLS database
 
-function retrieveAtoms(atomCount, callback) {
-  console.log(' Retrieving all atoms. This can take up to 5 minutes...\n');
-  mysql.query(umlsRetrieveQuery, function (err, records) {
-    if (err) {
-      callback(err);
-***REMOVED*** ***REMOVED***
-      uploadChunk     = 100 / records.length;
-      console.log(' Atoms retrieved: ' + records.length);
-      console.log(' All atoms accounted for: '
-                  + (atomCount === records.length)
-                  + '\n');
-      console.log(' Uploading all atoms');
-      callback(null, records);
+// function retrieveAtoms(atomCount, callback) {
+//   console.log(' Retrieving all atoms. This can take up to 5 minutes...\n');
+//   mysql.query(umlsRetrieveQuery, function (err, records) {
+//     if (err) {
+//       callback(err);
+// ***REMOVED*** ***REMOVED***
+//       uploadChunk     = 100 / records.length;
+//       console.log(' Atoms retrieved: ' + records.length);
+//       console.log(' All atoms accounted for: '
+//                   + (atomCount === records.length)
+//                   + '\n');
+//       console.log(' Uploading all atoms');
+//       callback(null, records);
+// ***REMOVED***;
+//   ***REMOVED***);
+// ***REMOVED***;
+
+function retrieveAtoms(callback) {
+
+  console.log("\n  Custom amount of atoms:", atomCount = 101);
+  var batch     = Math.floor(atomCount / 50);
+
+  var limit               = [0, batch];
+
+  while (true) {
+
+    var umlsRetrieveQuery = [
+      "SELECT b.CUI, b.AUI, a.STY, b.STR",
+      "FROM MRSTY a, MRCONSO b",
+      "WHERE a.STY IN ('"
+      + acConfig.semanticTypes.join("', '")
+      + "')",
+      "AND a.CUI = b.CUI LIMIT"
+      + " "
+      + limit.join(", ")
+      + ";"
+    ].join(' ');
+
+    
+
+    mysql.query(umlsRetrieveQuery, function (err, records) {
+      console.log("  Current limit: ", limit)
+
+      totalProcessedAtoms++;
+      console.log("  Amount of records retrieved:", records.length);
+
+      if (totalProcessedAtoms >= atomCount) {
+        allProcessed = true;
+  ***REMOVED***;
+
+      limit[0] += batch;
+
+***REMOVED***);
+
+    
+    
+    
+    if (allProcessed === true) {
+      console.log('done')
+      callback();
+      break
 ***REMOVED***;
-  ***REMOVED***);
-***REMOVED***;
+  ***REMOVED***;
+
+  // async.until(function () {
+  //   return allProcessed === true;
+  // ***REMOVED***,
+
+  // function (nextRetrieve) {
+
+
+
+***REMOVED*** 
+
+
+
+***REMOVED*** 
+***REMOVED***   
+***REMOVED***   processedAtoms  = 0;
+
+  // ***REMOVED*** if (totalProcessedAtoms >= atomCount) {
+  // ***REMOVED***   allProcessed = true;
+  // ***REMOVED***   // callback();
+  // ***REMOVED*** ***REMOVED*** ***REMOVED***
+  // ***REMOVED***   nextRetrieve();
+  // ***REMOVED*** ***REMOVED***
+
+  // ***REMOVED*** uploadChunk         = 100 / records.length;
+
+  ***REMOVED*** for (var i = 0; i < records.length; i++) {
+
+  // ***REMOVED***   transformAtom(records[i], function (document) {
+  // ***REMOVED***     uploadDocument(document, function (err) {
+        ***REMOVED*** totalProcessedAtoms++;
+        ***REMOVED*** processedAtoms++;
+
+        ***REMOVED*** console.log(processedAtoms)
+
+  // ***REMOVED***       if (err) {
+  // ***REMOVED***         console.log(err);
+  // ***REMOVED***   ***REMOVED***
+  // ***REMOVED*** ***REMOVED***);
+  // ***REMOVED***   ***REMOVED***);
+
+  // ***REMOVED***   if (totalProcessedAtoms >= atomCount) {
+  // ***REMOVED***     allProcessed = true;
+  // ***REMOVED***   ***REMOVED***;
+
+    ***REMOVED*** if (processedAtoms >= records.lenth) {
+    ***REMOVED***   
+    ***REMOVED***   console.log('totalProcessedAtoms:', totalProcessedAtoms)
+      ***REMOVED*** nextRetrieve();
+  ***REMOVED***   ***REMOVED***
+  ***REMOVED*** ***REMOVED***;
+
+  ***REMOVED*** while(true) {
+  ***REMOVED***   if (processedAtoms >= records.length) {
+  ***REMOVED***     nextRetrieve();
+  ***REMOVED***     break
+  ***REMOVED***   ***REMOVED***;
+  ***REMOVED*** ***REMOVED***;
+
+***REMOVED*** ***REMOVED***);
+  // ***REMOVED***,
+
+  // function (err) {
+  //   if (err) {
+  //     callback(err);
+  //   ***REMOVED*** ***REMOVED***
+  // ***REMOVED*** console.log("atoms processed: ", totalProcessedAtoms)
+  //     callback(null, 'success');
+  //   ***REMOVED***
+  // ***REMOVED***);
+
+***REMOVED***
 
 // Transform MYSQL atoms into JSON atoms
 
@@ -172,10 +290,13 @@ function uploadDocument(document, callback) {
   elasticClient.index(document, function (error, response) {
     uploadBar.tick(uploadChunk);
     if (error) {
-      console.error(error);
-      callback();
+      callback(error);
+  ***REMOVED*** setImmediate(callback);
 ***REMOVED*** ***REMOVED***
-      callback();
+  ***REMOVED*** setTimeout(function() {
+        callback();
+  ***REMOVED*** ***REMOVED***, 5000);
+  ***REMOVED*** setImmediate(callback);
 ***REMOVED***;
   ***REMOVED***);
 
@@ -213,34 +334,23 @@ function transformAtom(atom, callback) {
              .replace(/\s+/g, " ")
              .trim());
 
-  uploadDocument(document, function () {
-    callback();
-  ***REMOVED***);
+  // uploadDocument(document, function () {
+    callback(document);
+  // ***REMOVED***);
 ***REMOVED***;
 
 // Execute count, retrieve, transform and upload atoms
 
 function retrieveTransformUploadAtoms(semanticTypes, callback) {
-  countAtoms(function (err, atomCount) {
+  countAtoms(function (err) {
     if (err) {
       callback(err);
 ***REMOVED*** ***REMOVED***
-
-      retrieveAtoms(atomCount, function (err, records) {
+      retrieveAtoms(function (err) {
         if (err) {
           callback(err);
     ***REMOVED*** ***REMOVED***
-
-          async.eachSeries(records, transformAtom, function (err) {
-            if (err) {
-              callback(err);
-        ***REMOVED*** ***REMOVED***
-
-              callback();
-
-        ***REMOVED***;
-      ***REMOVED***);
-
+          callback(null, 'success');
     ***REMOVED***;
   ***REMOVED***);
 ***REMOVED***;
@@ -275,8 +385,8 @@ async.series({
       if (err) {
         nextFunction(err);
   ***REMOVED*** ***REMOVED***
-        nextFunction(null, 'success');
-  ***REMOVED***;
+        nextFunction(null, success);
+  ***REMOVED***
 ***REMOVED***);
   ***REMOVED***,
 
