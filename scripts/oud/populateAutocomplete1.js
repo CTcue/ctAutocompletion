@@ -256,6 +256,8 @@ function transformAtom(atom, callback) {
     atom.input = results;
   });
 
+  atom.input.push(atom.STR);
+
   var document = {
       "index" : acConfig.index,
       "type"  : atom.STY.toLowerCase().replace(/\s/g, '_'),
@@ -391,25 +393,25 @@ function closeElasticSearch(callback) {
 
 async.series({
 
-  deleteIndex : function (nextFunction) {
-    deleteIndex(acConfig.index, function (err, success) {
-      if (err) {
-        nextFunction(err);
-      } else {
-        nextFunction(null, success);
-      };
-    });
-  },
+  // deleteIndex : function (nextFunction) {
+  //   deleteIndex(acConfig.index, function (err, success) {
+  //     if (err) {
+  //       nextFunction(err);
+  //     } else {
+  //       nextFunction(null, success);
+  //     };
+  //   });
+  // },
 
-  mapIndex : function (nextFunction) {
-    mapIndex(acConfig.index, function (err, success) {
-      if (err) {
-        nextFunction(err);
-      } else {
-        nextFunction(null, success);
-      };
-    });
-  },
+  // mapIndex : function (nextFunction) {
+  //   mapIndex(acConfig.index, function (err, success) {
+  //     if (err) {
+  //       nextFunction(err);
+  //     } else {
+  //       nextFunction(null, success);
+  //     };
+  //   });
+  // },
 
   initializeStorage : function (nextFunction) {
     initializeStorage(acConfig.semanticTypes, function (err, success) {

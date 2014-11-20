@@ -14,7 +14,8 @@ var json          = require('koa-json');
 var helmet        = require('koa-helmet');
 
 var autocomplete  = require('./controllers/autocompleteController.js');
-var elasticQuery  = require('./lib/elasticQuery.js');
+var autocomplete_v2  = require('./controllers/autocompleteController_v2.js');
+// var elasticQuery  = require('./lib/elasticQuery.js');
 
 // JSON output
 app.use(json({ pretty: true, param: 'pretty' }));
@@ -43,11 +44,19 @@ app.all('/', function *() {
 app.post('/autocomplete', function *() {
   var searchQuery = this.request.body.query;
 
-  var results = yield autocomplete(searchQuery);
+  var suggests    = yield autocomplete(searchQuery);
 
-  this.body = results;
+  this.body       = suggests;
 
 });
+
+app.post('/autocomplete_v2', function *() {
+  var searchQuery = this.request.body.query;
+
+  var suggests    = yield autocomplete_v2(searchQuery);
+
+  this.body       = suggests;
+})
 
 // Listen
 app.listen(config.port);
