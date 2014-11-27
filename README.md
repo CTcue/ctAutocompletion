@@ -1,4 +1,4 @@
 CTcUMLS
 =======
 
-Autosuggest and expander api for UMLS terms
+Autocompletion, suggestions and expander API for medical terms using UMLS.
