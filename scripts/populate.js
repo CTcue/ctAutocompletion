@@ -98,14 +98,14 @@ co(function *() {
   ***REMOVED*** Get avg. length 
       var sum = _.reduce(output, function(sum, str) {
         return sum + str.length;
-  ***REMOVED***);
+  ***REMOVED***, 0);
 
-      var average = sum / output.length;
+      var average = Math.ceil(sum / output.length);
           average = average > 20 ? average + 10 : average;
 
       bulk.push({
         "complete" : {
-          "weight"  : 100 / average,
+          "weight"  : Math.ceil(1000 / average),
           "input"   : output,
           "output"  : output,
           "payload" : { "cui" : cuiCodes[i].CUI, "codes" : output ***REMOVED***
