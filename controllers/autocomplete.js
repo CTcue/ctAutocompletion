@@ -16,8 +16,11 @@ var lookup =  {
       "text" : "",
       "completion" : {
         "field" : "complete",
-        "size"  : 80,
-        "fuzzy" : true,
+        "size"  : 50,
+        "fuzzy" : {
+          "min_length"    : 4,
+          "prefix_length" : 3
+        },
 
         "context" : { 
           "type" : []
@@ -30,8 +33,6 @@ var lookup =  {
 
 exports.simple = function(query) {
   return function(callback) {
-    // TODO If query has multiple words ...
-    
     lookup.body.suggest.text = query;
     lookup.body.suggest.completion.context.type = [
       "disease_or_syndrome",
@@ -48,8 +49,6 @@ exports.simple = function(query) {
 
 exports.diagnosis = function(query) {
   return function(callback) {
-    // TODO If query has multiple words ...
-    
     lookup.body.suggest.text = query;
     lookup.body.suggest.completion.context.type = [
       "disease_or_syndrome",
@@ -71,8 +70,6 @@ exports.diagnosis = function(query) {
 
 exports.medicine = function(query) {
   return function(callback) {
-    // TODO If query has multiple words ...
-    
     lookup.body.suggest.text = query;
     lookup.body.suggest.completion.context.type = [
       "clinical_drug"
