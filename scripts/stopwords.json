@@ -1,5 +1,4 @@
-{
-  "dutch" : [
+[
     "aan",
     "af",
     "al",
@@ -47,9 +46,7 @@
     "zei",
     "zij",
     "zo",
-    "zou"
-  ],
-  "english" : [
+    "zou",
     "I",
     "a",
     "about",
@@ -82,5 +79,4 @@
     "will",
     "with",
     "the"
-  ]
-***REMOVED***
+]
