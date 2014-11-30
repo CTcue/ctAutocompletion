@@ -25,17 +25,7 @@ echo " index deleted"
 curl -XPUT "http://localhost:9200/$index" -d '{
   "settings" : {
     "number_of_shards"   : 1,
-    "number_of_replicas" : 0,
-
-    "analysis" : {
-      "analyzer" : {
-        "test" : {
-          "type"      : "custom",
-          "tokenizer" : "standard",
-          "filter"    : ["lowercase", "standard", "asciifolding"]
-        }
-      }
-    }
+    "number_of_replicas" : 0
   }
 }'
 echo " new index created"
@@ -50,7 +40,21 @@ do
         "complete" : {
           "type"            : "completion",
           "index_analyzer"  : "simple",
-          "search_analyzer" : "test",
+          "search_analyzer" : "simple",
+          "payloads" : true,
+
+          "context": {
+            "type": { 
+              "type": "category",
+              "path": "_type"
+            }
+          }
+        },
+
+        "words" : {
+          "type"            : "completion",
+          "index_analyzer"  : "simple",
+          "search_analyzer" : "simple",
           "payloads" : true,
 
           "context": {
