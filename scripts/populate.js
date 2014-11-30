@@ -12,8 +12,6 @@ var connection = mysql.createConnection(config.mysql);
 
 var client = wrapper(connection);
 
-//var mysql   = require('mysql').createConnection(config.mysql);
-
 var elastic = require('elasticsearch');
 var sugar   = require('sugar');
 var _       = require('lodash');
@@ -35,7 +33,7 @@ var elasticClient = new elastic.Client({
   ]
 ***REMOVED***);
 
-//var stopWords     = require('./stopwords.json');
+var stopWords     = require('./stopwords.json');
 var semanticTypes = require('./semanticTypes.js');
 var limit  = [ process.argv[2], process.argv[3] ];
 
@@ -57,8 +55,7 @@ co(function *() {
   ***REMOVED***
   
   // Get all records for single CUI
-  for (var i in cuiCodes) {
-
+  for (var i=0, L=cuiCodes.length; i<L; i++) {
 ***REMOVED*** Possibly narrow it down for preffered terms
 ***REMOVED*** Then include keywords/key-phrases as well 
     var retrieveQuery = [
@@ -67,7 +64,8 @@ co(function *() {
       "WHERE CUI='" + cuiCodes[i].CUI + "'",
       "AND TS='P'",
       "AND STT='PF'",
-      "AND ISPREF='Y'"
+      "AND ISPREF='Y'",
+      "AND LAT in ('ENG', 'DUT')"
     ].join(" ");
 
     var records = yield client.query(retrieveQuery);
@@ -80,35 +78,44 @@ co(function *() {
     ***REMOVED***
   ***REMOVED***);
 
-      var output;    
-      output = _.pluck(records, 'STR');
-      output = _.map(output, function(str) {
+      var definitions;
+      definitions = _.pluck(records, 'STR');
+      definitions = _.map(definitions, function(str) {
         return str.toLowerCase()
-              ***REMOVED***.replace("disease/diagnosis", "")
-              ***REMOVED***.replace("disease/disorder", "")
-              ***REMOVED***.replace("disease/finding", "")
-              ***REMOVED***.replace(/\W+/g, " ")
-                  .replace(/[,.'";:]/g, " ")
+                  .replace(/[,.'";:_-]/g, " ")
                   .replace(/  /g, " ")
                   .trim();
   ***REMOVED***);
 
-      output = _.uniq(output);
+      definitions = _.uniq(definitions);
 
-  ***REMOVED*** Get avg. length 
-      var sum = _.reduce(output, function(sum, str) {
-        return sum + str.length;
-  ***REMOVED***, 0);
+  ***REMOVED*** Get unique words for suggestions / autocompletion of multiple words
+  ***REMOVED*** so that the order does not matter
+      var words = _.map(definitions, function(str) {
+        return _.reject(str.words(), function(str) {
+            return stopWords.indexOf(str) >= 0;
+      ***REMOVED***);
+  ***REMOVED***);
 
-      var average = Math.ceil(sum / output.length);
-          average = average > 20 ? average + 10 : average;
+      words = _.uniq(_.flatten(words, true));
+    
+  ***REMOVED*** The less unique words -> higher score
+  ***REMOVED*** TODO : check if additional penalty for very long defenitions is needed
+      var score = Math.ceil(100 / words.length);
 
       bulk.push({
         "complete" : {
-          "weight"  : Math.ceil(1000 / average),
-          "input"   : output,
-          "output"  : output,
-          "payload" : { "cui" : cuiCodes[i].CUI, "codes" : output ***REMOVED***
+          "weight"  : score,
+          "input"   : definitions,
+          "output"  : definitions,
+          "payload" : { "cui" : cuiCodes[i].CUI, "codes" : definitions ***REMOVED***
+    ***REMOVED***,
+
+        "words" : {
+          "weight"  : score,
+          "input"   : words,
+          "output"  : words,
+          "payload" : { "cui" : cuiCodes[i].CUI, "codes" : definitions ***REMOVED***
     ***REMOVED***
   ***REMOVED***);
 ***REMOVED***
