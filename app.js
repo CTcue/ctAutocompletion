@@ -44,6 +44,13 @@ app.all('/', function *() {
   };
 });
 
+// Simple autocompletion
+app.post('/autocomplete', 
+  checkBody,
+  medQuery 
+);
+
+// Allows type -> diagnosis / medicine
 app.post('/autocomplete/:type', 
   checkBody,
   medQuery 
@@ -111,7 +118,7 @@ function * medQuery(next) {
         var intersection = _.intersection(cuiCodes[0], cuiCodes[1], cuiCodes[2], cuiCodes[3]);
       }
 
-      // TODO If intersection is empty, skip a word?
+      // TODO If intersection is empty, skip word and check for other combinations?
 
       var set = _.filter(payloads, function(a) {
         return this.indexOf(a.cui) >= 0;
