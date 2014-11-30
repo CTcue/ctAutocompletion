@@ -9,47 +9,28 @@ var elasticClient = new elastic.Client({
   host : config.elastic
 });
 
-var lookup =  {
-  "index" : "autocomplete",
-  "body" : {
-    "suggest" : {
-      "text" : "",
-      "completion" : {
-        "field" : "complete",
-        "size"  : 50,
-        "fuzzy" : {
-          "min_length"    : 4,
-          "prefix_length" : 3
-        },
-
-        "context" : { 
-          "type" : []
+exports.fn = function(query, type, size, field) {
+  var lookup =  {
+    "index" : "autocomplete",
+    "body" : {
+      "suggest" : {
+        "text" : query,
+        "completion" : {
+          "field" : (field || "complete"),
+          "size"  : (size  || 50),
+          "fuzzy" : {
+            "min_length"    : 4,
+            "prefix_length" : 3
+          },
+          "context" : { 
+            "type" : []
+          }
         }
       }
     }
-  }
-};
-
-
-exports.simple = function(query) {
-  return function(callback) {
-    lookup.body.suggest.text = query;
-    lookup.body.suggest.completion.context.type = [
-      "disease_or_syndrome",
-      "sign_or_symptom",
-      "neoplastic_process"
-    ];
-
-    elasticClient.suggest(lookup, function (err, res) {
-      callback(err, res);
-    });
   };
-};
 
-
-exports.diagnosis = function(query) {
-  return function(callback) {
-    lookup.body.suggest.text = query;
+  if (type == "diagnosis") {
     lookup.body.suggest.completion.context.type = [
       "disease_or_syndrome",
       "sign_or_symptom",
@@ -60,24 +41,23 @@ exports.diagnosis = function(query) {
       "neoplastic_process", 
       "experimental_model_of_disease"
     ];
-
-    elasticClient.suggest(lookup, function (err, res) {
-      callback(err, res);
-    });
-  };
-};
-
-
-exports.medicine = function(query) {
-  return function(callback) {
-    lookup.body.suggest.text = query;
+  }
+  else if (type == "medicine") {
     lookup.body.suggest.completion.context.type = [
       "clinical_drug"
     ];
-
+  }
+  else {
+    lookup.body.suggest.completion.context.type = [
+      "disease_or_syndrome",
+      "sign_or_symptom",
+      "neoplastic_process"
+    ];
+  }
+  
+  return function(callback) {
     elasticClient.suggest(lookup, function (err, res) {
       callback(err, res);
     });
   };
 };
-
