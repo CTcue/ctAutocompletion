@@ -89,7 +89,7 @@ echo "Total records: $total";
 
 echo -e "\nInserting UMLS entries\n"
 
-for ((i=0, j=i+500; i<total; i+=500))
+for ((i=0, j=i+100; i<total; i+=100))
 do
   node --harmony populate.js $i $j
   sleep 1

@@ -80,22 +80,20 @@ exports.words = function(words, type, size) {
 ***REMOVED***
 
 // Looks for edge n-gram word matches 
-exports.expandCUI = function(query, type, size) {
-  size = size || 12;
-
+exports.expandCUI = function(query, type) {
   var context = ct.getContext(type);
   
   var lookup = {
     "_source" : ["cui", "terms"],
     "query": {
-      "term": {
-        "cui": query
+      "match": {
+        "cui": query.toUpperCase()
   ***REMOVED***
 ***REMOVED***
   ***REMOVED***;
 
   return function(callback) {
-    reqClient.post(context.join(',') + "/_search?size=" + size, lookup, function(err, res, body) {
+    reqClient.post("_search?size=1", lookup, function(err, res, body) {
       callback(err, body);
 ***REMOVED***);
   ***REMOVED***;

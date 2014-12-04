@@ -74,13 +74,15 @@ co(function *() {
       "FROM MRCONSO",
       "WHERE CUI='" + cuiCodes[i].CUI + "'",
       "AND TS='S'",
-      "AND STT='PF'",
+  ***REMOVED***"AND STT='PF'",
       "AND ISPREF='Y'",
       "AND LAT='ENG'"
     ].join(" ");
 
     var preferred = yield client.query(preferredQuery);
     var alternate = yield client.query(alternateQuery);
+
+    console.log(cuiCodes[i].CUI, preferred);
 
     if (preferred) {
       var definitions = _.pluck(preferred, 'STR');
@@ -132,10 +134,16 @@ co(function *() {
 
   // Insert preffered in Elasticsearch
   elasticClient.bulk({'body' : bulk ***REMOVED***, function(err, body) {
-    var offset = parseInt(process.argv[2], 10);
-    var end    = offset + parseInt(process.argv[3], 10);
+    if (err) {
+      console.log(err);
+***REMOVED***
+    ***REMOVED***
+      var offset = parseInt(process.argv[2], 10);
+      var end    = offset + parseInt(process.argv[3], 10);
 
-    console.log("Inserted " + offset + "," + end);
+      console.log("Inserted " + offset + "," + end);
+***REMOVED***
+
     process.exit(0);
   ***REMOVED***);
 ***REMOVED***);
