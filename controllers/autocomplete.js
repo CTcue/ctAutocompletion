@@ -1,63 +1,102 @@
 'use strict';
 
 /** Module dependencies. */
-var config    = require('../config/config.js');
-var _         = require('lodash');
-var elastic   = require('elasticsearch');
+var config = require('../config/config.js');
+var _      = require('lodash');
+var ct     = require('../lib/context');
 
-var elasticClient = new elastic.Client({
-  host : config.elastic
-});
+var request   = require('request-json');
+var reqClient = request.newClient(config.elastic + "/autocomplete/");
 
 exports.fn = function(query, type, size, field) {
   var lookup =  {
-    "index" : "autocomplete",
-    "body" : {
-      "suggest" : {
-        "text" : query,
-        "completion" : {
-          "field" : (field || "complete"),
-          "size"  : (size  || 50),
-          "fuzzy" : {
-            "min_length"    : 4,
-            "prefix_length" : 3
-          },
-          "context" : { 
-            "type" : []
-          }
+    "suggest" : {
+      "text" : query,
+      "completion" : {
+        "field" : (field || "complete"),
+        "size"  : (size  || 50),
+        "fuzzy" : {
+          "min_length"    : 4,
+          "prefix_length" : 3
+        },
+        "context" : { 
+          "type" : ct.getContext(type)
         }
       }
     }
   };
 
-  if (type == "diagnosis") {
-    lookup.body.suggest.completion.context.type = [
-      "disease_or_syndrome",
-      "sign_or_symptom",
-      "pathologic_function",
-      "mental_or_behavioral_dysfunction",
-      "cell_or_molecular_dysfunction",
-      "injury_or_poisoning",
-      "neoplastic_process", 
-      "experimental_model_of_disease"
-    ];
-  }
-  else if (type == "medicine") {
-    lookup.body.suggest.completion.context.type = [
-      "clinical_drug"
-    ];
-  }
-  else {
-    lookup.body.suggest.completion.context.type = [
-      "disease_or_syndrome",
-      "sign_or_symptom",
-      "neoplastic_process"
-    ];
-  }
-  
   return function(callback) {
-    elasticClient.suggest(lookup, function (err, res) {
-      callback(err, res);
+    reqClient.post("_suggest", lookup, function(err, res, body) {
+      callback(err, body);
     });
   };
 };
+ 
+// Check edge ngrams + start position 
+// (i.e br tumor -> brain tumor, but NOT "tumor of brain")
+exports.startsWith = function(words, type, size) {
+  size = size || 12;
+
+  var context = ct.getContext(type);
+
+  var lookup = {
+    "_source" : ["cui", "terms"],
+    "query" : {
+      "filtered": {
+        "query":  { "match"  :  { "words"      : words.join(' ') }},
+        "filter": { "prefix" :  { "startsWith" : words[0] }}
+      }
+    }
+  };
+
+  return function(callback) {
+    reqClient.post(context.join(',') + "/_search?size=" + size, lookup, function(err, res, body) {
+      callback(err, body);
+    });
+  };
+}
+
+// Looks for edge n-gram word matches 
+exports.words = function(words, type, size) {
+  size = size || 12;
+
+  var context = ct.getContext(type);
+  
+  var lookup = {
+    "_source" : ["cui", "terms"],
+    "query": {
+      "match": {
+        "words": words.join(' ')
+      }
+    }
+  };
+
+  return function(callback) {
+    reqClient.post(context.join(',') + "/_search?size=" + size, lookup, function(err, res, body) {
+      callback(err, body);
+    });
+  };
+}
+
+// Looks for edge n-gram word matches 
+exports.expandCUI = function(query, type, size) {
+  size = size || 12;
+
+  var context = ct.getContext(type);
+  
+  var lookup = {
+    "_source" : ["cui", "terms"],
+    "query": {
+      "term": {
+        "cui": query
+      }
+    }
+  };
+
+  return function(callback) {
+    reqClient.post(context.join(',') + "/_search?size=" + size, lookup, function(err, res, body) {
+      callback(err, body);
+    });
+  };
+}

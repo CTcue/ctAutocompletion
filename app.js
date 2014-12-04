@@ -16,6 +16,8 @@ var sugar        = require('sugar');
 var _            = require('lodash');
 
 var autocomplete = require('./controllers/autocomplete.js');
+var suggest      = require('./controllers/suggest.js');
+
 var filters      = require('./lib/filters.js');
 
 // JSON output
@@ -56,28 +58,90 @@ app.post('/autocomplete/:type',
   medQuery 
 );
 
+app.post('/suggest/:type', 
+  checkBody,
+  suggestQuery 
+);
 
-function * checkBody(next) {
-  if (!this.request.body || _.isEmpty(this.request.body) || !!!this.request.body.query) {
-    return this.body = {
-      'error' : true,
-      'msg'   : 'Please provide a valid JSON request body.'
+app.post('/expand', 
+  checkBody,
+  expandQuery 
+);
+
+function * suggestQuery() {
+  var query = this.body.query.words(); 
+  var suggestions = [], tmp = {};
+
+  /*
+    Some suggestions can be quite random, so get autocomplete suggestions
+    as well.
+  */
+  if (query.length > 1) {
+    tmp = yield autocomplete.words(query, this.params.type, 5);
+  }
+  else {
+    tmp = yield autocomplete.startsWith(query, this.params.type, 5);
+  }
+
+  if (tmp.hits && tmp.hits.total > 0) {
+    suggestions = tmp.hits.hits;
+  }
+
+
+  // Look for suggestions in the terms
+  var alt = yield suggest.match(query, this.params.type);
+
+  if (alt.hits && alt.hits.total > 0) {
+    // Get found CUI codes in suggestions
+    var added = suggestions.map(function(a) { return a._source.cui });
+
+    // Reject already found CUI codes
+    var hits = _.reject(alt.hits.hits, function(a) {
+      return this.indexOf(a._source.cui) >= 0;  
+    }, added);
+
+    suggestions = suggestions.concat(hits);
+  }
+
+  // Convert Elastic results to our JSON objects
+  if (suggestions.length > 0) {
+    var set = [];
+
+    for (var i=0, L=suggestions.length; i<L; i++) {
+      var terms = suggestions[i]._source.terms;
+
+      // Only include reason suggestsions that have the query word in it
+      var reason = _.filter(terms, function(str) {
+        return str.has(this);
+      }, query[0]);
+
+      // Long terms / many words get a score penalty
+      var lengthPenalty = terms[0].words().length - 2;
+      var score = suggestions[i]._score - lengthPenalty;
+
+      if (score < 2.5)
+        continue;
+
+      set.push({
+        "_id"    : suggestions[i]._source.cui,
+        "str"    : terms[0],
+        "score"  : score,
+        "reason" : reason
+      });
     }
+
+    // Sort the list by score
+    set = _.sortBy(set, function(a){ 
+      return -a.score 
+    }).slice(0, 12);
+
+    return this.body = set; 
   }
 
-  // Queries should not be empty or single character
-  if (this.request.body.query.length <= 1) {
-    return this.body = [];
-  }
-  
-  this.body = {};
-  this.body.query = this.request.body.query.trim().toLowerCase();
+  this.body = [];
+}
 
-  yield next;
-};
-
-
-function * medQuery(next) {
+function * medQuery() {
   var suggestions = yield autocomplete.fn(this.body.query, this.params.type);
   var set = suggestions.suggest[0];
 
@@ -95,61 +159,62 @@ function * medQuery(next) {
 
     // Does the query contain multiple words?
     if (words.length > 0) {
-      var payloads = {};
-      var cuiCodes = [];
+      suggestions = yield autocomplete.startsWith(words, this.params.type);
 
-      // For the additional words
-      for (var i=0, L=words.length; i<L; i++) {
-        var suggestions = yield autocomplete.fn(words[i], this.params.type, querySize(words[i]), "words");
-        var set = suggestions.suggest[0];
-            set = _.pluck(set.options, 'payload');
+      if (suggestions.hits && suggestions.hits.total > 0) {
+        var tmp = suggestions.hits.hits;
+        set = [];
 
-        payloads = _.assign(set);
-        cuiCodes.push( _.pluck(set, 'cui'));
+        for (var i=0, L=tmp.length; i<L; i++) {
+          if (tmp[i]._score < 2) 
+            continue;
+          
+          set.push({
+            "_id"   : tmp[i]._source.cui,
+            "str"   : tmp[i]._source.terms[0]
+          });
+        }
+
+        return this.body = set.slice(0, 12); 
       }
-
-      if (words.length == 2) {
-        var intersection = _.intersection(cuiCodes[0], cuiCodes[1]);
-      }
-      else if (words.length == 3) {
-        var intersection = _.intersection(cuiCodes[0], cuiCodes[1], cuiCodes[2]);
-      }
-      else {
-        var intersection = _.intersection(cuiCodes[0], cuiCodes[1], cuiCodes[2], cuiCodes[3]);
-      }
-
-      // TODO If intersection is empty, skip word and check for other combinations?
-
-      var set = _.filter(payloads, function(a) {
-        return this.indexOf(a.cui) >= 0;
-      }, intersection);
-
-      // Get recommendations
-      set = filters.suggestionsFromElasticRecords(set, words[0]);
-
-      return this.body = set.slice(0, 12);
     }
   }
 
-  // TODO look for larger set?
+  // If nothing is found, client can send the query to "/suggest" 
 
   this.body = [];
 }
 
-function querySize(str) {
-  var N = str.length;
-
-  if (N <= 5) {
-    return 150;
-  }
-  else if (N < 10) {
-    return 100;
-  }
-  else {
-    return 80;
-  }
+function * expandQuery() {
+  var suggestions = yield autocomplete.expandCUI(this.body.query, this.params.type);
+  this.body = suggestions;
 }
 
+function * checkBody(next) {
+  if (isInvalidObjQuery(this.request)) {
+    return this.body = {
+      'error' : true,
+      'msg'   : 'Please provide a valid JSON request body.'
+    }
+  }
+
+  // Queries should not be empty or single character
+  if (this.request.body.query.length <= 1) {
+    return this.body = [];
+  }
+  
+  this.body = {};
+  this.body.query = this.request.body.query.trim().toLowerCase();
+
+  yield next;
+};
+
+function isInvalidObjQuery(obj) {
+  return !obj.body       || 
+    _.isEmpty(obj.body)  ||
+    !!!obj.body.query    || 
+    typeof obj.body.query !== 'string';
+}
 
 // Listen
 app.listen(config.port);
