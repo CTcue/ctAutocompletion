@@ -25,7 +25,29 @@ echo " index deleted"
 curl -XPUT "http://localhost:9200/$index" -d '{
   "settings" : {
     "number_of_shards"   : 1,
-    "number_of_replicas" : 0
+    "number_of_replicas" : 0,
+
+    "analysis": {
+      "filter": {
+        "autocomplete_filter": { 
+          "type":     "edge_ngram",
+          "min_gram": 3,
+          "max_gram": 15
+    ***REMOVED***
+  ***REMOVED***,
+      
+      "analyzer": {
+        "autocomplete": {
+          "type":      "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "asciifolding",
+            "lowercase",
+            "autocomplete_filter" 
+          ]
+    ***REMOVED***
+  ***REMOVED***
+***REMOVED***
   ***REMOVED***
 ***REMOVED***'
 echo " new index created"
@@ -37,21 +59,11 @@ do
   curl -XPUT "http://localhost:9200/$index/$t/_mapping" -d '{
   "'"$t"'": {
       "properties": {
+        "cui"      : { "type" : "string" ***REMOVED***,
+        "terms"    : { "type" : "string", "analyzer": "autocomplete" ***REMOVED***,
+        "words"    : { "type" : "string", "analyzer": "autocomplete" ***REMOVED***,
+
         "complete" : {
-          "type"            : "completion",
-          "index_analyzer"  : "simple",
-          "search_analyzer" : "simple",
-          "payloads" : true,
-
-          "context": {
-            "type": { 
-              "type": "category",
-              "path": "_type"
-        ***REMOVED***
-      ***REMOVED***
-    ***REMOVED***,
-
-        "words" : {
           "type"            : "completion",
           "index_analyzer"  : "simple",
           "search_analyzer" : "simple",
@@ -77,7 +89,7 @@ echo "Total records: $total";
 
 echo -e "\nInserting UMLS entries\n"
 
-for ((i=0, j=i+1000; i<total; i+=1000))
+for ((i=0, j=i+500; i<total; i+=500))
 do
   node --harmony populate.js $i $j
   sleep 1
