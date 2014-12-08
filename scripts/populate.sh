@@ -16,6 +16,8 @@ declare -a types=(
   "experimental_model_of_disease"
   "injury_or_poisoning"
   "clinical_drug"
+  "organic_chemical"
+  "pharmacologic_substance"
 )
 
 
