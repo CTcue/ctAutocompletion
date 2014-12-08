@@ -8,5 +8,7 @@ module.exports = [
   "Cell or Molecular Dysfunction",
   "Experimental Model of Disease",
   "Injury or Poisoning",
-  "Clinical Drug"
+  "Clinical Drug",
+  "Organic Chemical",
+  "Pharmacologic Substance"
 ];
