@@ -1,9 +1,9 @@
 
 module.exports = [
-
   // Medicine
   "Pharmacologic Substance",
   //"Clinical Drug"
+  "Organic Chemical",
 
   // Disease
   "Finding",
@@ -15,6 +15,7 @@ module.exports = [
   "Mental or Behavioral Dysfunction",
 
   "Experimental Model of Disease",
+
   "Cell or Molecular Dysfunction",
   "Injury or Poisoning"
 ];

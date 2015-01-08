@@ -8,6 +8,7 @@ index="autocomplete"
 # Semantic types
 declare -a types=(
   "pharmacologic_substance",
+  "organic_chemical",
   "finding",
   "sign_or_symptom",
   "pathologic_function",
