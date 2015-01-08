@@ -7,16 +7,16 @@ index="autocomplete"
 
 # Semantic types
 declare -a types=(
-  "pharmacologic_substance",
-  "organic_chemical",
-  "finding",
-  "sign_or_symptom",
-  "pathologic_function",
-  "disease_or_syndrome",
-  "neoplastic_process",
-  "mental_or_behavioral_dysfunction",
-  "experimental_model_of_disease",
-  "cell_or_molecular_dysfunction",
+  "pharmacologic_substance"
+  "organic_chemical"
+  "finding"
+  "sign_or_symptom"
+  "pathologic_function"
+  "disease_or_syndrome"
+  "neoplastic_process"
+  "mental_or_behavioral_dysfunction"
+  "experimental_model_of_disease"
+  "cell_or_molecular_dysfunction"
   "injury_or_poisoning"
 )
 
