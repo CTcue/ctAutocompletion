@@ -49,9 +49,9 @@ co(function *() {
 
   if (! cuiCodes) {
     console.log("Could not get CUI codes!");
-    process.exit(0);    
+    process.exit(0);
   ***REMOVED***
-  
+
   var bulk = [];
 
   // Get all records for single CUI
@@ -62,10 +62,11 @@ co(function *() {
       "SELECT STR",
       "FROM MRCONSO",
       "WHERE CUI='" + cuiCodes[i].CUI + "'",
+      "AND SAB IN ('SNOMEDCT_US', 'ICD10CM')",
       "AND TS='P'",
       "AND STT='PF'",
       "AND ISPREF='Y'",
-      "AND LAT='ENG'"
+      "AND LAT IN ('DUT', 'ENG')"
     ].join(" ");
 
 ***REMOVED*** Alternate/Different spellings
@@ -73,16 +74,12 @@ co(function *() {
       "SELECT STR",
       "FROM MRCONSO",
       "WHERE CUI='" + cuiCodes[i].CUI + "'",
-      "AND TS='S'",
-  ***REMOVED***"AND STT='PF'",
-      "AND ISPREF='Y'",
-      "AND LAT='ENG'"
+      "AND SAB IN ('SNOMEDCT_US', 'ICD10CM')",
+      "AND LAT IN ('DUT', 'ENG')"
     ].join(" ");
 
     var preferred = yield client.query(preferredQuery);
     var alternate = yield client.query(alternateQuery);
-
-    console.log(cuiCodes[i].CUI, preferred);
 
     if (preferred) {
       var definitions = _.pluck(preferred, 'STR');
@@ -92,7 +89,7 @@ co(function *() {
       var altDefinitions = _.pluck(alternate, 'STR');
           altDefinitions = getUniqueDefinitions(altDefinitions);
 
-      
+
   ***REMOVED*** Select unique words from preferred definitions
       var words = _.map(definitions, function(str) {
         return _.reject(str.words(), function(str) {
@@ -102,9 +99,9 @@ co(function *() {
 
       words = _.uniq(_.flatten(words, true));
 
-      
+
   ***REMOVED*** Add document to bulk list
-      bulk.push({ 
+      bulk.push({
         "index" : {
           "_index" : "autocomplete",
           "_type"  : cuiCodes[i].STY.toLowerCase().replace(/ /g, "_"),
@@ -114,7 +111,9 @@ co(function *() {
       bulk.push({
         "cui"   : cuiCodes[i].CUI,
         "words" : words,
-        
+
+    ***REMOVED*** Check  for abbr
+
     ***REMOVED*** To allow prefix query for incomplete starting words
         "startsWith" : words[0],
 

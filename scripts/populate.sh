@@ -7,15 +7,16 @@ index="autocomplete"
 
 # Semantic types
 declare -a types=(
-  "sign_or_symptom"
-  "pathologic_function"
-  "disease_or_syndrome"
-  "mental_or_behavioral_dysfunction"
-  "neoplastic_process"
-  "cell_or_molecular_dysfunction"
-  "experimental_model_of_disease"
+  "pharmacologic_substance",
+  "finding",
+  "sign_or_symptom",
+  "pathologic_function",
+  "disease_or_syndrome",
+  "neoplastic_process",
+  "mental_or_behavioral_dysfunction",
+  "experimental_model_of_disease",
+  "cell_or_molecular_dysfunction",
   "injury_or_poisoning"
-  "clinical_drug"
 )
 
 
@@ -29,13 +30,13 @@ curl -XPUT "http://localhost:9200/$index" -d '{
 
     "analysis": {
       "filter": {
-        "autocomplete_filter": { 
+        "autocomplete_filter": {
           "type":     "edge_ngram",
           "min_gram": 3,
           "max_gram": 15
     ***REMOVED***
   ***REMOVED***,
-      
+
       "analyzer": {
         "autocomplete": {
           "type":      "custom",
@@ -43,7 +44,7 @@ curl -XPUT "http://localhost:9200/$index" -d '{
           "filter": [
             "asciifolding",
             "lowercase",
-            "autocomplete_filter" 
+            "autocomplete_filter"
           ]
     ***REMOVED***
   ***REMOVED***
@@ -54,7 +55,7 @@ echo " new index created"
 
 echo -e "\nAdding index mappings\n"
 
-for t in "${types[@]***REMOVED***" 
+for t in "${types[@]***REMOVED***"
 do
   curl -XPUT "http://localhost:9200/$index/$t/_mapping" -d '{
   "'"$t"'": {
@@ -70,7 +71,7 @@ do
           "payloads" : true,
 
           "context": {
-            "type": { 
+            "type": {
               "type": "category",
               "path": "_type"
         ***REMOVED***
@@ -89,7 +90,7 @@ echo "Total records: $total";
 
 echo -e "\nInserting UMLS entries\n"
 
-for ((i=0, j=i+100; i<total; i+=100))
+for ((i=0, j=i+200; i<total; i+=200))
 do
   node --harmony populate.js $i $j
   sleep 1
