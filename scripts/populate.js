@@ -2,6 +2,7 @@
 'use strict';
 
 var config  = require('../config/config.js');
+var queries = require('./queries/main.js');
 
 var wrapper = require('co-mysql'),
     mysql   = require('mysql'),
@@ -18,34 +19,17 @@ var _       = require('lodash');
 var utf8    = require('utf8');
 
 var elasticClient = new elastic.Client({
-  "apiVersion" : "1.3",
-
-  "log" : [
-    {
-      type  : 'file',
-      level : 'trace',
-      path  : './elastic_trace.log'
-    },
-    {
-      type  : 'file',
-      level : 'error',
-      path  : './elastic_error.log'
-    }
-  ]
+  "apiVersion" : "1.3"
 });
 
-var semanticTypes = require('./semanticTypes.js');
-var limit  = [ process.argv[2], process.argv[3] ];
+var limit = [ process.argv[2], process.argv[3] ];
 
 co(function *() {
-  var cuiQuery = [
-    "SELECT DISTINCT CUI, STY",
-    "FROM MRSTY",
-    "WHERE STY IN ('"+ semanticTypes.join("', '") + "')",
-    "LIMIT " + limit.join(", ")
-  ].join(" ");
+  // Get preferred terms
+  var preferredQuery = queries.preferredQuery + " LIMIT " + limit.join(",");
+  var cuiCodes = yield client.query(preferredQuery);
 
-  var cuiCodes = yield client.query(cuiQuery);
+  console.log("Query started.");
 
   if (! cuiCodes) {
     console.log("Could not get CUI codes!");
@@ -56,77 +40,44 @@ co(function *() {
 
   // Get all records for single CUI
   for (var i=0, L=cuiCodes.length; i<L; i++) {
-
-    // Get preferred terms
-    var preferredQuery = [
-      "SELECT STR",
-      "FROM MRCONSO",
-      "WHERE CUI='" + cuiCodes[i].CUI + "'",
-      "AND SAB IN ('SNOMEDCT_US', 'ICD10CM')",
-      "AND TS='P'",
-      "AND STT='PF'",
-      "AND ISPREF='Y'",
-      "AND LAT IN ('DUT', 'ENG')"
-    ].join(" ");
+    console.log("Query: " + JSON.stringify(cuiCodes[i], null, " "));
 
     // Alternate/Different spellings
-    var alternateQuery = [
+    var englishQuery = [
       "SELECT STR",
       "FROM MRCONSO",
       "WHERE CUI='" + cuiCodes[i].CUI + "'",
-      "AND SAB IN ('SNOMEDCT_US', 'ICD10CM')",
-      "AND LAT IN ('DUT', 'ENG')"
+      "AND SAB IN ('SNOMEDCT_US')"
     ].join(" ");
 
-    var preferred = yield client.query(preferredQuery);
-    var alternate = yield client.query(alternateQuery);
+    var dutchQuery = [
+      "SELECT STR",
+      "FROM MRCONSO",
+      "WHERE CUI='" + cuiCodes[i].CUI + "'",
+      "AND SAB IN ('MDRDUT', 'MSHDUT', 'ICD10DUT')"
+    ].join(" ");
 
-    if (preferred) {
-      var definitions = _.pluck(preferred, 'STR');
-          definitions = getUniqueDefinitions(definitions);
+    var englishTerms = yield client.query(englishQuery);
+        englishTerms = getUnique(englishTerms);
 
-      // Alternate definitions
-      var altDefinitions = _.pluck(alternate, 'STR');
-          altDefinitions = getUniqueDefinitions(altDefinitions);
+    var dutchTerms = yield client.query(dutchQuery);
+        dutchTerms = getUnique(dutchTerms);
 
+    // Add document to bulk list
+    bulk.push({
+      "index" : {
+        "_index" : "autocomplete",
+        "_type"  : "records",
+      }
+    });
 
-      // Select unique words from preferred definitions
-      var words = _.map(definitions, function(str) {
-        return _.reject(str.words(), function(str) {
-          return str.length < 5;
-        });
-      });
+    bulk.push({
+      "cui"   : cuiCodes[i].CUI,
+      "type"  : cuiCodes[i].STY,
 
-      words = _.uniq(_.flatten(words, true));
-
-
-      // Add document to bulk list
-      bulk.push({
-        "index" : {
-          "_index" : "autocomplete",
-          "_type"  : cuiCodes[i].STY.toLowerCase().replace(/ /g, "_"),
-        }
-      });
-
-      bulk.push({
-        "cui"   : cuiCodes[i].CUI,
-        "words" : words,
-
-        // Check  for abbr
-
-        // To allow prefix query for incomplete starting words
-        "startsWith" : words[0],
-
-        "terms" : definitions.concat(altDefinitions),
-
-        "complete" : {
-          "weight"  : scoreTerms(definitions),
-          "input"   : definitions,
-          "output"  : definitions,
-          "payload" : { "cui" : cuiCodes[i].CUI, "codes" : definitions }
-        }
-      });
-    }
+      "eng" : englishTerms,
+      "dut" : dutchTerms
+   });
   }
 
   connection.end();
@@ -147,18 +98,6 @@ co(function *() {
   });
 });
 
-
-// +- the avg. length of terms
-function scoreTerms(terms) {
-  var sum = _.reduce(terms, function(sum, str) {
-    return sum + str.length;
-  }, 0);
-
-  var average = sum / terms.length;
-      average = average > 40 ? average + 10 : average;
-
-  return Math.ceil(1000/average);
-}
 
 var diacritics = [
     {'base':'a','letters':/[\u00E1\u00E2\u00E3\u00E4\u00E5\u0101\u0103\u0105\u01CE\u01FB\u00C0\u00C4]/g},
@@ -216,20 +155,27 @@ function removeDiacritics(str) {
   return str;
 }
 
-function getUniqueDefinitions(list) {
-  return _.uniq(_.map(list, function(str) {
+
+// From an SQL (UMLS) result, return the unique strings
+function getUnique(list) {
+  list = _.pluck(list, 'STR');
+  list = _.map(list, function(str) {
     try {
       str = utf8.decode(str);
 
       return removeDiacritics(str)
           .toLowerCase()
-          .replace(/\W+/g, " ")
           .replace(/  /g, " ")
           .trim();
     }
     catch (err) {
-     return "";
+      return "";
     }
-  }));
-}
+  });
 
+  list = _.sort(list, function(str) {
+    return str.length;
+  });
+
+  return list;
+}

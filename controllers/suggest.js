@@ -9,10 +9,8 @@ var request   = require('request-json');
 var reqClient = request.newClient(config.elastic + "/autocomplete/");
 
 // Difference with autocomplete.words is that it looks for complete terms
-exports.match = function(words, type, size) {
+exports.match = function(words, size) {
   size = size || 12;
-
-  var context = ct.getContext(type);
 
   var lookup = {
     "_source" : ["cui", "terms"],
@@ -24,7 +22,7 @@ exports.match = function(words, type, size) {
   };
 
   return function(callback) {
-    reqClient.post(context.join(',') + "/_search?size=" + size, lookup, function(err, res, body) {
+    reqClient.post("records/_search?size=" + size, lookup, function(err, res, body) {
       callback(err, body);
     });
   };
