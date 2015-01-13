@@ -57,7 +57,6 @@ app.all('/', function *() {
 app.post('/autocomplete', checkBody, autocomplete);
 
 //app.post('/suggest', checkBody, suggest);
-
 //app.post('/expand', checkBody, expandQuery);
 
 
