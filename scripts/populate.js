@@ -37,9 +37,9 @@ var semanticTypes = [
 
 var DEBUG = false || process.argv[4] === "debug";
 var config  = require('../config/config.js');
-var wrapper = require('co-mysql'),
-    mysql   = require('mysql'),
-    co      = require('co');
+var wrapper = require('co-mysql');
+var mysql   = require('mysql');
+var co      = require('co');
 
 try {
   var connection = mysql.createConnection(config.mysql);

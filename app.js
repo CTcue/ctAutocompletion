@@ -17,8 +17,6 @@ var _            = require('lodash');
 
 var checkBody    = require('./middleware/checkBody.js');
 var autocomplete = require('./controllers/autocompleteQuery.js');
-var suggest      = require('./controllers/suggestQuery.js');
-
 
 var filters      = require('./lib/filters.js');
 
@@ -55,8 +53,6 @@ app.all('/', function *() {
   ***REMOVED***'
 */
 app.post('/autocomplete', checkBody, autocomplete);
-
-//app.post('/suggest', checkBody, suggest);
 //app.post('/expand', checkBody, expandQuery);
 
 
