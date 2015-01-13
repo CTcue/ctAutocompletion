@@ -39,23 +39,23 @@ echo " new index created"
 curl -XPUT "http://localhost:9200/$index/records/_mapping" -d '{
 "records" : {
     "properties": {
-      "cui"  : { "type" : "string" },
-      "type" : { "type" : "string" },
+      "cui"   : { "type" : "string", "index": "not_analyzed" },
+      "type"  : { "type" : "string", "index": "not_analyzed" },
 
-      "eng" : { "type" : "string", "analyzer": "autocomplete" },
-      "dut" : { "type" : "string", "analyzer": "autocomplete" }
+      "startsWith" : { "type" : "string", "index": "not_analyzed" },
+      "boost" : { "type": "float", "index": "not_analyzed" },
+
+      "eng"   : { "type" : "string", "analyzer": "autocomplete" },
+      "dut"   : { "type" : "string", "analyzer": "autocomplete" }
     }
   }
 }'
 echo " mapping added"
 
-
-echo -e "\nCounting UMLS entries\n"
-total=100 #$(node count.js)
-
+total=$(node count.js)
 echo -e "\nInserting $total UMLS entries\n"
 
-for ((i=0, j=i+10; i<total; i+=10))
+for ((i=1, j=i+4999; i<total; i+=5000, j=i+4999))
 do
   node --harmony populate.js $i $j
   sleep 1
