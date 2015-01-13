@@ -1,12 +1,16 @@
 #!/bin/bash
 
 # Elasticsearch index
-index="autocomplete"
+autocomplete="autocomplete"
+expander="expander"
 
-curl -XDELETE "http://localhost:9200/$index"
+curl -XDELETE "http://localhost:9200/$autocomplete"
 echo " index deleted"
 
-curl -XPUT "http://localhost:9200/$index" -d '{
+curl -XDELETE "http://localhost:9200/$expander"
+echo " index deleted"
+
+curl -XPUT "http://localhost:9200/$autocomplete" -d '{
   "settings" : {
     "number_of_shards"   : 1,
     "number_of_replicas" : 0,
@@ -14,9 +18,9 @@ curl -XPUT "http://localhost:9200/$index" -d '{
     "analysis": {
       "filter": {
         "autocomplete_filter": {
-          "type":     "edge_ngram",
-          "min_gram": 3,
-          "max_gram": 12
+          "type"     : "edge_ngram",
+          "min_gram" : 2,
+          "max_gram" : 12
         }
       },
 
@@ -36,21 +40,38 @@ curl -XPUT "http://localhost:9200/$index" -d '{
 }'
 echo " new index created"
 
-curl -XPUT "http://localhost:9200/$index/records/_mapping" -d '{
+curl -XPUT "http://localhost:9200/$expander" -d '{
+  "settings" : {
+    "number_of_shards"   : 1,
+    "number_of_replicas" : 0
+  }
+}'
+echo " new index created"
+
+curl -XPUT "http://localhost:9200/$autocomplete/records/_mapping" -d '{
+"records" : {
+    "properties": {
+      "cui"  : { "type" : "string", "index": "not_analyzed" },
+      "boost" : { "type": "float", "index": "not_analyzed" },
+
+      "str" : { "type" : "string", "analyzer": "autocomplete" }
+    }
+  }
+}'
+echo " mapping added"
+
+curl -XPUT "http://localhost:9200/$expander/records/_mapping" -d '{
 "records" : {
     "properties": {
       "cui"   : { "type" : "string", "index": "not_analyzed" },
       "type"  : { "type" : "string", "index": "not_analyzed" },
 
-      "startsWith" : { "type" : "string", "index": "not_analyzed" },
-      "boost" : { "type": "float", "index": "not_analyzed" },
-
-      "eng"   : { "type" : "string", "analyzer": "autocomplete" },
-      "dut"   : { "type" : "string", "analyzer": "autocomplete" }
+      "str" : { "type" : "string", "index": "not_analyzed" }
     }
   }
 }'
 echo " mapping added"
+
 
 total=$(node count.js)
 echo -e "\nInserting $total UMLS entries\n"

@@ -40,6 +40,7 @@
     "lodash": "^2.4.1",
     "mysql": "^2.5.3",
     "request-json": "^0.5.0",
+    "sift-string": "0.0.2",
     "sugar": "^1.4.1"
   }
 }
