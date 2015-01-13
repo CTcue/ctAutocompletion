@@ -5,7 +5,6 @@ var config = require('../config/config.js');
 var _      = require('lodash');
 var sugar  = require('sugar');
 
-var bestMatch = require('../lib/bestMatch.js');
 var client    = require('../lib/requestClient.js');
 
 module.exports = function *() {
@@ -15,31 +14,31 @@ module.exports = function *() {
   var words = query.words();
 
   var lookup = {
-    "_source" : ["cui", "eng"],
+    "_source" : ["cui", "str"],
     "query" : {
-      "bool" : {
-        "must" : {
-          "terms" : {
-            "eng" : words
-      ***REMOVED***
-    ***REMOVED***,
+      "dis_max" : {
+        "tie_breaker" : 0.5,
 
-        "should" : [
+        "queries" : [
+          {
+            "terms" : {
+              "str" : words
+        ***REMOVED***
+      ***REMOVED***,
+
           {
             "prefix" : {
-              "startsWith" : { "value" : words[0], "boost" : 2 ***REMOVED***
+              "str" : words[0].substring(0, 5)
         ***REMOVED***
       ***REMOVED***,
 
           {
             "fuzzy_like_this_field" : {
-              "eng" : {
+              "str" : {
                 "prefix_length"   : 2,
                 "analyzer"        : "not_analyzed",
                 "like_text"       : query,
-                "max_query_terms" : 12,
-
-                "boost" : 0.5
+                "max_query_terms" : 12
           ***REMOVED***
         ***REMOVED***
       ***REMOVED***
@@ -91,10 +90,7 @@ module.exports = function *() {
   ***REMOVED***
       */
 
-      response.hits[i] = {
-        "cui"   : resultHits[i]._source.cui,
-        "term"  : resultHits[i]._source.eng //bestMatch(resultHits[i]._source.eng, query)
-  ***REMOVED***;
+      response.hits[i] = resultHits[i]._source;
 ***REMOVED***
 
     this.body = response;

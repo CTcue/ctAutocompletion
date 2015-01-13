@@ -73,6 +73,7 @@ var preferredQuery = [
 ].join(" ");
 
 co(function *() {
+  var recordCounter = 0;
   var cuiCodes = yield client.query(preferredQuery);
 
   if (! cuiCodes || cuiCodes.length === 0) {
@@ -83,7 +84,7 @@ co(function *() {
   var bulk = [];
 
   // Get all records for single CUI
-  for (var i=0, L=cuiCodes.length; i<L; i++) {
+  for (var i=0, N=cuiCodes.length; i<N; i++) {
 ***REMOVED*** Alternate/Different spellings
     var englishQuery = [
       "SELECT STR",
@@ -113,8 +114,13 @@ co(function *() {
       continue;
 ***REMOVED***
 
+
     var dutchTerms = yield client.query(dutchQuery);
         dutchTerms = _.pluck(dutchTerms, 'STR')
+
+    if (DEBUG) {
+      console.log("Terms dut", dutchTerms);
+***REMOVED***
 
 ***REMOVED*** Now make the terms unique-ish for elasticsearch
     englishTerms = getUnique(englishTerms);
@@ -123,37 +129,70 @@ co(function *() {
 ***REMOVED*** Base score on english terms,
 ***REMOVED*** Add small bonus if dutch (or other) variants are found
 ***REMOVED***  > add altTerms = dutchTerms.concat(OtherLanguages) etc. for scoring
-    var scoreBoost = score(englishTerms, dutchTerms);
+***REMOVED*** var scoreBoost = score(englishTerms, dutchTerms);
 
+    /*
     var startsWith = englishTerms.filter(checkLength).map(getFirstWord);
         startsWith = getUnique(startsWith);
+    */
 
     if (DEBUG) {
       console.log(cuiCodes[i].CUI);
       console.log("Unique", englishTerms);
-      console.log("Starts with ", startsWith);
+      console.log("Unique dut", dutchTerms);
       console.log("----------");
 ***REMOVED***
 
 
-***REMOVED*** Add document to bulk list
+***REMOVED*** Add document as a whole for expanding queries.
     bulk.push({
       "index" : {
-        "_index" : "autocomplete",
+        "_index" : "expander",
         "_type"  : "records",
   ***REMOVED***
 ***REMOVED***);
 
     bulk.push({
-      "cui"   : cuiCodes[i].CUI,
-      "type"  : cuiCodes[i].STY,
+      "cui"  : cuiCodes[i].CUI,
+      "type" : cuiCodes[i].STY,
+      "str"  : englishTerms.concat(dutchTerms)
+***REMOVED***);
 
-      "startsWith" : startsWith,
-      "boost" : scoreBoost,
+    if (DEBUG) {
+      console.log("Added expander doc");
+***REMOVED***
 
-      "eng" : englishTerms,
-      "dut" : dutchTerms
-   ***REMOVED***);
+***REMOVED*** For each english term add a document for autocompletions
+    for (var j=0, L=englishTerms.length; j<L; j++) {
+      recordCounter++;
+
+      var score = 1;
+      var wordCount = englishTerms[j].words().length;
+
+  ***REMOVED*** Penalize lots of words
+      if (wordCount > 6) {
+        score -= 0.4;
+  ***REMOVED***
+      else if (wordCount > 5) {
+        score -= 0.3;
+  ***REMOVED***
+      else if (wordCount > 4) {
+        score -= 0.2;
+  ***REMOVED***
+
+      bulk.push({
+        "index" : {
+          "_index" : "autocomplete",
+          "_type"  : "records",
+    ***REMOVED***
+  ***REMOVED***);
+
+      bulk.push({
+        "cui"   : cuiCodes[i].CUI,
+        "boost" : score,
+        "str"   : englishTerms[j]
+  ***REMOVED***);
+***REMOVED***
   ***REMOVED***
 
   connection.end();
@@ -169,19 +208,9 @@ co(function *() {
       console.log(err);
 ***REMOVED***
     ***REMOVED***
-      console.log("Inserted " + bulk.length + " records between " + between);
+      console.log("Inserted " + recordCounter + " records between \"" + between + "\"");
 ***REMOVED***
 
     process.exit(0);
   ***REMOVED***);
 ***REMOVED***);
-
-function checkLength(str) {
-  var L = str.words()[0];
-
-  return L.length > 5;
-***REMOVED***
-
-function getFirstWord(str) {
-  return str.words()[0].substring(0, 8);
-***REMOVED***
