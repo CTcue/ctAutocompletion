@@ -5,8 +5,8 @@ var config = require('../config/config.js');
 var _      = require('lodash');
 var sugar  = require('sugar');
 
-var filters = require('../lib/filters.js');
-var client  = require('../lib/requestClient.js');
+var bestMatch = require('../lib/bestMatch.js');
+var client    = require('../lib/requestClient.js');
 
 module.exports = function *() {
   var path = config.elastic + "/autocomplete/records/_search?size=" + 30;
@@ -15,72 +15,88 @@ module.exports = function *() {
   var words = query.words();
 
   var lookup = {
-    "_source" : ["cui", "type", "eng"],
-
+    "_source" : ["cui", "eng"],
     "query" : {
-      "function_score" : {
-        "query" : {
-          "bool" : {
-            "must" : {
-              "terms" : {
-                "eng" : words
-          ***REMOVED***
-        ***REMOVED***,
-
-            "should" : [
-              {
-                "match_phrase" : { "eng" : query ***REMOVED***
-          ***REMOVED***,
-              {
-                "prefix" : {
-                  "startsWith" :  { "value" : words[0], "boost" : 2 ***REMOVED***
-            ***REMOVED***
-          ***REMOVED***
-            ]
+      "bool" : {
+        "must" : {
+          "terms" : {
+            "eng" : words
       ***REMOVED***
     ***REMOVED***,
 
-        "script_score" : {
-          "script" : "_score * doc['boost'].value"
-    ***REMOVED***,
+        "should" : [
+          {
+            "prefix" : {
+              "startsWith" : { "value" : words[0], "boost" : 2 ***REMOVED***
+        ***REMOVED***
+      ***REMOVED***,
 
-        "boost_mode" : "replace"
+          {
+            "fuzzy_like_this_field" : {
+              "eng" : {
+                "prefix_length"   : 2,
+                "analyzer"        : "not_analyzed",
+                "like_text"       : query,
+                "max_query_terms" : 12,
+
+                "boost" : 0.5
+          ***REMOVED***
+        ***REMOVED***
+      ***REMOVED***
+        ]
+  ***REMOVED***
+***REMOVED***,
+
+    "rescore" : {
+      "window_size" : 30,
+      "query" : {
+        "rescore_query" : {
+          "function_score" : {
+            "script_score" : {
+              "script" : "_score * doc['boost'].value"
+        ***REMOVED***
+      ***REMOVED***
+    ***REMOVED***
   ***REMOVED***
 ***REMOVED***
   ***REMOVED***;
 
-  /*
-  var lookup = {
-    "_source" : ["cui", "type", "eng"],
-    "query" : {
-      "match_phrase" : { "eng" : this.body.query ***REMOVED***
-***REMOVED***
-  ***REMOVED***;
-  */
-
   var response = {
-    "took" : 1000,
-    "hits" : []
+    "took"  : 1000,
+    "hits"  : []
   ***REMOVED***;
 
   var result = yield client.post(path, lookup);
 
   if (!result || !result.hasOwnProperty('hits') || result.hits.total === 0) {
-    return this.body = [];
+***REMOVED*** Error
+    console.log(result);
+
+    this.body = [];
   ***REMOVED***
-
-  response.took = result.took;
-
-  var hits = result.hits.hits;
-
-  for (var i=0, N=hits.length; i<N; i++) {
-    response.hits[i] = {
-      "score" : hits[i]._score,
-      "cui"   : hits[i]._source.cui,
-      "terms" : hits[i]._source.eng,
-      "type"  : hits[i]._source.type
-***REMOVED***;
   ***REMOVED***
+    response.took  = result.took;
 
-  this.body = response;
+    var resultHits = result.hits.hits;
+***REMOVED*** var scoreThreshold = result.hits.max_score * 0.5;
+
+    for (var i=0, N=resultHits.length; i<N; i++) {
+      /*
+      TODO : Find method do set an appropriate scoreThreshold
+
+  ***REMOVED*** Check if result score is good enough
+  ***REMOVED*** > Mostly since we use fuzzy matching
+      if (resultHits[i]._score < scoreThreshold) {
+        break;
+  ***REMOVED***
+      */
+
+      response.hits[i] = {
+        "cui"   : resultHits[i]._source.cui,
+        "term"  : resultHits[i]._source.eng //bestMatch(resultHits[i]._source.eng, query)
+  ***REMOVED***;
+***REMOVED***
+
+    this.body = response;
+  ***REMOVED***
 ***REMOVED***;
