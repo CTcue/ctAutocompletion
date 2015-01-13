@@ -1,22 +1,18 @@
 'use strict';
 
-var config  = require('../config/config.js');
-var mysql   = require('mysql').createConnection(config.mysql);
-var queries = require('./queries/main.js');
+var config = require('../config/config.js');
+var mysql  = require('mysql').createConnection(config.mysql);
 
-console.log(30);
+// Get largest CUI code
+var countQuery = "SELECT CUI FROM MRCONSO ORDER BY CUI DESC LIMIT 1"
 
-/*
-mysql.query(queries.countQuery, function(err, data) {
+mysql.query(countQuery, function(err, data) {
   if (err) {
     console.log("ERROR: " + err)
   ***REMOVED***
   ***REMOVED***
-    console.log(data[0]["count"]);
+    console.log(data[0].CUI.substring(1));
   ***REMOVED***
 
   process.exit(0);
 ***REMOVED***);
-*/
-
-process.exit(0);
