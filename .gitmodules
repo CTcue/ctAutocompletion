@@ -1,0 +1,3 @@
+[submodule "ctcue-config"]
+	path = ctcue-config
+	url = https://github.com/jvduf/ctcue-config
