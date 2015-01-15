@@ -1,35 +1,25 @@
 
-// Looks for edge n-gram word matches
-exports.expandCUI = function(query) {
-  var lookup = {
-    "_source" : ["cui", "terms"],
-    "query": {
-      "match": {
-        "cui": query.toUpperCase()
-  ***REMOVED***
-***REMOVED***
-  ***REMOVED***;
-
-  return function(callback) {
-    reqClient.post("_search?size=1", lookup, function(err, res, body) {
-      callback(err, body);
-***REMOVED***);
-  ***REMOVED***;
-***REMOVED***
+var config = require('../config/config.js');
+var client = require('../lib/requestClient.js');
 
 module.exports = function *() {
-  var suggestions = yield autocomplete.expandCUI(this.body.query);
+  var path = config.elastic + "/expander/records/_search?size=1";
 
-  if (suggestions.hits && suggestions.hits.hits) {
-    var hit = suggestions.hits.hits[0]._source;
-
-    this.body = {
-      'cui'   : hit.cui,
-      'terms' : hit.terms,
-      'type'  : suggestions.hits.hits[0]._type
-***REMOVED***
-  ***REMOVED***
-  ***REMOVED***
-    this.body = {***REMOVED***;
+  var lookup = {
+    "_source" : ["str"],
+    "query": {
+      "match": {
+        "cui": this.body.query.toUpperCase()
   ***REMOVED***
 ***REMOVED***
+  ***REMOVED***;
+
+  var result = yield client.post(path, lookup);
+
+  if (result.hits.total >= 1) {
+    this.body = result.hits.hits[0]._source.str;
+  ***REMOVED***
+  ***REMOVED***
+    this.body = [];
+  ***REMOVED***
+***REMOVED***;
