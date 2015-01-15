@@ -29,8 +29,10 @@ curl -XPUT "http://localhost:9200/$autocomplete" -d '{
           "type":      "custom",
           "tokenizer": "standard",
           "filter": [
-            "asciifolding",
+            "standard",
             "lowercase",
+            "elision",
+            "asciifolding",
             "autocomplete_filter"
           ]
         }

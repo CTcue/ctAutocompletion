@@ -1,35 +1,25 @@
 
-// Looks for edge n-gram word matches
-exports.expandCUI = function(query) {
+var config = require('../config/config.js');
+var client = require('../lib/requestClient.js');
+
+module.exports = function *() {
+  var path = config.elastic + "/expander/records/_search?size=1";
+
   var lookup = {
-    "_source" : ["cui", "terms"],
+    "_source" : ["str"],
     "query": {
       "match": {
-        "cui": query.toUpperCase()
+        "cui": this.body.query.toUpperCase()
       }
     }
   };
 
-  return function(callback) {
-    reqClient.post("_search?size=1", lookup, function(err, res, body) {
-      callback(err, body);
-    });
-  };
-}
+  var result = yield client.post(path, lookup);
 
-module.exports = function *() {
-  var suggestions = yield autocomplete.expandCUI(this.body.query);
-
-  if (suggestions.hits && suggestions.hits.hits) {
-    var hit = suggestions.hits.hits[0]._source;
-
-    this.body = {
-      'cui'   : hit.cui,
-      'terms' : hit.terms,
-      'type'  : suggestions.hits.hits[0]._type
-    }
+  if (result.hits.total >= 1) {
+    this.body = result.hits.hits[0]._source.str;
   }
   else {
-    this.body = {};
+    this.body = [];
   }
-}
+};

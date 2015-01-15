@@ -8,7 +8,7 @@ var sugar  = require('sugar');
 var client    = require('../lib/requestClient.js');
 
 module.exports = function *() {
-  var path = config.elastic + "/autocomplete/records/_search?size=" + 30;
+  var path = config.elastic + "/autocomplete/records/_search?size=20";
 
   var query = this.body.query;
   var words = query.words();
@@ -17,18 +17,29 @@ module.exports = function *() {
     "_source" : ["cui", "str"],
     "query" : {
       "dis_max" : {
-        "tie_breaker" : 0.5,
+        "tie_breaker" : 0.3,
 
         "queries" : [
           {
+            "match" : {
+              "str" : {
+                "type"  : "phrase",
+                "query" : query,
+                "boost" : 0.5
+              }
+            }
+          },
+
+          {
             "terms" : {
-              "str" : words
+                "str" : words,
+                "minimum_should_match" : 1
             }
           },
 
           {
             "prefix" : {
-              "str" : words[0].substring(0, 5)
+              "str" : words[0].substring(0,5)
             }
           },
 
@@ -38,24 +49,11 @@ module.exports = function *() {
                 "prefix_length"   : 2,
                 "analyzer"        : "not_analyzed",
                 "like_text"       : query,
-                "max_query_terms" : 12
+                "max_query_terms" : 8
               }
             }
           }
         ]
-      }
-    },
-
-    "rescore" : {
-      "window_size" : 30,
-      "query" : {
-        "rescore_query" : {
-          "function_score" : {
-            "script_score" : {
-              "script" : "_score * doc['boost'].value"
-            }
-          }
-        }
       }
     }
   };

@@ -6,7 +6,7 @@ var removeDiacritics = require('./diacritics.js');
 // Example @list
 //  ["term", "Another term"]
 var getUnique = function(list) {
-  var rejectPattern = /\(.*\)|\[X\]|-RETIRED-/;
+  var rejectPattern = /\(.*\)|\[(X|Q)\]|-RETIRED-/;
 
   list = _.map(list, function(str) {
     return removeDiacritics(str);

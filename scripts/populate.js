@@ -187,6 +187,7 @@ co(function *() {
         }
       });
 
+      // Later on the `boost` can be incremented by "popularity" in selections
       bulk.push({
         "cui"   : cuiCodes[i].CUI,
         "boost" : score,
