@@ -1,5 +1,7 @@
 'use strict';
 
+var version = "1.0.0";
+
 /** Module dependencies. */
 var config  = require('./config/config');
 
@@ -42,7 +44,8 @@ app.use(router(app));
 
 app.all('/', function *() {
   this.body = {
-    success : true
+    "version" : version,
+    "success" : true
   ***REMOVED***;
 ***REMOVED***);
 
@@ -57,7 +60,7 @@ app.post('/expand',       checkBody, expander);
 
 
 app.post('/deploy', function *() {
-  console.log('Deploying ctSearch');
+  console.log('Deploying CTcUMLS');
 
   var crypto  = require("crypto");
   var exec    = require("child_process").exec, child;
@@ -69,7 +72,12 @@ app.post('/deploy', function *() {
   var calculatedSignature = 'sha1=' + hmac.digest('hex');
 
   if (this.req.headers['x-hub-signature'] === calculatedSignature) {
-    exec("git pull && git submodule update && npm install && forever restartall");
+    if (this.request.body.ref === "refs/heads/master") {
+      exec("git pull && git submodule update && npm install && forever restartall");
+***REMOVED***
+    ***REMOVED***
+  ***REMOVED*** Currently we do nothing with branches
+***REMOVED***
   ***REMOVED***
   ***REMOVED***
     console.log('Invalid signature.');
