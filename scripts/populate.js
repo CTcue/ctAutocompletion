@@ -6,17 +6,7 @@
   in the Semantic Types defined below, that have at least one SNOWMED description.
 
   For each entry matching this criteria, it will lookup alternative, but unique,
-  variants in english and dutch. Then a custom score is added to favor
-  shorter terms. For instance, (A) should rank higher in the example below.
-
-    var A = [
-      "ankylosing, spondylitis",
-      "ziekte van mary strumpëll"
-    ];
-
-    var B = [
-      "ankylosing spondylitis occipito atlanto axial region"
-    ];
+  variants in english and dutch.
 */
 
 var semanticTypes = [
@@ -35,7 +25,7 @@ var semanticTypes = [
 ];
 
 
-var DEBUG = false || process.argv[4] === "debug";
+var DEBUG = true || process.argv[4] === "debug";
 var config  = require('../config/config.js');
 var wrapper = require('co-mysql');
 var mysql   = require('mysql');
@@ -57,7 +47,6 @@ var _       = require('lodash');
 var sugar   = require('sugar');
 
 // Custom lib functions
-var score      = require('./lib/score.js');
 var getUnique  = require('./lib/getUnique.js');
 var digitToCUI = require('./lib/digitToCUI.js');
 
@@ -98,8 +87,8 @@ co(function *() {
       "SELECT STR",
       "FROM MRCONSO",
       "WHERE CUI='" + cuiCodes[i].CUI + "'",
-      "AND SAB IN ('MDRDUT', 'MSHDUT', 'ICD10DUT')",
-      "LIMIT 10"
+      "AND SAB IN ('MDRDUT', 'MSHDUT', 'ICD10DUT', 'ICD9')",
+      "LIMIT 30"
     ].join(" ");
 
     var englishTerms = yield client.query(englishQuery);
@@ -107,43 +96,27 @@ co(function *() {
 
     if (DEBUG) {
       console.log(cuiCodes[i].CUI);
-      console.log("Terms", englishTerms);
+  ***REMOVED***console.log(englishTerms);
 ***REMOVED***
 
     if (englishTerms.length === 0) {
       continue;
 ***REMOVED***
 
-
     var dutchTerms = yield client.query(dutchQuery);
         dutchTerms = _.pluck(dutchTerms, 'STR')
-
-    if (DEBUG) {
-      console.log("Terms dut", dutchTerms);
-***REMOVED***
 
 ***REMOVED*** Now make the terms unique-ish for elasticsearch
     englishTerms = getUnique(englishTerms);
     dutchTerms   = getUnique(dutchTerms);
 
-***REMOVED*** Base score on english terms,
-***REMOVED*** Add small bonus if dutch (or other) variants are found
-***REMOVED***  > add altTerms = dutchTerms.concat(OtherLanguages) etc. for scoring
-***REMOVED*** var scoreBoost = score(englishTerms, dutchTerms);
-
-    /*
-    var startsWith = englishTerms.filter(checkLength).map(getFirstWord);
-        startsWith = getUnique(startsWith);
-    */
-
     if (DEBUG) {
-      console.log(cuiCodes[i].CUI);
-      console.log("Unique", englishTerms);
-      console.log("Unique dut", dutchTerms);
+      console.log("Unique\n", englishTerms.concat(dutchTerms));
+  ***REMOVED***console.log("Unique dut", dutchTerms);
       console.log("----------");
 ***REMOVED***
 
-
+    /*
 ***REMOVED*** Add document as a whole for expanding queries.
     bulk.push({
       "index" : {
@@ -166,20 +139,6 @@ co(function *() {
     for (var j=0, L=englishTerms.length; j<L; j++) {
       recordCounter++;
 
-      var score = 1;
-      var wordCount = englishTerms[j].words().length;
-
-  ***REMOVED*** Penalize lots of words
-      if (wordCount > 6) {
-        score -= 0.4;
-  ***REMOVED***
-      else if (wordCount > 5) {
-        score -= 0.3;
-  ***REMOVED***
-      else if (wordCount > 4) {
-        score -= 0.2;
-  ***REMOVED***
-
       bulk.push({
         "index" : {
           "_index" : "autocomplete",
@@ -187,17 +146,17 @@ co(function *() {
     ***REMOVED***
   ***REMOVED***);
 
-  ***REMOVED*** Later on the `boost` can be incremented by "popularity" in selections
       bulk.push({
         "cui"   : cuiCodes[i].CUI,
-        "boost" : score,
         "str"   : englishTerms[j]
   ***REMOVED***);
 ***REMOVED***
+    */
   ***REMOVED***
 
   connection.end();
 
+  /*
   // No entries with usable CUI codes found
   if (bulk.length === 0) {
     process.exit(0);
@@ -214,4 +173,5 @@ co(function *() {
 
     process.exit(0);
   ***REMOVED***);
+  */
 ***REMOVED***);

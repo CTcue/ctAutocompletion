@@ -6,24 +6,84 @@ var removeDiacritics = require('./diacritics.js');
 // Example @list
 //  ["term", "Another term"]
 var getUnique = function(list) {
-  var rejectPattern = /\(.*\)|\[(X|Q)\]|-RETIRED-/;
-
   list = _.map(list, function(str) {
     return removeDiacritics(str);
   ***REMOVED***);
 
-  list = _.reject(list, function(str) {
-    return str.length === 0 || rejectPattern.test(str);
+  var wordsInBrackets = [
+    "assessment scale",
+    "attribute",
+    "body structure",
+    "cell structure",
+    "disorder",
+    "syndrome",
+    "environment",
+    "environment / location",
+    "event",
+    "finding",
+    "disease",
+    "foundation metadata concept",
+    "morphologic abnormality",
+    "navigational concept",
+    "observable entity",
+    "occupation",
+    "organism",
+    "person",
+    "physical object",
+    "procedure",
+    "product",
+    "qualifier value",
+    "record artifact",
+    "regime/therapy",
+    "situation",
+    "situational",
+    "context-dependent category",
+    "specimen",
+    "substance",
+    "specify",
+    "function",
+    "clinical",
+    "chronic",
+    "chronisch",
+    "chemical"
+  ];
+
+  // Additional list with all medical words removed
+  // Find longest common substrings
+  // Add these to the list (if duplicate, the next function removes them)
+
+  var removeRegex = new RegExp('\\b(' + wordsInBrackets.join('|') + '|stage|stadium|ziekte van|niet gespecificeerde?|unspecified|undefined|NAO|NOS|NEG|Ambiguous)\\b', 'gi');
+
+  // Clone list
+  listClone = list.slice()
+  listClone = _.map(listClone, function(str) {
+    return str
+      .replace(/\(.*\)|\[.*\]|,/g, '')   // Remove anything in brackets
+      .replace(/-|_/g, ' ')          ***REMOVED*** Remove dashes
+      .replace(/\b[a-z]\b/gi, ' ')   ***REMOVED*** Remove single characters (weird UMLS thing)
+      .replace(removeRegex, '')      ***REMOVED*** Remove unneeded words
+      .trim()
+  ***REMOVED***);
+
+  // Remove short words and terms that are deleted (but still in UMLS)
+  list = _.reject(list.concat( _.uniq(listClone) ), function(str) {
+    return str.length < 4 || /^\[.\]|-RETIRED-/i.test(str);
+  ***REMOVED***);
+
+  // Sort, so unique returns shortest version
+  list = _.sortBy(list, function(str) {
+    return str.length;
   ***REMOVED***);
 
   // Checks for the uniqueness
   // * Case-, dash-, underscore- insensitive
   // * Medical skip words (NOS, NAO) may be left out
+  var duplicateRegex = new RegExp('\((' + wordsInBrackets.join('|') + ')\)|NAO|NOS|NEG|unspecified|undefined|Ambiguous', 'gi');
   list = _.uniq(list, function(str) {
     return str
-      .replace(/,|NOS|NAO/g, '')
-      .replace(/_|-/g, ' ')
-      .replace('\'s', 's')
+      .replace(duplicateRegex, '')
+      .replace(/-|_|\.|\,|\(\)|\[\]/g, ' ')
+      .replace(/\s{2,***REMOVED***/g, ' ')
       .toLowerCase()
       .trim();
   ***REMOVED***);
@@ -31,30 +91,3 @@ var getUnique = function(list) {
   return list;
 ***REMOVED***
 module.exports = getUnique;
-
-
-// Do test cases
-if (typeof process.argv[2] !== 'undefined' && process.argv[2] === "test") {
-  var cases = [
-    [
-      "Malignant tumor of mesopharynx",
-      "Malignant tumour of mesopharynx",
-      "Malignant tumour of mesopharynx, NOS",
-      "Malignant tumour of mesopharynx (disorder)",
-      "Malignant tumour of mesopharynx (syndrome)",
-    ],
-    [
-      "Ankylosing spondylitis",
-      "Bekhterevs disease",
-      "Bekhterev's disease",
-      "Marie-Strumpell spondylitis",
-      "Marie Strumpell spondylitis",
-    ]
-  ];
-
-  for (var i=0; i < cases.length; i++) {
-    console.log(cases[i]);
-    console.log("Unique : ", getUnique(cases[i]));
-    console.log("------------");
-  ***REMOVED***
-***REMOVED***;

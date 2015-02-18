@@ -1,9 +1,9 @@
 'use strict';
 
-var version = "1.0.0";
+var version = "1.0.1";
 
 /** Module dependencies. */
-var config  = require('./config/config');
+var config = require('./config/config');
 
 var koa    = require('koa');
 var app    = koa();
@@ -19,8 +19,11 @@ var sugar        = require('sugar');
 var _            = require('lodash');
 
 var checkBody    = require('./middleware/checkBody.js');
+var checkSecret  = require('./middleware/checkSecret.js');
+
 var autocomplete = require('./controllers/autocompleteQuery.js');
 var expander     = require('./controllers/expandQuery.js');
+var customTerms  = require('./controllers/customTerms.js');
 
 // JSON output
 app.use(json({ pretty: true, param: 'pretty' ***REMOVED***));
@@ -57,6 +60,21 @@ app.all('/', function *() {
 */
 app.post('/autocomplete', checkBody, autocomplete);
 app.post('/expand',       checkBody, expander);
+
+
+/* Example request to add terms to cUMLS autocomplete:
+
+  curl -XPOST 178.62.230.23/custom -d '{
+    "secret"   : "394893szfihweuiufwfhsufhushufsduhf", // Your personal secret
+    "term"     : "Agatston score",
+    "synonyms" : [
+      "Calcium score",
+      "Agatston-score",
+      ...
+    ]
+  ***REMOVED***'
+*/
+//app.post('/custom', checkSecret, customTerms);
 
 
 app.post('/deploy', function *() {
