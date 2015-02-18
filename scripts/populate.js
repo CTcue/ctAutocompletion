@@ -25,7 +25,7 @@ var semanticTypes = [
 ];
 
 
-var DEBUG = true || process.argv[4] === "debug";
+var DEBUG   = false || process.argv[4] === "debug";
 var config  = require('../config/config.js');
 var wrapper = require('co-mysql');
 var mysql   = require('mysql');
@@ -112,11 +112,10 @@ co(function *() {
 
     if (DEBUG) {
       console.log("Unique\n", englishTerms.concat(dutchTerms));
-  ***REMOVED***console.log("Unique dut", dutchTerms);
+      console.log("Unique dut", dutchTerms);
       console.log("----------");
 ***REMOVED***
 
-    /*
 ***REMOVED*** Add document as a whole for expanding queries.
     bulk.push({
       "index" : {
@@ -151,12 +150,10 @@ co(function *() {
         "str"   : englishTerms[j]
   ***REMOVED***);
 ***REMOVED***
-    */
   ***REMOVED***
 
   connection.end();
 
-  /*
   // No entries with usable CUI codes found
   if (bulk.length === 0) {
     process.exit(0);
@@ -173,5 +170,4 @@ co(function *() {
 
     process.exit(0);
   ***REMOVED***);
-  */
 ***REMOVED***);
