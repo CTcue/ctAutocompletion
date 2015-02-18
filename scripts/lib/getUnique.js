@@ -2,10 +2,11 @@
 var _ = require('lodash');
 var removeDiacritics = require('./diacritics.js');
 
+
 // From an SQL (UMLS) result, return the unique strings
 // Example @list
 //  ["term", "Another term"]
-var getUnique = function(list) {
+var getUnique = function(list, removeIndications) {
   list = _.map(list, function(str) {
     return removeDiacritics(str);
   ***REMOVED***);
@@ -52,22 +53,19 @@ var getUnique = function(list) {
   // Find longest common substrings
   // Add these to the list (if duplicate, the next function removes them)
 
-  var removeRegex = new RegExp('\\b(' + wordsInBrackets.join('|') + '|stage|stadium|ziekte van|niet gespecificeerde?|unspecified|undefined|NAO|NOS|NEG|Ambiguous)\\b', 'gi');
+  var removeWordsInBrackets = new RegExp('\\((' + wordsInBrackets.join('|') + ')\\)', 'gi');
 
-  // Clone list
-  listClone = list.slice()
-  listClone = _.map(listClone, function(str) {
+  list = _.map(list, function(str) {
     return str
-      .replace(/\(.*\)|\[.*\]|,/g, '')   // Remove anything in brackets
-      .replace(/-|_/g, ' ')          ***REMOVED*** Remove dashes
-      .replace(/\b[a-z]\b/gi, ' ')   ***REMOVED*** Remove single characters (weird UMLS thing)
-      .replace(removeRegex, '')      ***REMOVED*** Remove unneeded words
+      .replace(removeWordsInBrackets, '')
+      .replace(/-|_|\.|\,|\(\)|\[\]|'s/g, ' ')
+      .replace(/\b(NAO|NOS|NEG)\b/gi, '')   // Remove unwanted words
+      .replace(/\s{2,***REMOVED***/g, ' ')          ***REMOVED*** Reduce multiple whitespace
       .trim()
   ***REMOVED***);
 
-  // Remove short words and terms that are deleted (but still in UMLS)
-  list = _.reject(list.concat( _.uniq(listClone) ), function(str) {
-    return str.length < 4 || /^\[.\]|-RETIRED-/i.test(str);
+  list = _.reject(list, function(str) {
+    return str.length < 2 || /^\[.\]|-RETIRED-/i.test(str);
   ***REMOVED***);
 
   // Sort, so unique returns shortest version
@@ -75,18 +73,38 @@ var getUnique = function(list) {
     return str.length;
   ***REMOVED***);
 
-  // Checks for the uniqueness
-  // * Case-, dash-, underscore- insensitive
-  // * Medical skip words (NOS, NAO) may be left out
-  var duplicateRegex = new RegExp('\((' + wordsInBrackets.join('|') + ')\)|NAO|NOS|NEG|unspecified|undefined|Ambiguous', 'gi');
   list = _.uniq(list, function(str) {
     return str
-      .replace(duplicateRegex, '')
-      .replace(/-|_|\.|\,|\(\)|\[\]/g, ' ')
-      .replace(/\s{2,***REMOVED***/g, ' ')
       .toLowerCase()
       .trim();
   ***REMOVED***);
+
+  if (typeof removeIndications !== "undefined") {
+***REMOVED*** Checks for the uniqueness
+***REMOVED*** * Case-, dash-, underscore- insensitive
+    var removeWords = new RegExp('(' + wordsInBrackets.join('|') + ')', 'gi');
+
+    var listClone = list.slice()
+    listClone = _.map(listClone, function(str) {
+      return str
+        .replace(removeWords, '')
+        .replace(/\(.*\)|\[.*\]/g, '')   // Remove anything in brackets
+        .trim()
+***REMOVED***);
+
+    list = list.concat(listClone);
+
+    list = _.map(list, function(str) {
+      return str
+        .replace(/-|_|\.|\,|\(\)|\[\]/g, ' ')
+        .replace(/\s{2,***REMOVED***/g, ' ')
+        .replace(/\b[a-z]\b/gi, ' ')   ***REMOVED*** Remove single characters (weird UMLS thing)
+        .toLowerCase()
+        .trim()
+***REMOVED***);
+
+    list = _.uniq(list);
+  ***REMOVED***
 
   return list;
 ***REMOVED***

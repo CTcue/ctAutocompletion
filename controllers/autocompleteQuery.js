@@ -17,7 +17,7 @@ module.exports = function *() {
     "_source" : ["cui", "str"],
     "query" : {
       "dis_max" : {
-        "tie_breaker" : 0.3,
+        "tie_breaker" : 0.5,
 
         "queries" : [
           {
@@ -25,7 +25,7 @@ module.exports = function *() {
               "str" : {
                 "type"  : "phrase",
                 "query" : query,
-                "boost" : 0.5
+                "boost" : 1
           ***REMOVED***
         ***REMOVED***
       ***REMOVED***,
@@ -46,7 +46,7 @@ module.exports = function *() {
           {
             "fuzzy_like_this_field" : {
               "str" : {
-                "prefix_length"   : 2,
+                "prefix_length"   : 3,
                 "analyzer"        : "not_analyzed",
                 "like_text"       : query,
                 "max_query_terms" : 8

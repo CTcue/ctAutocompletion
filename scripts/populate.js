@@ -62,6 +62,8 @@ var preferredQuery = [
 ].join(" ");
 
 co(function *() {
+
+  var bulk = [];
   var recordCounter = 0;
   var cuiCodes = yield client.query(preferredQuery);
 
@@ -69,8 +71,6 @@ co(function *() {
     console.log("Could not find any CUI codes!");
     process.exit(0);
   ***REMOVED***
-
-  var bulk = [];
 
   // Get all records for single CUI
   for (var i=0, N=cuiCodes.length; i<N; i++) {
@@ -87,7 +87,7 @@ co(function *() {
       "SELECT STR",
       "FROM MRCONSO",
       "WHERE CUI='" + cuiCodes[i].CUI + "'",
-      "AND SAB IN ('MDRDUT', 'MSHDUT', 'ICD10DUT', 'ICD9')",
+      "AND SAB IN ('MDRDUT', 'MSHDUT', 'ICD10DUT')", // 'ICD9'
       "LIMIT 30"
     ].join(" ");
 
@@ -96,42 +96,18 @@ co(function *() {
 
     if (DEBUG) {
       console.log(cuiCodes[i].CUI);
-  ***REMOVED***console.log(englishTerms);
+      console.log(englishTerms);
 ***REMOVED***
 
     if (englishTerms.length === 0) {
       continue;
 ***REMOVED***
 
-    var dutchTerms = yield client.query(dutchQuery);
-        dutchTerms = _.pluck(dutchTerms, 'STR')
-
 ***REMOVED*** Now make the terms unique-ish for elasticsearch
     englishTerms = getUnique(englishTerms);
-    dutchTerms   = getUnique(dutchTerms);
 
     if (DEBUG) {
-      console.log("Unique\n", englishTerms.concat(dutchTerms));
-      console.log("Unique dut", dutchTerms);
-      console.log("----------");
-***REMOVED***
-
-***REMOVED*** Add document as a whole for expanding queries.
-    bulk.push({
-      "index" : {
-        "_index" : "expander",
-        "_type"  : "records",
-  ***REMOVED***
-***REMOVED***);
-
-    bulk.push({
-      "cui"  : cuiCodes[i].CUI,
-      "type" : cuiCodes[i].STY,
-      "str"  : englishTerms.concat(dutchTerms)
-***REMOVED***);
-
-    if (DEBUG) {
-      console.log("Added expander doc");
+      console.log(englishTerms);
 ***REMOVED***
 
 ***REMOVED*** For each english term add a document for autocompletions
@@ -150,6 +126,35 @@ co(function *() {
         "str"   : englishTerms[j]
   ***REMOVED***);
 ***REMOVED***
+
+
+***REMOVED*** Get dutch terms for expander
+    var dutchTerms = yield client.query(dutchQuery);
+        dutchTerms = _.pluck(dutchTerms, 'STR')
+
+    var allTerms = getUnique(englishTerms.concat(dutchTerms), true);
+
+    if (DEBUG) {
+      console.log(allTerms);
+***REMOVED***
+
+***REMOVED*** Add document as a whole for expanding queries.
+    bulk.push({
+      "index" : {
+        "_index" : "expander",
+        "_type"  : "records",
+  ***REMOVED***
+***REMOVED***);
+
+    bulk.push({
+      "cui"  : cuiCodes[i].CUI,
+      "type" : cuiCodes[i].STY,
+      "str"  : allTerms
+***REMOVED***);
+
+    if (DEBUG) {
+      console.log("Added expander doc");
+***REMOVED***
   ***REMOVED***
 
   connection.end();
@@ -167,7 +172,6 @@ co(function *() {
     ***REMOVED***
       console.log("Inserted " + recordCounter + " records between \"" + between + "\"");
 ***REMOVED***
-
     process.exit(0);
   ***REMOVED***);
 ***REMOVED***);
