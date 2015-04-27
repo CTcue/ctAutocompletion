@@ -1,25 +1,32 @@
 
 var config = require('../config/config.js');
-var client = require('../lib/requestClient.js');
+var elastic = require('elasticsearch');
+var elasticClient = new elastic.Client({
+    "apiVersion" : "1.4"
+});
 
 module.exports = function *() {
-  var path = config.elastic + "/expander/records/_search?size=1";
-
-  var lookup = {
-    "_source" : ["str"],
-    "query": {
-      "match": {
-        "cui": this.body.query
-      }
-    }
+  var result = yield function(callback) {
+      elasticClient.search({
+          "index" : 'expander',
+          "type"  : 'records',
+          "body" : {
+              "query" : {
+                  "term" : {
+                      "cui" : this.body.query
+                   }
+               }
+          }
+      },
+      function(err, resp) {
+          if (resp && !!resp.hits && resp.hits.total > 0) {
+            callback(false, resp.hits.hits[0]._source.str);
+          }
+          else {
+            callback(err, []);
+          }
+      });
   };
 
-  var result = yield client.post(path, lookup);
-
-  if (result.hits.total >= 1) {
-    this.body = result.hits.hits[0]._source.str;
-  }
-  else {
-    this.body = [];
-  }
+  this.body = result;
 };
