@@ -41,8 +41,8 @@ function findTerms(query) {
     query     = query.trim().toLowerCase();
     var words = query.split(" ");
 
-    var termQuery = {
-        "term": {
+    var simplePrefixQuery = {
+        "prefix": {
             "str": {
               "value" : words[0]
             }
@@ -96,16 +96,14 @@ function findTerms(query) {
 
     if (words.length === 1) {
         // Single word --> Term query matches shorter words better
-        lookup.bool.must.push(termQuery);
+        lookup.bool.must.push(simplePrefixQuery);
     }
     else {
-        // With multiple words, we need to make sure it has the right prefix
+        // Multiple words, no need for term
         lookup.bool.must.push(prefixQuery);
     }
 
-    if (query.length > 4) {
-        lookup.bool.must.push(phraseQuery);
-    }
+    lookup.bool.must.push(phraseQuery);
 
 
     return function(callback) {
