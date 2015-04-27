@@ -31,6 +31,16 @@ module.exports = function *() {
         response.hits[i]       = resultHits[i]._source;
         response.hits[i].score = resultHits[i]._score;
       }
+
+      response.hits.sort(function(a, b) {
+            // For similar score, order by shortest string first
+            if (a.score === b.score) {
+                return a.str.length - b.str.length;
+            }
+
+            // Else rank from highest score to lowest
+            return b.score - a.score;
+      });
   }
 
   this.body = response;
