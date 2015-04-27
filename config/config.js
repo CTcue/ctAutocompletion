@@ -1,16 +1,12 @@
 var config = {}
 
 if (process.env.NODE_ENV === 'production') {
+  var cUMLS = require("../ctcue-config/cUMLS");
+
   config.host = '178.62.230.23';
   config.port = 3000;
 
-  config.mysql = {
-    host      : 'localhost',
-    user      : 'cumls',
-    password  : 'b7B5mDNu',
-    database  : 'umls'
-  };
-
+  config.mysql = cUMLS.mysql;
 }
 else {
   config.host = 'localhost';
@@ -24,7 +20,13 @@ else {
   };
 }
 
-config.elastic = "http://localhost:9200"
+config.mongodb = {
+  "path"        : "mongodb://localhost/ctUMLS",
+  "user"        : "",
+  "pass"        : ""
+};
+
+config.elastic = "http://localhost:9200";
 
 config.path = 'http://'
               + config.host

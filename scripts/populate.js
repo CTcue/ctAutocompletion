@@ -30,6 +30,7 @@ var config  = require('../config/config.js');
 var wrapper = require('co-mysql');
 var mysql   = require('mysql');
 var co      = require('co');
+var sha1    = require("../lib/sha1");
 
 try {
   var connection = mysql.createConnection(config.mysql);
@@ -51,7 +52,7 @@ var getUnique  = require('./lib/getUnique.js');
 var digitToCUI = require('./lib/digitToCUI.js');
 
 var elasticClient = new elastic.Client({
-  "apiVersion" : "1.3"
+  "apiVersion" : "1.4"
 });
 
 var between = digitToCUI(process.argv[2]) +"\" AND \"" + digitToCUI(process.argv[3]);
@@ -106,28 +107,6 @@ co(function *() {
     // Now make the terms unique-ish for elasticsearch
     englishTerms = getUnique(englishTerms);
 
-    if (DEBUG) {
-      console.log(englishTerms);
-    }
-
-    // For each english term add a document for autocompletions
-    for (var j=0, L=englishTerms.length; j<L; j++) {
-      recordCounter++;
-
-      bulk.push({
-        "index" : {
-          "_index" : "autocomplete",
-          "_type"  : "records",
-        }
-      });
-
-      bulk.push({
-        "cui"   : cuiCodes[i].CUI,
-        "str"   : englishTerms[j]
-      });
-    }
-
-
     // Get dutch terms for expander
     var dutchTerms = yield client.query(dutchQuery);
         dutchTerms = _.pluck(dutchTerms, 'STR')
@@ -138,11 +117,30 @@ co(function *() {
       console.log(allTerms);
     }
 
+    // For each english term add a document for autocompletions
+    for (var j=0, L=allTerms.length; j<L; j++) {
+      recordCounter++;
+
+      bulk.push({
+        "index" : {
+          "_index" : "autocomplete",
+          "_type"  : "records",
+          "_id"    : sha1.sum(allTerms[j].toLowerCase().trim())
+        }
+      });
+
+      bulk.push({
+        "cui"   : cuiCodes[i].CUI,
+        "str"   : allTerms[j]
+      });
+    }
+
     // Add document as a whole for expanding queries.
     bulk.push({
       "index" : {
-        "_index" : "expander",
-        "_type"  : "records",
+          "_index" : "expander",
+          "_type"  : "records",
+          "_id"    : cuiCodes[i].CUI
       }
     });
 

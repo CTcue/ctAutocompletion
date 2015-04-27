@@ -9,7 +9,7 @@ module.exports = function *() {
     "_source" : ["str"],
     "query": {
       "match": {
-        "cui": this.body.query.toUpperCase()
+        "cui": this.body.query
       }
     }
   };
