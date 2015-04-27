@@ -4,7 +4,7 @@ if (process.env.NODE_ENV === 'production') {
   var cUMLS = require("../ctcue-config/cUMLS");
 
   config.host = '178.62.230.23';
-  config.port = 3000;
+  config.port = 80;
 
   config.mysql = cUMLS.mysql;
 }
