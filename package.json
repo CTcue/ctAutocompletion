@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon --harmony app.js",
     "production": "forever start -l $(date +%g_%m_%d_%H_%M_%S).log -o $(date +%g_%m_%d_%H_%M_%S).log -e $(date +%g_%m_%d_%H_%M_%S).log --spinSleepTime 10000 --minUptime 5000 -c \"node --harmony\" app.js --ctCumls",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --harmony -R spec --recursive ./test"
   ***REMOVED***,
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
   "dependencies": {
     "co": "^4.0.0",
     "co-body": "^1.0.0",
+    "co-monk": "^1.0.0",
     "co-mysql": "^1.0.0",
     "elasticsearch": "^3.0.0",
     "koa": "^0.12.1",
@@ -38,9 +39,15 @@
     "koa-json": "^1.1.1",
     "koa-trail": "0.0.2",
     "lodash": "^2.4.1",
+    "monk": "^1.0.1",
     "mysql": "^2.5.3",
+    "node-uuid": "^1.4.3",
     "request-json": "^0.5.0",
     "sift-string": "0.0.2",
     "sugar": "^1.4.1"
+  ***REMOVED***,
+  "devDependencies": {
+    "supertest" : "*",
+    "mocha": "*"
   ***REMOVED***
 ***REMOVED***

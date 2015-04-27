@@ -1,96 +1,122 @@
 
 /** Module dependencies. */
 
-var config = require('../config/config.js');
-var _      = require('lodash');
-var sugar  = require('sugar');
-
-var client    = require('../lib/requestClient.js');
+var config  = require('../config/config.js');
+var _       = require('lodash');
+var elastic = require('elasticsearch');
+var elasticClient = new elastic.Client({
+    "apiVersion" : "1.4"
+***REMOVED***);
 
 module.exports = function *() {
-  var path = config.elastic + "/autocomplete/records/_search?size=20";
-
-  var query = this.body.query;
-  var words = query.words();
-
-  var lookup = {
-    "_source" : ["cui", "str"],
-    "query" : {
-      "dis_max" : {
-        "tie_breaker" : 0.5,
-
-        "queries" : [
-          {
-            "match" : {
-              "str" : {
-                "type"  : "phrase",
-                "query" : query,
-                "boost" : 1
-          ***REMOVED***
-        ***REMOVED***
-      ***REMOVED***,
-
-          {
-            "terms" : {
-                "str" : words,
-                "minimum_should_match" : 1
-        ***REMOVED***
-      ***REMOVED***,
-
-          {
-            "prefix" : {
-              "str" : words[0].substring(0,5)
-        ***REMOVED***
-      ***REMOVED***,
-
-          {
-            "fuzzy_like_this_field" : {
-              "str" : {
-                "prefix_length"   : 3,
-                "analyzer"        : "not_analyzed",
-                "like_text"       : query,
-                "max_query_terms" : 8
-          ***REMOVED***
-        ***REMOVED***
-      ***REMOVED***
-        ]
-  ***REMOVED***
-***REMOVED***
-  ***REMOVED***;
-
   var response = {
     "took"  : 1000,
     "hits"  : []
   ***REMOVED***;
 
-  var result = yield client.post(path, lookup);
+  var query = this.request.body.query;
+  var result = yield findTerms(query);
 
-  if (!result || !result.hasOwnProperty('hits') || result.hits.total === 0) {
-***REMOVED*** Error
-    console.log(result);
+  if (result && result.hits) {
+      response.took = result.took;
+      var resultHits = result.hits.hits;
 
-    this.body = [];
+  ***REMOVED*** FUTURE
+  ***REMOVED*** Add a scoreThreshold
+  ***REMOVED***  Note: Elasticsearch scoring is relative, so you cannot use a hardcoded
+  ***REMOVED***        threshold. Perhaps k-means to create two groups "high/low" scoring
+  ***REMOVED***        and only return the "high" scoring group.
+
+      for (var i=0, N=resultHits.length; i<N; i++) {
+        response.hits[i]       = resultHits[i]._source;
+        response.hits[i].score = resultHits[i]._score;
   ***REMOVED***
   ***REMOVED***
-    response.took  = result.took;
 
-    var resultHits = result.hits.hits;
-***REMOVED*** var scoreThreshold = result.hits.max_score * 0.5;
+  this.body = response;
+***REMOVED***;
 
-    for (var i=0, N=resultHits.length; i<N; i++) {
-      /*
-      TODO : Find method do set an appropriate scoreThreshold
 
-  ***REMOVED*** Check if result score is good enough
-  ***REMOVED*** > Mostly since we use fuzzy matching
-      if (resultHits[i]._score < scoreThreshold) {
-        break;
-  ***REMOVED***
-      */
+function findTerms(query) {
+    query     = query.trim().toLowerCase();
+    var words = query.split(" ");
 
-      response.hits[i] = resultHits[i]._source;
+    var prefixQuery = {
+        "span_first": {
+            "end": 1,
+            "match": {
+                "span_multi": {
+                    "match": {
+                        "prefix": {
+                            "str": {
+                                "value" : words[0],
+                        ***REMOVED***
+                    ***REMOVED***
+                ***REMOVED***
+            ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***;
+
+    var phraseQuery = {
+        "match" : {
+            "str" : {
+              "type"  : "phrase",
+              "query" : query,
+              "boost" : 1.5
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***;
+
+    var fuzzyQuery = {
+        "fuzzy_like_this_field" : {
+            "str" : {
+                "prefix_length"   : 3,
+                "analyzer"        : "not_analyzed",
+                "like_text"       : query,
+                "max_query_terms" : 8
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***;
+
+    var lookup = {
+        "bool" : {
+            "must" : [prefixQuery]
+    ***REMOVED***
+***REMOVED***;
+
+    if (query.length > 4) {
+        lookup.bool.must.push(phraseQuery);
 ***REMOVED***
 
-    this.body = response;
-  ***REMOVED***
-***REMOVED***;
+    return function(callback) {
+        elasticClient.search({
+            "index" : 'autocomplete',
+            "type"  : 'records',
+            "body" : {
+                "query" : lookup
+        ***REMOVED***
+    ***REMOVED***,
+        function(err, resp) {
+            if (resp && !!resp.hits && resp.hits.total > 0) {
+                callback(err, resp);
+        ***REMOVED***
+            ***REMOVED***
+            ***REMOVED*** Nothing found --> Find alternatives with fuzzy query
+                elasticClient.search(
+                    {
+                        "index" : 'autocomplete',
+                        "type"  : 'records',
+                        "body" : {
+                            "query" : fuzzyQuery
+                    ***REMOVED***
+                ***REMOVED***,
+                    function(err2, resp2) {
+                      resp2.took += resp.took;
+                      callback(err2, resp2);
+                ***REMOVED***
+                );
+        ***REMOVED***
+    ***REMOVED***)
+***REMOVED***
+***REMOVED***

@@ -10,12 +10,17 @@ module.exports = function *(next) {
   ***REMOVED***
 
   // Queries should not be empty or single character
-  if (this.request.body.query.length <= 1) {
-    return this.body = [];
+  // Elasticsearch is slow with single character query, as it returns so many results
+  if (this.request.body.query.length < 2) {
+    return this.body = {
+      "took" : 10,
+      "hits" : [],
+      "msg"  : "Cannot autocomplete for single character"
+***REMOVED***;
   ***REMOVED***
 
   this.body = {***REMOVED***;
-  this.body.query = this.request.body.query.trim().toLowerCase();
+  this.body.query = this.request.body.query.trim();
 
   yield next;
 ***REMOVED***;

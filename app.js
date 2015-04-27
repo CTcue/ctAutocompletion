@@ -6,7 +6,7 @@ var version = "1.0.1";
 var config = require('./config/config');
 
 var koa    = require('koa');
-var app    = koa();
+var app = module.exports = koa();
 
 /** KOA Middleware */
 var cors   = require('koa-cors');
@@ -15,11 +15,8 @@ var json   = require('koa-json');
 var helmet = require('koa-helmet');
 var parse  = require('./lib/koa-request-body');
 
-var sugar        = require('sugar');
-var _            = require('lodash');
-
-var checkBody    = require('./middleware/checkBody.js');
-var checkSecret  = require('./middleware/checkSecret.js');
+var checkBody   = require('./middleware/checkBody.js');
+var checkSecret = require('./middleware/checkSecret.js');
 
 var autocomplete = require('./controllers/autocompleteQuery.js');
 var expander     = require('./controllers/expandQuery.js');
@@ -52,7 +49,7 @@ app.all('/', function *() {
   ***REMOVED***;
 ***REMOVED***);
 
-/* Example request:
+/* Example request: POST since we will need more parameters for context (domain, type)
 
   curl -XPOST 178.62.230.23/autocomplete -d '{
     "query" : "major dep"
@@ -64,9 +61,13 @@ app.post('/expand',       checkBody, expander);
 
 /* Example request to add terms to cUMLS autocomplete:
 
+  Headers: x-auth-token : "secret code"
   curl -XPOST 178.62.230.23/custom -d '{
-    "secret"   : "394893szfihweuiufwfhsufhushufsduhf", // Your personal secret
+    "user" : { name, email, environment etc ***REMOVED***,
+
     "term"     : "Agatston score",
+
+***REMOVED*** (optional)
     "synonyms" : [
       "Calcium score",
       "Agatston-score",
@@ -74,8 +75,20 @@ app.post('/expand',       checkBody, expander);
     ]
   ***REMOVED***'
 */
-//app.post('/custom', checkSecret, customTerms);
+app.post('/custom', checkSecret, customTerms);
 
+/*
+app.get('/custom',  function *() {
+  var config = require('./config/config.js');
+
+  // Database
+  var db   = require('monk')(config.mongodb.path);
+  var wrap = require('co-monk');
+  var table = wrap(db.get('customTerms'));
+
+  this.body = yield table.find({***REMOVED***);
+***REMOVED***);
+*/
 
 app.post('/deploy', function *() {
   console.log('Deploying CTcUMLS');

@@ -1,22 +1,14 @@
 
-var secrets = require('../ctcue-config/cUMLS').secrets;
-var _ = require('lodash');
+var secureCode = require("../ctcue-config/ctSearch_secret").cumls;
 
 module.exports = function *(next) {
-  var error = false;
+    var headers = this.req.headers;
 
-  // Check application secret (currently in "ctcue-config")
-  // Later on this could be your ctcue secret key/identity?
-  if (!!this.request.body && this.request.body.hasOwnProperty('secret')) {
-    var found = _.findIndex(secrets, { 'code' : this.request.body.secret ***REMOVED***)
-
-    if (~found) {
-      return yield next;
+    if (typeof secureCode !== "undefined" && secureCode === headers["x-auth-token"]) {
+        yield next();
 ***REMOVED***
-  ***REMOVED***
-
-  this.body = {
-    'error' : true,
-    'msg'   : 'Please provide a valid secret token.'
-  ***REMOVED***
+    ***REMOVED***
+        this.response.status  = 401;
+        this.response.message = "Please provide the correct Authorization header";
+***REMOVED***
 ***REMOVED***;
