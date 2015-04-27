@@ -31,6 +31,16 @@ module.exports = function *() {
         response.hits[i]       = resultHits[i]._source;
         response.hits[i].score = resultHits[i]._score;
   ***REMOVED***
+
+      response.hits.sort(function(a, b) {
+        ***REMOVED*** For similar score, order by shortest string first
+            if (a.score === b.score) {
+                return a.str.length - b.str.length;
+        ***REMOVED***
+
+        ***REMOVED*** Else rank from highest score to lowest
+            return b.score - a.score;
+  ***REMOVED***);
   ***REMOVED***
 
   this.body = response;
