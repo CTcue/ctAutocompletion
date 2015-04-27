@@ -41,6 +41,14 @@ function findTerms(query) {
     query     = query.trim().toLowerCase();
     var words = query.split(" ");
 
+    var termQuery = {
+        "term": {
+            "str": {
+              "value" : words[0]
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***;
+
     var prefixQuery = {
         "span_first": {
             "end": 1,
@@ -49,7 +57,7 @@ function findTerms(query) {
                     "match": {
                         "prefix": {
                             "str": {
-                                "value" : words[0],
+                                "value" : words[0]
                         ***REMOVED***
                     ***REMOVED***
                 ***REMOVED***
@@ -81,13 +89,24 @@ function findTerms(query) {
 
     var lookup = {
         "bool" : {
-            "must" : [prefixQuery]
+            "must" : []
     ***REMOVED***
 ***REMOVED***;
+
+
+    if (words.length === 1) {
+    ***REMOVED*** Single word --> Term query matches shorter words better
+        lookup.bool.must.push(termQuery);
+***REMOVED***
+    ***REMOVED***
+    ***REMOVED*** With multiple words, we need to make sure it has the right prefix
+        lookup.bool.must.push(prefixQuery);
+***REMOVED***
 
     if (query.length > 4) {
         lookup.bool.must.push(phraseQuery);
 ***REMOVED***
+
 
     return function(callback) {
         elasticClient.search({
