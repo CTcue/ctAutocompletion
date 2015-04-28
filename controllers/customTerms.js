@@ -63,6 +63,12 @@ function addAutocompleteTerm(cui, term) {
 }
 
 function addExpandList(cui, terms) {
+
+    // Scripting in production is disabled
+    // Place following script inside: ~/etc/elasticsearch/scripts/uniqueTerms.groovy
+
+    var uniqueTermsScript = "for (term in terms) { if (!ctx._source.str.contains(term)){ ctx._source.str += term; } }";
+
     return function(callback) {
         var updateDocument = {
             "index"  : "expander",
@@ -70,10 +76,8 @@ function addExpandList(cui, terms) {
             "id"     : cui,
             "fields" : "_source",
 
-            // for (term in terms) { if (!ctx._source.str.contains(term)){ ctx._source.str += term; } }
-
             "body"  : {
-                "script": "uniqueTerms",
+                "script": (process.env.NODE_ENV === "production" ? "uniqueTerms" : uniqueTermsScript),
                 "lang"  : "groovy",
                 "params" : {
                     "terms" : terms
@@ -87,7 +91,6 @@ function addExpandList(cui, terms) {
         };
 
         elasticClient.update(updateDocument, function(err, response) {
-            console.log(err, response);
             callback(err, response.get._source);
         });
     }
