@@ -70,8 +70,11 @@ function addExpandList(cui, terms) {
             "id"     : cui,
             "fields" : "_source",
 
+            // for (term in terms) { if (!ctx._source.str.contains(term)){ ctx._source.str += term; } }
+
             "body"  : {
-                "script": "for (term in terms) { if (!ctx._source.str.contains(term)){ ctx._source.str += term; } }",
+                "script": "uniqueTerms",
+                "lang"  : "groovy",
                 "params" : {
                     "terms" : terms
                 },
@@ -84,6 +87,7 @@ function addExpandList(cui, terms) {
         };
 
         elasticClient.update(updateDocument, function(err, response) {
+            console.log(err, response);
             callback(err, response.get._source);
         });
     }
