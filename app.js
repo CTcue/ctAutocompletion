@@ -21,6 +21,7 @@ var checkSecret = require('./middleware/checkSecret.js');
 var autocomplete = require('./controllers/autocompleteQuery.js');
 var expander     = require('./controllers/expandQuery.js');
 var customTerms  = require('./controllers/customTerms.js');
+var addedTerms   = require('./controllers/addedTerms.js');
 
 // JSON output
 app.use(json({ pretty: true, param: 'pretty' ***REMOVED***));
@@ -76,6 +77,7 @@ app.post('/expand',       checkBody, expander);
   ***REMOVED***'
 */
 app.post('/custom', checkSecret, customTerms);
+app.get('/addedTerms', checkSecret, addedTerms);
 
 /*
 app.get('/custom',  function *() {
