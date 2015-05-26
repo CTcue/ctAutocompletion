@@ -54,7 +54,7 @@ function findTerms(query) {
     var simplePrefixQuery = {
         "prefix": {
             "str": {
-              "value" : words[0]
+              "value" : words[0].substring(0,3)
         ***REMOVED***
     ***REMOVED***
 ***REMOVED***;
@@ -67,7 +67,7 @@ function findTerms(query) {
                     "match": {
                         "prefix": {
                             "str": {
-                                "value" : words[0]
+                                "value" : words[0].substring(0,3)
                         ***REMOVED***
                     ***REMOVED***
                 ***REMOVED***
@@ -92,7 +92,7 @@ function findTerms(query) {
                 "prefix_length"   : 3,
                 "analyzer"        : "not_analyzed",
                 "like_text"       : query,
-                "max_query_terms" : 8
+                "max_query_terms" : 15
         ***REMOVED***
     ***REMOVED***
 ***REMOVED***;
