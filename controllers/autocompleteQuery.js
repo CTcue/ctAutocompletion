@@ -54,24 +54,8 @@ function findTerms(query) {
     var simplePrefixQuery = {
         "prefix": {
             "str": {
-              "value" : words[0].substring(0,3)
-            }
-        }
-    };
-
-    var prefixQuery = {
-        "span_first": {
-            "end": 1,
-            "match": {
-                "span_multi": {
-                    "match": {
-                        "prefix": {
-                            "str": {
-                                "value" : words[0].substring(0,3)
-                            }
-                        }
-                    }
-                }
+              "analyzer": "standard",
+              "value" : words[0][0]
             }
         }
     };
@@ -89,34 +73,20 @@ function findTerms(query) {
     var fuzzyQuery = {
         "fuzzy_like_this_field" : {
             "str" : {
-                "prefix_length"   : 3,
+                "prefix_length"   : 1,
                 "analyzer"        : "not_analyzed",
                 "like_text"       : query,
-                "max_query_terms" : 15
+                "max_query_terms" : 12
             }
         }
     };
 
     var lookup = {
-        "bool" : {
-            "must"   : [],
-            "should" : []
+        "dis_max" : {
+            "tie_breaker" : 0.7,
+            "queries" : [phraseQuery, fuzzyQuery, simplePrefixQuery]
         }
-    };
-
-
-    if (words.length === 1) {
-        // Single word --> Term query matches shorter words better
-        lookup.bool.should.push(simplePrefixQuery);
     }
-    else {
-        // Multiple words, no need for term
-        lookup.bool.should.push(prefixQuery);
-    }
-
-    lookup.bool.should.push(phraseQuery);
-    lookup.bool.must.push(fuzzyQuery);
-
 
     return function(callback) {
         elasticClient.search({
