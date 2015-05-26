@@ -85,7 +85,8 @@ function addExpandList(cui, terms) {
 
                 "upsert" : {
                     "cui" : cui,
-                    "str" : terms
+                    "str" : terms,
+                    "type" : ""
             ***REMOVED***
         ***REMOVED***
     ***REMOVED***;
