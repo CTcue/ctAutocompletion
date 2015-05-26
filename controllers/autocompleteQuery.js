@@ -99,21 +99,23 @@ function findTerms(query) {
 
     var lookup = {
         "bool" : {
-            "must" : []
+            "must"   : [],
+            "should" : []
     ***REMOVED***
 ***REMOVED***;
 
 
     if (words.length === 1) {
     ***REMOVED*** Single word --> Term query matches shorter words better
-        lookup.bool.must.push(simplePrefixQuery);
+        lookup.bool.should.push(simplePrefixQuery);
 ***REMOVED***
     ***REMOVED***
     ***REMOVED*** Multiple words, no need for term
-        lookup.bool.must.push(prefixQuery);
+        lookup.bool.should.push(prefixQuery);
 ***REMOVED***
 
-    lookup.bool.must.push(phraseQuery);
+    lookup.bool.should.push(phraseQuery);
+    lookup.bool.must.push(fuzzyQuery);
 
 
     return function(callback) {
