@@ -99,21 +99,23 @@ function findTerms(query) {
 
     var lookup = {
         "bool" : {
-            "must" : []
+            "must"   : [],
+            "should" : []
         }
     };
 
 
     if (words.length === 1) {
         // Single word --> Term query matches shorter words better
-        lookup.bool.must.push(simplePrefixQuery);
+        lookup.bool.should.push(simplePrefixQuery);
     }
     else {
         // Multiple words, no need for term
-        lookup.bool.must.push(prefixQuery);
+        lookup.bool.should.push(prefixQuery);
     }
 
-    lookup.bool.must.push(phraseQuery);
+    lookup.bool.should.push(phraseQuery);
+    lookup.bool.must.push(fuzzyQuery);
 
 
     return function(callback) {
