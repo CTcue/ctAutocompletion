@@ -63,7 +63,6 @@ var preferredQuery = [
 ].join(" ");
 
 co(function *() {
-
   var bulk = [];
   var recordCounter = 0;
   var cuiCodes = yield client.query(preferredQuery);
