@@ -15,15 +15,15 @@ module.exports = function *() {
   };
 
   var query = this.request.body.query;
-  var result = yield findTerms(query);
+  var selectedIds = this.request.body.selectedIds || [];
+  var result = yield findTerms(query, selectedIds);
 
   if (result && result.hits) {
       response.took = result.took;
       var resultHits = result.hits.hits;
 
-      // FUTURE
-      // Add a scoreThreshold
-      //  Note: Elasticsearch scoring is relative, so you cannot use a hardcoded
+      // TODO : Add a scoreThreshold
+      // Note : Elasticsearch scoring is relative, so you cannot use a hardcoded
       //        threshold. Perhaps k-means to create two groups "high/low" scoring
       //        and only return the "high" scoring group.
 
@@ -47,7 +47,7 @@ module.exports = function *() {
 };
 
 
-function findTerms(query) {
+function findTerms(query, selectedIds) {
     query     = query.trim().toLowerCase();
     var words = query.split(" ");
 
@@ -88,12 +88,25 @@ function findTerms(query) {
         }
     }
 
+    // Filter out CUI codes that the user already selected
     return function(callback) {
         elasticClient.search({
             "index" : 'autocomplete',
             "type"  : 'records',
             "body" : {
-                "query" : lookup
+                "query" : {
+                    "filtered" : {
+                        "query" : lookup,
+
+                        "filter" : {
+                          "not" : {
+                              "terms" : {
+                                  "cui" : selectedIds
+                              }
+                          }
+                        }
+                    }
+                }
             }
         },
         function(err, resp) {
