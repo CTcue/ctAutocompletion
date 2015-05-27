@@ -15,15 +15,15 @@ module.exports = function *() {
   ***REMOVED***;
 
   var query = this.request.body.query;
-  var result = yield findTerms(query);
+  var selectedIds = this.request.body.selectedIds || [];
+  var result = yield findTerms(query, selectedIds);
 
   if (result && result.hits) {
       response.took = result.took;
       var resultHits = result.hits.hits;
 
-  ***REMOVED*** FUTURE
-  ***REMOVED*** Add a scoreThreshold
-  ***REMOVED***  Note: Elasticsearch scoring is relative, so you cannot use a hardcoded
+  ***REMOVED*** TODO : Add a scoreThreshold
+  ***REMOVED*** Note : Elasticsearch scoring is relative, so you cannot use a hardcoded
   ***REMOVED***        threshold. Perhaps k-means to create two groups "high/low" scoring
   ***REMOVED***        and only return the "high" scoring group.
 
@@ -47,7 +47,7 @@ module.exports = function *() {
 ***REMOVED***;
 
 
-function findTerms(query) {
+function findTerms(query, selectedIds) {
     query     = query.trim().toLowerCase();
     var words = query.split(" ");
 
@@ -88,12 +88,25 @@ function findTerms(query) {
     ***REMOVED***
 ***REMOVED***
 
+***REMOVED*** Filter out CUI codes that the user already selected
     return function(callback) {
         elasticClient.search({
             "index" : 'autocomplete',
             "type"  : 'records',
             "body" : {
-                "query" : lookup
+                "query" : {
+                    "filtered" : {
+                        "query" : lookup,
+
+                        "filter" : {
+                          "not" : {
+                              "terms" : {
+                                  "cui" : selectedIds
+                          ***REMOVED***
+                      ***REMOVED***
+                    ***REMOVED***
+                ***REMOVED***
+            ***REMOVED***
         ***REMOVED***
     ***REMOVED***,
         function(err, resp) {
