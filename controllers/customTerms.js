@@ -16,14 +16,22 @@ var elasticClient = new elastic.Client({
 
 module.exports = function *() {
     var body = this.request.body;
+    var cui = (!!body.cui && body.cui.length) ? body.cui : uuid.v4();
 
 ***REMOVED*** Insert custom term request in mongoDB
     if (!!body.custom) {
-        body.created = new Date();
-        var mongoResult = yield table.insert(body);
-***REMOVED***
+        var added = {
+            "user"    : body.user,
+            "created" : new Date(),
+            "added"   : body.custom,
+            "object"  : {
+                "cui"  : cui,
+                "term" : body.term
+        ***REMOVED***
+    ***REMOVED***;
 
-    var cui = (!!body.cui && body.cui.length) ? body.cui : uuid.v4();
+        var mongoResult = yield table.insert(added);
+***REMOVED***
 
     for (var i=0, L=body.synonyms.length; i < L; i++) {
         var term  = body.synonyms[i].trim();

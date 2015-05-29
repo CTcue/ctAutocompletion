@@ -1,6 +1,6 @@
 'use strict';
 
-var version = "28 apr. 2015";
+var version = "29 may 2015";
 
 /** Module dependencies. */
 var config = require('./config/config');
