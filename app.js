@@ -77,7 +77,7 @@ app.post('/expand',       checkBody, expander);
     ]
   ***REMOVED***'
 */
-app.post('/custom', customTerms);
+app.post('/custom', checkSecret, customTerms);
 app.get('/addedTerms', checkSecret, addedTerms);
 app.post('/removeTerm', checkSecret, removeTerm);
 
