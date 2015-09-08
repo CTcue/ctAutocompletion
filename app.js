@@ -77,50 +77,9 @@ app.post('/expand',       checkBody, expander);
     ]
   }'
 */
-app.post('/custom', checkSecret, customTerms);
+app.post('/custom', customTerms);
 app.get('/addedTerms', checkSecret, addedTerms);
 app.post('/removeTerm', checkSecret, removeTerm);
-
-/*
-app.get('/custom',  function *() {
-  var config = require('./config/config.js');
-
-  // Database
-  var db   = require('monk')(config.mongodb.path);
-  var wrap = require('co-monk');
-  var table = wrap(db.get('customTerms'));
-
-  this.body = yield table.find({});
-});
-*/
-
-app.post('/deploy', function *() {
-  console.log('Deploying CTcUMLS');
-
-  var crypto  = require("crypto");
-  var exec    = require("child_process").exec, child;
-  var secrets = require('./ctcue-config/deploy_secrets');
-
-  var hmac = crypto.createHmac('sha1', secrets.ctcumls);
-      hmac.update(JSON.stringify(this.request.body));
-
-  var calculatedSignature = 'sha1=' + hmac.digest('hex');
-
-  if (this.req.headers['x-hub-signature'] === calculatedSignature) {
-    if (this.request.body.ref === "refs/heads/master") {
-      exec("git pull && git submodule update && npm install && forever restartall");
-    }
-    else {
-      // Currently we do nothing with branches
-    }
-  }
-  else {
-    console.log('Invalid signature.');
-  }
-
-  this.body = { "success" : true };
-});
-
 
 // Listen
 app.listen(config.port);
