@@ -120,7 +120,8 @@ function getExpandList(cui, terms) {
       ***REMOVED***,
           function(err, resp) {
               if (resp && !!resp.hits && resp.hits.total > 0) {
-                callback(false, resp.hits.hits[0]._source.str);
+                console.log("??")
+                callback(false, resp.hits.hits[0]._source);
           ***REMOVED***
               ***REMOVED***
                 callback(err, []);
