@@ -33,13 +33,15 @@ module.exports = function *() {
         var mongoResult = yield table.insert(added);
 ***REMOVED***
 
+    /*
     for (var i=0, L=body.synonyms.length; i < L; i++) {
         var term  = body.synonyms[i].trim();
 
         cui = yield addAutocompleteTerm(cui, term);
 ***REMOVED***
+    */
 
-    this.body = yield addExpandList(cui, body.synonyms);
+    this.body = yield getExpandList(cui, body.synonyms);
 ***REMOVED***;
 
 
@@ -71,9 +73,8 @@ function addAutocompleteTerm(cui, term) {
 ***REMOVED***
 
 function addExpandList(cui, terms) {
-
 ***REMOVED*** Scripting in production is disabled
-***REMOVED*** Place following script inside: ~/etc/elasticsearch/scripts/uniqueTerms.groovy
+***REMOVED*** Place following script inside: /etc/elasticsearch/scripts/uniqueTerms.groovy
 
     var uniqueTermsScript = "for (term in terms) { if (!ctx._source.str.contains(term)){ ctx._source.str += term; ***REMOVED*** ***REMOVED***";
 
@@ -102,4 +103,28 @@ function addExpandList(cui, terms) {
             callback(err, response.get._source);
     ***REMOVED***);
 ***REMOVED***
+***REMOVED***
+
+function getExpandList(cui, terms) {
+    return function(callback) {
+          elasticClient.search({
+              "index" : 'expander',
+              "type"  : 'records',
+              "body" : {
+                  "query" : {
+                      "term" : {
+                          "cui" : cui
+                   ***REMOVED***
+               ***REMOVED***
+          ***REMOVED***
+      ***REMOVED***,
+          function(err, resp) {
+              if (resp && !!resp.hits && resp.hits.total > 0) {
+                callback(false, resp.hits.hits[0]._source.str);
+          ***REMOVED***
+              ***REMOVED***
+                callback(err, []);
+          ***REMOVED***
+      ***REMOVED***);
+***REMOVED***;
 ***REMOVED***
