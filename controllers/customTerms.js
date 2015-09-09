@@ -120,7 +120,6 @@ function getExpandList(cui, terms) {
           },
           function(err, resp) {
               if (resp && !!resp.hits && resp.hits.total > 0) {
-                console.log("??")
                 callback(false, resp.hits.hits[0]._source);
               }
               else {
