@@ -32,7 +32,13 @@ app.use(helmet.defaults());
 
 // Needed for authentication/authorization
 app.use(cors({
-  'headers' : [ 'Content-Type', 'Authorization' ]
+    "headers" : [
+        "Content-Type",
+        "Authorization",
+        "Access-Control-Allow-Credentials",
+        "If-Modified-Since",
+        "Cache-Control"
+    ]
 ***REMOVED***));
 
 // Body parser
