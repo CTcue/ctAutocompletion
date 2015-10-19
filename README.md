@@ -7,7 +7,7 @@ Find relevant UMLS terms based on user input.
 
 
 ```
-curl -XPOST 178.62.230.23/autocomplete -d '{
+curl -XPOST localhost/autocomplete -d '{
     "query" : "Major dep"
 ***REMOVED***'
 
@@ -44,7 +44,7 @@ Obtain all umls synonyms for a given CUI code.
 
 
 ```
-curl -XPOST 178.62.230.23/autocomplete -d '{
+curl -XPOST localhost/autocomplete -d '{
     "query" : "C1269683"
 ***REMOVED***'
 
