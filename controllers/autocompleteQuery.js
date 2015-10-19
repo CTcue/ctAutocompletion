@@ -8,68 +8,7 @@ var elasticClient = new elastic.Client({
     "apiVersion" : "1.4"
 ***REMOVED***);
 
-module.exports = function *() {
-  var response = {
-    "took"  : 1000,
-    "hits"  : []
-  ***REMOVED***;
-
-  var query = this.request.body.query;
-  var selectedIds = this.request.body.selectedIds || [];
-  var result = yield findTerms(query, selectedIds);
-
-  if (result && result.hits) {
-      response.took = result.took;
-      var resultHits = result.hits.hits;
-
-  ***REMOVED*** TODO : Add a scoreThreshold
-  ***REMOVED*** Note : Elasticsearch scoring is relative, so you cannot use a hardcoded
-  ***REMOVED***        threshold. Perhaps k-means to create two groups "high/low" scoring
-  ***REMOVED***        and only return the "high" scoring group.
-
-      for (var i=0, N=resultHits.length; i<N; i++) {
-        response.hits[i]       = resultHits[i]._source;
-        response.hits[i].score = resultHits[i]._score;
-  ***REMOVED***
-
-      response.hits.sort(function(a, b) {
-        ***REMOVED*** For similar score, order by shortest string first
-            if (a.score === b.score) {
-                return a.str.length - b.str.length;
-        ***REMOVED***
-
-        ***REMOVED*** Else rank from highest score to lowest
-            return b.score - a.score;
-  ***REMOVED***);
-  ***REMOVED***
-
-  this.body = response;
-***REMOVED***;
-
-
-function findTerms(query, selectedIds) {
-    query     = query.trim().toLowerCase();
-    var words = query.split(" ");
-
-    var simplePrefixQuery = {
-        "prefix": {
-            "str": {
-              "analyzer": "standard",
-              "value" : words[0][0]
-        ***REMOVED***
-    ***REMOVED***
-***REMOVED***;
-
-    var phraseQuery = {
-        "match" : {
-            "str" : {
-              "type"  : "phrase",
-              "query" : query,
-              "boost" : 1.5
-        ***REMOVED***
-    ***REMOVED***
-***REMOVED***;
-
+/*
     var fuzzyQuery = {
         "fuzzy_like_this_field" : {
             "str" : {
@@ -81,22 +20,52 @@ function findTerms(query, selectedIds) {
     ***REMOVED***
 ***REMOVED***;
 
-    var lookup = {
-        "dis_max" : {
-            "tie_breaker" : 0.7,
-            "queries" : [phraseQuery, fuzzyQuery, simplePrefixQuery]
-    ***REMOVED***
-***REMOVED***
 
+*/
+
+module.exports = function *() {
+  var response = {
+    "took"  : 220,
+    "hits"  : []
+  ***REMOVED***;
+
+  var query = this.request.body.query;
+  var selectedIds = this.request.body.selectedIds || [];
+
+  var result = yield findTerms(query, selectedIds);
+  if (!result || result.hits.total === 0) {
+      result = yield findFuzzyTerms(query, selectedIds);
+  ***REMOVED***
+
+  if (result && result.hits.total > 0) {
+      response.took = result.took;
+      var resultHits = result.hits.hits;
+
+      for (var i=0, N=resultHits.length; i<N; i++) {
+        response.hits[i]       = resultHits[i]._source;
+        response.hits[i].score = resultHits[i]._score;
+  ***REMOVED***
+  ***REMOVED***
+
+  this.body = response;
+***REMOVED***;
+
+
+function findTerms(query, selectedIds) {
 ***REMOVED*** Filter out CUI codes that the user already selected
     return function(callback) {
         elasticClient.search({
             "index" : 'autocomplete',
             "type"  : 'records',
             "body" : {
-                "query" : {
+
+              "query" : {
                     "filtered" : {
-                        "query" : lookup,
+                        "query" : {
+                            "match_phrase" : {
+                              "str" :  query.trim()
+                        ***REMOVED***
+                    ***REMOVED***,
 
                         "filter" : {
                           "not" : {
@@ -108,27 +77,28 @@ function findTerms(query, selectedIds) {
                 ***REMOVED***
             ***REMOVED***
         ***REMOVED***
-    ***REMOVED***,
-        function(err, resp) {
-            if (resp && !!resp.hits && resp.hits.total > 0) {
-                callback(err, resp);
-        ***REMOVED***
-            ***REMOVED***
-            ***REMOVED*** Nothing found --> Find alternatives with fuzzy query
-                elasticClient.search(
-                    {
-                        "index" : 'autocomplete',
-                        "type"  : 'records',
-                        "body" : {
-                            "query" : fuzzyQuery
+    ***REMOVED***, function(err, res) { callback(err, res); ***REMOVED***);
+***REMOVED***
+***REMOVED***
+
+
+function findFuzzyTerms(query, selectedIds) {
+***REMOVED*** Filter out CUI codes that the user already selected
+    return function(callback) {
+        elasticClient.search({
+            "index" : 'autocomplete',
+            "type"  : 'records',
+            "body" : {
+                "query" : {
+                    "match" : {
+                        "str" : {
+                          "type": "phrase",
+                          "fuzziness": "AUTO",
+                          "query" :  query.trim()
                     ***REMOVED***
-                ***REMOVED***,
-                    function(err2, resp2) {
-                      resp2.took += resp.took;
-                      callback(err2, resp2);
                 ***REMOVED***
-                );
+            ***REMOVED***
         ***REMOVED***
-    ***REMOVED***)
+    ***REMOVED***, function(err, res) { callback(err, res); ***REMOVED***);
 ***REMOVED***
 ***REMOVED***

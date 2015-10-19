@@ -1,3 +1,4 @@
-[submodule "ctcue-config"]
-  path = ctcue-config
-  url = git@bitbucket.org:ctcue/ctcue-config.git
+[submodule "secret-config"]
+    path = config/secret
+    url = git@github.com:CTcue/ctcue-config.git
+    branch = master
