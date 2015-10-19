@@ -1,5 +1,4 @@
 
-var config = require('../config/config.js');
 var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client({
     "apiVersion" : "1.4"
@@ -8,19 +7,21 @@ var elasticClient = new elastic.Client({
 module.exports = function *() {
   var result = yield function(callback) {
       elasticClient.search({
-          "index" : 'expander',
+          "index" : 'autocomplete',
           "type"  : 'records',
           "body" : {
               "query" : {
                   "term" : {
-                      "cui" : this.body.query
+                      "cui" : this.request.body.query
                    }
                }
           }
       },
       function(err, resp) {
           if (resp && !!resp.hits && resp.hits.total > 0) {
-            callback(false, resp.hits.hits[0]._source.str);
+            callback(false, resp.hits.hits.map(function(item) {
+                return item._source.str;
+            }));
           }
           else {
             callback(err, []);

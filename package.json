@@ -1,50 +1,31 @@
 {
-  "name": "CTcUMLS",
+  "name": "ct-autocompletion",
   "version": "0.0.1",
-  "description": "Autocomplete and expander api for UMLS terms",
+  "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
     "start": "nodemon --harmony app.js",
-    "production": "forever start -l $(date +%g_%m_%d_%H_%M_%S).log -o $(date +%g_%m_%d_%H_%M_%S).log -e $(date +%g_%m_%d_%H_%M_%S).log --spinSleepTime 10000 --minUptime 5000 -c \"node --harmony\" app.js --ctCumls",
     "test": "mocha --harmony -R spec --recursive ./test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/CTcue/CTcUMLS.git"
+    "url": "git@github.com:CTcue/ctAutocompletion.git"
   },
   "keywords": [
     "umls",
     "autosuggest",
     "autocomplete",
     "suggest",
-    "complete",
-    "expander",
-    "ctcue"
+    "complete"
   ],
   "author": "CTcue",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/CTcue/CTcUMLS/issues"
-  },
-  "homepage": "https://github.com/CTcue/CTcUMLS",
+  "homepage": "https://github.com/CTcue/ctAutocompletion",
   "dependencies": {
-    "co": "latest",
-    "co-body": "latest",
-    "co-monk": "latest",
-    "co-mysql": "latest",
     "elasticsearch": "latest",
     "koa": "latest",
     "koa-cors": "latest",
-    "koa-helmet": "latest",
-    "koa-json": "latest",
-    "koa-trail": "latest",
-    "lodash": "latest",
-    "monk": "latest",
-    "mysql": "latest",
-    "node-uuid": "latest",
-    "request-json": "latest",
-    "sift-string": "latest",
-    "sugar": "latest"
+    "koa-router": "latest"
   },
   "devDependencies": {
     "supertest" : "*",

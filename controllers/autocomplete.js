@@ -2,26 +2,10 @@
 /** Module dependencies. */
 
 var config  = require('../config/config.js');
-var _       = require('lodash');
 var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client({
     "apiVersion" : "1.4"
 });
-
-/*
-    var fuzzyQuery = {
-        "fuzzy_like_this_field" : {
-            "str" : {
-                "prefix_length"   : 1,
-                "analyzer"        : "not_analyzed",
-                "like_text"       : query,
-                "max_query_terms" : 12
-            }
-        }
-    };
-
-
-*/
 
 module.exports = function *() {
   var response = {

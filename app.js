@@ -1,32 +1,13 @@
 'use strict';
 
-var version = "29 may 2015";
+var version = "19 okt. 2015";
 
-/** Module dependencies. */
 var config = require('./config/config');
-
-var koa    = require('koa');
+var koa = require('koa');
 var app = module.exports = koa();
+var router = require('koa-router')();
 
-/** KOA Middleware */
-var cors   = require('koa-cors');
-var router = require('koa-trail');
-var json   = require('koa-json');
-var parse  = require('./lib/koa-request-body');
-
-var checkBody   = require('./middleware/checkBody.js');
-var checkSecret = require('./middleware/checkSecret.js');
-
-var autocomplete = require('./controllers/autocompleteQuery.js');
-var expander     = require('./controllers/expandQuery.js');
-var customTerms  = require('./controllers/customTerms.js');
-var addedTerms   = require('./controllers/addedTerms.js');
-var removeTerm   = require('./controllers/removeTerm.js');
-
-// JSON output
-app.use(json({ pretty: true, param: 'pretty' }));
-
-// Needed for authentication/authorization
+var cors = require('koa-cors');
 app.use(cors({
     "headers" : [
         "Content-Type",
@@ -37,52 +18,38 @@ app.use(cors({
     ]
 }));
 
-// Body parser
-app.use(parse());
-
-// Routing
-app.use(router(app));
+var bodyParser = require('./middleware/parse');
+app.use(bodyParser);
 
 
-/** API */
+///////////
+// API
 
-app.all('/', function *() {
+router['get']('/', function *() {
   this.body = {
-    "version" : version,
-    "success" : true
+    "version" : version
   };
 });
 
-/* Example request: POST since we will need more parameters for context (domain, type)
-
+/*
   curl -XPOST 178.62.230.23/autocomplete -d '{
     "query" : "major dep"
   }'
 */
-app.post('/autocomplete', checkBody, autocomplete);
-app.post('/expand',       checkBody, expander);
+var autocomplete = require('./controllers/autocomplete.js');
+router['post']('/autocomplete', autocomplete);
 
 
-/* Example request to add terms to cUMLS autocomplete:
-
-  Headers: x-auth-token : "secret code"
-  curl -XPOST 178.62.230.23/custom -d '{
-    "user" : { name, email, environment etc },
-
-    "term"     : "Agatston score",
-
-    // (optional)
-    "synonyms" : [
-      "Calcium score",
-      "Agatston-score",
-      ...
-    ]
+/*
+  curl -XPOST 178.62.230.23/autocomplete -d '{
+    "query" : "C1269683"
   }'
 */
-app.post('/custom', checkSecret, customTerms);
-app.get('/addedTerms', checkSecret, addedTerms);
-app.post('/removeTerm', checkSecret, removeTerm);
+var expander     = require('./controllers/expand.js');
+router['post']('/expand', expander);
 
-// Listen
+
+
+app.use(router.routes());
 app.listen(config.port);
 console.log('listening on port %d', config.port);
