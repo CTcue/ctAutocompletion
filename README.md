@@ -1,6 +1,9 @@
 ctAutocompletion
 =======
 
+You will need an [UMLS license](https://www.nlm.nih.gov/research/umls/) to obtain the required `MRCONSO.rrf`.
+
+
 ### Autocompletion
 
 Find relevant UMLS terms based on user input.
