@@ -1,6 +1,6 @@
 
 module.exports = function *(next) {
-    var maxLength = 2048;
+    var maxLength = 512;
 
     if (this.req.method === 'POST') {
         this.request.body = {***REMOVED***;
