@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 else {
   config.host = 'localhost';
-  config.port = 4050;
+  config.port = 4080;
 
   config.mysql = {
     host      : 'localhost',

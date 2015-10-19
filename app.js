@@ -12,7 +12,6 @@ var app = module.exports = koa();
 var cors   = require('koa-cors');
 var router = require('koa-trail');
 var json   = require('koa-json');
-var helmet = require('koa-helmet');
 var parse  = require('./lib/koa-request-body');
 
 var checkBody   = require('./middleware/checkBody.js');
@@ -26,9 +25,6 @@ var removeTerm   = require('./controllers/removeTerm.js');
 
 // JSON output
 app.use(json({ pretty: true, param: 'pretty' }));
-
-// Security (XSS)
-app.use(helmet.defaults());
 
 // Needed for authentication/authorization
 app.use(cors({
