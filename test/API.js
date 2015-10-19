@@ -25,21 +25,19 @@ describe('API', function () {
     request
       .post('/autocomplete')
       .end(function(err, res) {
-          assert.equal(200, res.status);
-          assert.equal(true, res.body.error);
-
+          assert.equal(400, res.status);
           done();
   ***REMOVED***);
   ***REMOVED***);
 
 
-  it ('POST "/autocomplete" with -empty- query', function(done) {
+  it ('POST "/autocomplete" with empty query string', function(done) {
     request
       .post('/autocomplete')
       .send({ "query" : "" ***REMOVED***)
       .end(function(err, res) {
           assert.equal(200, res.status);
-          assert.equal(true, res.body.error);
+          assert.equal(0, res.body.hits.length);
 
           done();
   ***REMOVED***);
@@ -51,7 +49,7 @@ describe('API', function () {
       .send({ "query" : "a" ***REMOVED***)
       .end(function(err, res) {
           assert.equal(200, res.status);
-          assert.equal(true, !!res.body.hits);
+          assert.equal(true, res.body.hasOwnProperty('hits'));
 
           done();
   ***REMOVED***);
@@ -63,7 +61,7 @@ describe('API', function () {
       .send({ "query" : "anky spon" ***REMOVED***)
       .end(function(err, res) {
           assert.equal(200, res.status);
-          assert.equal(true, !!res.body.hits);
+          assert.equal(true, res.body.hasOwnProperty('hits'));
 
           done();
   ***REMOVED***);
@@ -73,8 +71,7 @@ describe('API', function () {
     request
       .post('/expand')
       .end(function(err, res) {
-          assert.equal(200, res.status);
-          assert.equal(true, res.body.error);
+          assert.equal(400, res.status);
 
           done();
   ***REMOVED***);
@@ -86,17 +83,6 @@ describe('API', function () {
       .send({ "query" : "C0003090" ***REMOVED***)
       .end(function(err, res) {
           assert.equal(200, res.status);
-          assert.equal(true, res.body.length > 0);
-
-          done();
-  ***REMOVED***);
-  ***REMOVED***);
-
-  it ('POST "/custom"', function(done) {
-    request
-      .post('/custom')
-      .end(function(err, res) {
-          assert.equal(401, res.status);
 
           done();
   ***REMOVED***);
