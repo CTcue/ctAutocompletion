@@ -8,81 +8,128 @@ var elasticClient = new elastic.Client({
 });
 
 module.exports = function *() {
-  var response = {
-    "took"  : 220,
-    "hits"  : []
-  };
 
   var query = this.request.body.query;
   var selectedIds = this.request.body.selectedIds || [];
 
-  var result = yield findTerms(query, selectedIds);
-  if (!result || result.hits.total === 0) {
-      result = yield findFuzzyTerms(query, selectedIds);
+  var split = query.split(" ")
+  var response = {};
+
+  if (split.length <= 1) {
+      response = yield findSingle(query, selectedIds);
   }
-
-  if (result && result.hits.total > 0) {
-      response.took = result.took;
-      var resultHits = result.hits.hits;
-
-      for (var i=0, N=resultHits.length; i<N; i++) {
-        response.hits[i]       = resultHits[i]._source;
-        response.hits[i].score = resultHits[i]._score;
-      }
+  else {
+      response = yield findTerms(query, selectedIds);
   }
 
   this.body = response;
 };
 
+function findSingle(query, selectedIds) {
+    return function(callback) {
+        var elastic_query =  {
+            "term-suggest": {
+                "text": query.trim(),
+                "completion": {
+                    "field": "suggest",
+                    "size": 10,
+                     "fuzzy" : {
+                       "prefix_length": 5,
+                       "fuzziness" : 0.6
+                    }
+                }
+            }
+        };
+
+        var queryObj = {
+            "index" : 'autocomplete',
+            "type"  : 'records',
+            "body"  : elastic_query
+        };
+
+        elasticClient.suggest(queryObj, function(err, res) {
+            var hits = res['term-suggest'][0]["options"];
+            var result = [];
+
+            for (var i=0; i<hits.length; i++) {
+                result.push({
+                  "cui": hits[i].payload['cui'],
+                  "str": hits[i].text
+                });
+            }
+
+            callback(err, {
+                "took": 120,
+                "hits": result
+            });
+        });
+    }
+}
 
 function findTerms(query, selectedIds) {
     // Filter out CUI codes that the user already selected
     return function(callback) {
-        elasticClient.search({
-            "index" : 'autocomplete',
-            "type"  : 'records',
-            "body" : {
+        var elastic_query =  {
+            "_source": ["cui", "str", "source"],
 
-              "query" : {
-                    "filtered" : {
-                        "query" : {
-                            "match_phrase" : {
-                              "str" :  query.trim()
+            "query": {
+                "filtered" : {
+                    "query" : {
+                        "function_score": {
+                            "query" : {
+                                "match_phrase" : {
+                                    "str" : query.trim()
+                                }
+                            },
+                            "functions": [
+                               {
+                                 "filter": {
+                                    "term": { "types": ["disorder", "diagnosis", "medication", "Disease or Syndrome", "Disease/Finding"] }
+                                  },
+                                 "weight": 2
+                               },
+                               {
+                                  "field_value_factor" : {
+                                      "field": "votes",
+                                      "modifier": "log1p",
+                                      "factor":   2
+                                  }
+                               }
+                            ]
+                        }
+                    },
+
+                    "filter" : {
+                        "not" : {
+                            "terms" : {
+                                "cui" : selectedIds
                             }
-                        },
-
-                        "filter" : {
-                          "not" : {
-                              "terms" : {
-                                  "cui" : selectedIds
-                              }
-                          }
                         }
                     }
                 }
             }
-        }, function(err, res) { callback(err, res); });
-    }
-}
+        };
 
-
-function findFuzzyTerms(query, selectedIds) {
-    // Filter out CUI codes that the user already selected
-    return function(callback) {
-        elasticClient.search({
+        var queryObj = {
             "index" : 'autocomplete',
             "type"  : 'records',
-            "body" : {
-                "query" : {
-                    "match" : {
-                        "str" : {
-                          "type": "phrase",
-                          "fuzziness": "AUTO",
-                          "query" :  query.trim()
-                        }
-                    }
+            "body"  : elastic_query
+        };
+
+        elasticClient.search(queryObj, function(err, res) {
+            var hits = res.hits;
+            var result = [];
+
+            if (hits.total > 0) {
+                for (var i=0; i<hits.hits.length; i++) {
+                    result.push(hits.hits[i]._source);
                 }
             }
-        }, function(err, res) { callback(err, res); });
+
+            callback(err, {
+                "took": res.took,
+                "hits": result
+            });
+        });
     }
 }
