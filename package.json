@@ -22,10 +22,10 @@
   "license": "ISC",
   "homepage": "https://github.com/CTcue/ctAutocompletion",
   "dependencies": {
-    "elasticsearch": "latest",
-    "koa": "latest",
-    "koa-cors": "latest",
-    "koa-router": "latest"
+    "elasticsearch": "8.1.0",
+    "koa": "1.1.0",
+    "koa-cors": "0.0.16",
+    "koa-router": "5.2.3"
   ***REMOVED***,
   "devDependencies": {
     "supertest" : "*",
