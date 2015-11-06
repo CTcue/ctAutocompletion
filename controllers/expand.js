@@ -37,13 +37,27 @@ module.exports = function *() {
 };
 
 
+//////
+// TODO
+// Simple machine learning algo: Based on types -> give statistically most likely category
+// Example: Calcium has types
+// [ 'substance',
+// 'Biologically Active Substance',
+// 'Element, Ion, or Isotope',
+// 'Chemical/Ingredient',
+// 'Pharmacologic Substance',
+// 'medication' ]
+//
+// And given Chemical/Ingredient and substance it's most likely a labresult.
+
+
 function typeToCategory(types) {
     if (!types || typeof types === "undefined" || types.length === 0) {
         return "diagnosis";
     }
 
     var medication = ["medication", "Pharmacologic Substance", "product"]
-    var labresult  = ["Laboratory Procedure", "Chemical/Ingredient"]
+    var labresult  = ["Finding", "Laboratory Procedure", "Chemical/Ingredient"]
 
     return inList(types, medication, "medication") ||
            inList(types, labresult, "labresult") ||
