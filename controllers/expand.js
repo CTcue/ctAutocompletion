@@ -9,6 +9,8 @@ module.exports = function *() {
       elasticClient.search({
           "index" : 'autocomplete',
           "type"  : 'records',
+          "size": 100,
+
           "body" : {
               "query" : {
                   "term" : {
