@@ -29,13 +29,17 @@ module.exports = function *() {
   ***REMOVED***);
   ***REMOVED***;
 
-  var types = result[0]._source.types;
+  if (result && result.length > 0) {
+      var types = result[0]._source.types;
 
-  this.body = {
-    "type": "-",
-    "category": typeToCategory(types),
-    "terms": result.map(function(item) { return item._source.str; ***REMOVED***)
+      return this.body = {
+        "type": "-",
+        "category": typeToCategory(types),
+        "terms": result.map(function(item) { return item._source.str; ***REMOVED***)
   ***REMOVED***;
+  ***REMOVED***
+
+  this.body = { "type": "", "category": "", "terms": [] ***REMOVED***
 ***REMOVED***;
 
 
