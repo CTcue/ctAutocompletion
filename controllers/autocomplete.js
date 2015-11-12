@@ -32,11 +32,11 @@ function findSingle(query, selectedIds) {
                 "text": query.trim(),
                 "completion": {
                     "field": "suggest",
-                    "size": 10,
-                     "fuzzy" : {
-                       "prefix_length": 3,
-                       "fuzziness" : "AUTO"
-                    }
+                    "size": 100,
+                    //  "fuzzy" : {
+                    //    "prefix_length": 3,
+                    //    "fuzziness" : 0.2
+                    // }
                 }
             }
         };
