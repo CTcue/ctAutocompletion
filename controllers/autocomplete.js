@@ -34,8 +34,8 @@ function findSingle(query, selectedIds) {
                     "field": "suggest",
                     "size": 10,
                      "fuzzy" : {
-                       "prefix_length": 5,
-                       "fuzziness" : 0.6
+                       "prefix_length": 3,
+                       "fuzziness" : "AUTO"
                 ***REMOVED***
             ***REMOVED***
         ***REMOVED***
@@ -46,6 +46,9 @@ function findSingle(query, selectedIds) {
             "type"  : 'records',
             "body"  : elastic_query
     ***REMOVED***;
+
+    ***REMOVED*** For some reason elasticsearch _suggest does not give time indication
+        var start = new Date().getTime();
 
         elasticClient.suggest(queryObj, function(err, res) {
             var hits = res['term-suggest'][0]["options"];
@@ -58,8 +61,9 @@ function findSingle(query, selectedIds) {
             ***REMOVED***);
         ***REMOVED***
 
+            var end = new Date().getTime();
             callback(err, {
-                "took": 120,
+                "took": end - start,
                 "hits": result
         ***REMOVED***);
     ***REMOVED***);
@@ -75,27 +79,8 @@ function findTerms(query, selectedIds) {
             "query": {
                 "filtered" : {
                     "query" : {
-                        "function_score": {
-                            "query" : {
-                                "match_phrase" : {
-                                    "str" : query.trim()
-                            ***REMOVED***
-                        ***REMOVED***,
-                            "functions": [
-                               {
-                                 "filter": {
-                                    "term": { "types": ["disorder", "diagnosis", "medication", "Disease or Syndrome", "Disease/Finding"] ***REMOVED***
-                              ***REMOVED***,
-                                 "weight": 2
-                           ***REMOVED***,
-                               {
-                                  "field_value_factor" : {
-                                      "field": "votes",
-                                      "modifier": "log1p",
-                                      "factor":   2
-                              ***REMOVED***
-                           ***REMOVED***
-                            ]
+                        "match_phrase" : {
+                            "str" : query.trim()
                     ***REMOVED***
                 ***REMOVED***,
 
@@ -120,7 +105,7 @@ function findTerms(query, selectedIds) {
             var hits = res.hits;
             var result = [];
 
-            if (hits.total > 0) {
+            if (hits && hits.total > 0) {
                 for (var i=0; i<hits.hits.length; i++) {
                     result.push(hits.hits[i]._source);
             ***REMOVED***
