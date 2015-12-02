@@ -10,7 +10,7 @@ var elasticClient = new elastic.Client({
 });
 
 
-const source = ["cui", "exact", "pref", "source", "types"];
+const source = ["cui", "str", "exact", "pref", "source", "types"];
 
 module.exports = function *() {
   var query = this.request.body.query;
