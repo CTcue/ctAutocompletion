@@ -6,7 +6,8 @@ You will need an [UMLS license](https://www.nlm.nih.gov/research/umls/) to obtai
 
 ### Autocompletion
 
-Find relevant UMLS terms based on user input.
+Find relevant UMLS terms based on user input. It will prioritize exact matches, secondly it will look for prefix matches. Given multiple words it will suggest terms using
+prefixes of multiple terms. Wildcard options are not supported.
 
 
 ```
@@ -43,7 +44,7 @@ curl -XPOST 'http://localhost/autocomplete' -d '{
 
 ### Synonym browsing
 
-Obtain all umls synonyms for a given CUI code.
+Obtain all UMLS synonyms for a given CUI code.
 
 
 ```

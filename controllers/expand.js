@@ -63,7 +63,7 @@ function typeToCategory(types) {
 ***REMOVED***
 
     var medication = ["medication", "Pharmacologic Substance", "product"]
-    var labresult  = ["Finding", "Laboratory Procedure", "Chemical/Ingredient"]
+    var labresult  = ["Finding", "Laboratory Procedure", "Laboratory or Test Result", "Chemical/Ingredient"]
 
     return inList(types, medication, "medication") ||
            inList(types, labresult, "labresult") ||
