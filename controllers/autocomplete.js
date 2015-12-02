@@ -2,41 +2,42 @@
 /** Module dependencies. */
 
 var config  = require('../config/config.js');
+var _ = require("lodash");
+
 var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client({
     "apiVersion" : "1.4"
 });
 
+
+const source = ["cui", "exact", "pref", "source", "types"];
+
 module.exports = function *() {
-
   var query = this.request.body.query;
-  var selectedIds = this.request.body.selectedIds || [];
 
-  var split = query.split(" ")
-  var response = {};
+  var exactMatches = yield findExact(query);
+  var closeMatches = yield findMatches(query);
 
-  if (split.length <= 1) {
-      response = yield findSingle(query, selectedIds);
-  }
-  else {
-      response = yield findTerms(query, selectedIds);
+  this.body = {
+    "took": exactMatches.took + closeMatches.took,
+    "hits": _.uniq(exactMatches.hits.concat(closeMatches.hits), "exact")
   }
 
-  this.body = response;
 };
 
-function findSingle(query, selectedIds) {
+function findExact(query) {
+    var wantedTerm = query.trim().toLowerCase();
+
+    // Filter out CUI codes that the user already selected
     return function(callback) {
         var elastic_query =  {
-            "term-suggest": {
-                "text": query.trim(),
-                "completion": {
-                    "field": "suggest",
-                    "size": 100,
-                    //  "fuzzy" : {
-                    //    "prefix_length": 3,
-                    //    "fuzziness" : 0.2
-                    // }
+            "_source": source,
+
+            "size": 3,
+
+            "query": {
+                "term" : {
+                    "exact" : wantedTerm
                 }
             }
         };
@@ -47,50 +48,57 @@ function findSingle(query, selectedIds) {
             "body"  : elastic_query
         };
 
-        // For some reason elasticsearch _suggest does not give time indication
-        var start = new Date().getTime();
-
-        elasticClient.suggest(queryObj, function(err, res) {
-            var hits = res['term-suggest'][0]["options"];
+        elasticClient.search(queryObj, function(err, res) {
+            var hits = res.hits;
             var result = [];
 
-            for (var i=0; i<hits.length; i++) {
-                result.push({
-                  "cui": hits[i].payload['cui'],
-                  "str": hits[i].text
-                });
+            if (hits && hits.total > 0) {
+                for (var i=0; i < hits.hits.length; i++) {
+                    result.push(hits.hits[i]._source);
+                }
             }
 
-            var end = new Date().getTime();
             callback(err, {
-                "took": end - start,
+                "took": res.took,
                 "hits": result
             });
         });
     }
 }
 
-function findTerms(query, selectedIds) {
+function findMatches(query) {
     // Filter out CUI codes that the user already selected
     return function(callback) {
         var elastic_query =  {
-            "_source": ["cui", "str", "source"],
+            "_source": source,
+
+            "size": 6,
 
             "query": {
-                "filtered" : {
+                "function_score" : {
                     "query" : {
                         "match_phrase" : {
                             "str" : query.trim()
                         }
                     },
 
-                    "filter" : {
-                        "not" : {
-                            "terms" : {
-                                "cui" : selectedIds
-                            }
+                    "functions" : [
+                        // Prefer SnomedCT / MeSH
+                        {
+                            "filter": {
+                                "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] }
+                            },
+                            "weight": 1.25
+                        },
+
+                        // Negative weight for some categories
+                        {
+                            "filter": {
+                                "terms": { "types": ["Health Care Activity", "Biomedical Occupation or Discipline"] }
+                            },
+                            "weight": 0.7
                         }
-                    }
+                    ]
                 }
             }
         };
