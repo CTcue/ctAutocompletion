@@ -147,11 +147,12 @@ if __name__ == '__main__':
             continue
 
         for g in utils.unique_terms(conso, 'normal'):
-            # If normalized concept is reduced to empty string
-            if not g or g == "":
-                continue
-
+            exact = g["normal"].replace("-", " ").lower()
             types = list(set(sty + types))
+
+            # If normalized concept is reduced to empty string
+            if not exact or exact == "":
+                continue
 
             bulk.append({
                 "_index": args.index,
@@ -160,7 +161,7 @@ if __name__ == '__main__':
                 "cui"   : cui,
                 "pref"  : preferred,    # UMLS preferred term
                 "str"   : g["normal"],  # Indexed for autocompletion
-                "exact" : g["normal"].replace("-", " ").lower(),  # Indexed for exact term lookup
+                "exact" : exact,  # Indexed for exact term lookup
 
                 "votes"  : 10, # start with 10 for now
 

@@ -94,7 +94,7 @@ function findMatches(query) {
                     ***REMOVED*** Negative weight for some categories
                         {
                             "filter": {
-                                "terms": { "types": ["Health Care Activity", "Biomedical Occupation or Discipline"] ***REMOVED***
+                                "terms": { "types": ["Health Care Activity", "Temporal Concept", "Biomedical Occupation or Discipline"] ***REMOVED***
                         ***REMOVED***,
                             "weight": 0.7
                     ***REMOVED***
