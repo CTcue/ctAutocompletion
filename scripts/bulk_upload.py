@@ -76,7 +76,7 @@ def read_conso(umls_dir):
 
     wanted = ["LAT", "SAB", "STT", "TS", "ISPREF", "TTY", "STR"]
 
-    filename = os.path.join(umls_dir, "MRCONSO.rrf")
+    filename = os.path.join(umls_dir, "MRCONSO.RRF")
     for cui, group in read_rrf(filename, header, wanted):
         filtered = []
         types = []
@@ -113,7 +113,7 @@ def read_sty(umls_dir):
 
     wanted = ["STY"]
 
-    filename = os.path.join(umls_dir, "MRSTY.rrf")
+    filename = os.path.join(umls_dir, "MRSTY.RRF")
     for cui, group in read_rrf(filename, header, wanted):
         filtered = [g["STY"] for g in group]
         yield (cui, filtered)
