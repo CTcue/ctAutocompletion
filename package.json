@@ -25,10 +25,11 @@
     "elasticsearch": "8.1.0",
     "koa": "1.1.0",
     "koa-cors": "0.0.16",
-    "koa-router": "5.2.3"
+    "koa-router": "5.2.3",
+    "lodash": "^3.10.1"
   ***REMOVED***,
   "devDependencies": {
-    "supertest" : "*",
+    "supertest": "*",
     "mocha": "*"
   ***REMOVED***
 ***REMOVED***
