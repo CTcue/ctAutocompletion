@@ -2,6 +2,8 @@
 /** Module dependencies. */
 
 var config  = require('../config/config.js');
+
+var guess_origin = require("./lib/guess_origin");
 var _ = require("lodash");
 
 var elastic = require('elasticsearch');
@@ -42,9 +44,9 @@ function findExact(query) {
         ***REMOVED***
     ***REMOVED***;
 
+    ***REMOVED*** Search in all indexes
         var queryObj = {
             "index" : 'autocomplete',
-            "type"  : 'records',
             "body"  : elastic_query
     ***REMOVED***;
 
@@ -67,45 +69,61 @@ function findExact(query) {
 ***REMOVED***
 
 function findMatches(query) {
+    var origin = guess_origin(query);
+
 ***REMOVED*** Filter out CUI codes that the user already selected
     return function(callback) {
-        var elastic_query =  {
-            "_source": source,
 
-            "size": 6,
+    ***REMOVED*** DBC code check needs prefix matching
+        if (origin === "code") {
+            var elastic_query =  {
+                "_source": source,
+                "size": 6,
 
-            "query": {
-                "function_score" : {
-                    "query" : {
-                        "match_phrase" : {
-                            "str" : query.trim()
-                    ***REMOVED***
-                ***REMOVED***,
+                "query": {
+                    "match_phrase_prefix" : {
+                        "str" : query.trim()
+                ***REMOVED***
+            ***REMOVED***
+        ***REMOVED***;
+    ***REMOVED***
+        ***REMOVED***
+            var elastic_query =  {
+                "_source": source,
+                "size": 6,
 
-                    "functions" : [
-                    ***REMOVED*** Prefer SnomedCT / MeSH
-                        {
-                            "filter": {
-                                "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] ***REMOVED***
-                        ***REMOVED***,
-                            "weight": 1.25
+                "query": {
+                    "function_score" : {
+                        "query" : {
+                            "match_phrase" : {
+                                "str" : query.trim()
+                        ***REMOVED***
                     ***REMOVED***,
 
-                    ***REMOVED*** Negative weight for some categories
-                        {
-                            "filter": {
-                                "terms": { "types": ["Health Care Activity", "Temporal Concept", "Biomedical Occupation or Discipline"] ***REMOVED***
+                        "functions" : [
+                        ***REMOVED*** Prefer SnomedCT / MeSH
+                            {
+                                "filter": {
+                                    "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] ***REMOVED***
+                            ***REMOVED***,
+                                "weight": 1.25
                         ***REMOVED***,
-                            "weight": 0.7
-                    ***REMOVED***
-                    ]
+
+                        ***REMOVED*** Negative weight for some categories
+                            {
+                                "filter": {
+                                    "terms": { "types": ["Health Care Activity", "Temporal Concept", "Biomedical Occupation or Discipline"] ***REMOVED***
+                            ***REMOVED***,
+                                "weight": 0.7
+                        ***REMOVED***
+                        ]
+                ***REMOVED***
             ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***;
+        ***REMOVED***;
+    ***REMOVED***
 
         var queryObj = {
             "index" : 'autocomplete',
-            "type"  : 'records',
             "body"  : elastic_query
     ***REMOVED***;
 

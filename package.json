@@ -22,6 +22,7 @@
   "license": "ISC",
   "homepage": "https://github.com/CTcue/ctAutocompletion",
   "dependencies": {
+    "dclassify": "^1.1.2",
     "elasticsearch": "8.1.0",
     "koa": "1.1.0",
     "koa-cors": "0.0.16",
