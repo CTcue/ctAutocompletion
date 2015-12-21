@@ -5,10 +5,10 @@ var elasticClient = new elastic.Client({
 });
 
 module.exports = function *() {
+
   var result = yield function(callback) {
       elasticClient.search({
           "index" : 'autocomplete',
-          "type"  : 'records',
           "size": 100,
 
           "body" : {

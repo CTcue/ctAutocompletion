@@ -2,6 +2,8 @@
 /** Module dependencies. */
 
 var config  = require('../config/config.js');
+
+var guess_origin = require("./lib/guess_origin");
 var _ = require("lodash");
 
 var elastic = require('elasticsearch');
@@ -42,9 +44,9 @@ function findExact(query) {
             }
         };
 
+        // Search in all indexes
         var queryObj = {
             "index" : 'autocomplete',
-            "type"  : 'records',
             "body"  : elastic_query
         };
 
@@ -67,45 +69,61 @@ function findExact(query) {
 }
 
 function findMatches(query) {
+    var origin = guess_origin(query);
+
     // Filter out CUI codes that the user already selected
     return function(callback) {
-        var elastic_query =  {
-            "_source": source,
 
-            "size": 6,
+        // DBC code check needs prefix matching
+        if (origin === "code") {
+            var elastic_query =  {
+                "_source": source,
+                "size": 6,
 
-            "query": {
-                "function_score" : {
-                    "query" : {
-                        "match_phrase" : {
-                            "str" : query.trim()
-                        }
-                    },
+                "query": {
+                    "match_phrase_prefix" : {
+                        "str" : query.trim()
+                    }
+                }
+            };
+        }
+        else {
+            var elastic_query =  {
+                "_source": source,
+                "size": 6,
 
-                    "functions" : [
-                        // Prefer SnomedCT / MeSH
-                        {
-                            "filter": {
-                                "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] }
-                            },
-                            "weight": 1.25
+                "query": {
+                    "function_score" : {
+                        "query" : {
+                            "match_phrase" : {
+                                "str" : query.trim()
+                            }
                         },
 
-                        // Negative weight for some categories
-                        {
-                            "filter": {
-                                "terms": { "types": ["Health Care Activity", "Temporal Concept", "Biomedical Occupation or Discipline"] }
+                        "functions" : [
+                            // Prefer SnomedCT / MeSH
+                            {
+                                "filter": {
+                                    "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] }
+                                },
+                                "weight": 1.25
                             },
-                            "weight": 0.7
-                        }
-                    ]
+
+                            // Negative weight for some categories
+                            {
+                                "filter": {
+                                    "terms": { "types": ["Health Care Activity", "Temporal Concept", "Biomedical Occupation or Discipline"] }
+                                },
+                                "weight": 0.7
+                            }
+                        ]
+                    }
                 }
-            }
-        };
+            };
+        }
 
         var queryObj = {
             "index" : 'autocomplete',
-            "type"  : 'records',
             "body"  : elastic_query
         };
 
