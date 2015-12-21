@@ -62,11 +62,13 @@ function typeToCategory(types) {
         return "diagnosis";
 ***REMOVED***
 
-    var medication = ["medication", "Pharmacologic Substance", "product"]
-    var labresult  = ["Finding", "Laboratory Procedure", "Laboratory or Test Result", "Chemical/Ingredient"]
+    var dbc        = ["DBC", "dbc", "zorgproduct"];
+    var medication = ["medication", "Pharmacologic Substance", "product"];
+    var labresult  = ["Finding", "Laboratory Procedure", "Laboratory or Test Result", "Chemical/Ingredient"];
 
-    return inList(types, medication, "medication") ||
-           inList(types, labresult, "labresult") ||
+    return inList(types, dbc, "dbc")               ||
+           inList(types, medication, "medication") ||
+           inList(types, labresult, "labresult")   ||
            "diagnosis";
 ***REMOVED***
 
