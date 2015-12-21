@@ -42,7 +42,7 @@ if __name__ == '__main__':
             "_index": args.index,
             "_type": "dbc_codes",
 
-            "cui"   : row["group"],
+            "cui"   : row["code"],  # For now, don't group them
             "pref"  : description,  # Display helper
             "str"   : row["code"],  # Indexed for autocompletion
             "exact" : row["code"],
