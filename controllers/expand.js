@@ -74,9 +74,9 @@ function typeToCategory(types) {
 
 function inList(haystack, search, type) {
     for (var i=0; i<search.length; i++) {
-          if (haystack.indexOf(search[i]) >= 0) {
-              return type;
-          }
+        if (haystack.indexOf(search[i]) >= 0) {
+            return type;
+        }
     }
 
     return false;

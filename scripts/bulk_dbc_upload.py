@@ -44,10 +44,10 @@ if __name__ == '__main__':
 
             "cui"   : row["code"],  # For now, don't group them
             "pref"  : description,  # Display helper
-            "str"   : row["code"],  # Indexed for autocompletion
+            "str"   : [row["code"], row["description"]],
             "exact" : row["code"],
 
-            "votes"  : 20,
+            "votes"  : 10,
             "lang" : "DUT",
             "source" : "CTcue",
             "types"  : ["DBC"]
