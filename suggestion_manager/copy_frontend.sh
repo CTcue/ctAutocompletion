@@ -1,0 +1,1 @@
+cp -rf ./frontend /var/www/suggest_manager_frontend
