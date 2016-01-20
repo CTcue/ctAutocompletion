@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<head>
+    <title>Neo4j demo</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+</head>
+<body ng-app="ctNeo4j">
+<div class="container">
+    <div class="header clearfix">
+        <nav>
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation"><a href="#" ng-click="showDangerzone = !showDangerzone">Show dangerzone</a></li>
+                <!-- <li role="presentation"><a target="_blank" href="http://localhost:7474">Browse neo4j</a></li> -->
+            </ul>
+        </nav>
+
+        <h3 class="text-muted">Neo4j management demo</h3>
+    </div>
+
+    <div class="row block ng-cloak" ng-if="msg">
+        <h3>All good</h3>
+        <pre>{{ msg | json ***REMOVED******REMOVED***</pre>
+    </div>
+
+    <div ng-controller="formController">
+
+        <div class="loading-indicator ng-cloak" ng-if="isLoading">
+            <h3>LOADING...</h3>
+        </div>
+
+        <form>
+            <div class="row">
+                <div class="col-md-10">
+                    <input type="text" class="form-control" placeholder="Url" ng-model="url">
+                    <small>Wikipedia url with table info</small>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary" ng-click="extract(url)">Extract data</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- <pre>{{ validated_tables | json ***REMOVED******REMOVED***</pre> -->
+
+        <form ng-if="validated_tables && !isLoading" class="ng-cloak">
+            <h3>Found table data</h3>
+            <p>You can manipulate the data, only columns with a custom header defined are saved. On submit, the data is inserted as a Group with Concept(s).</p>
+
+            <hr>
+
+            <div class="row">
+                <fieldset class="form-group col-md-5">
+                    <label>Neo4j username</label>
+                    <input type="text" class="form-control" placeholder="Enter username" ng-model="neo4j.username">
+                </fieldset>
+
+                <fieldset class="form-group col-md-5">
+                    <label>Password</label>
+                    <input type="text" class="form-control" placeholder="Password" ng-model="neo4j.password">
+                </fieldset>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <input type="hidden" ng-model="meta.url">
+
+                <fieldset class="form-group col-md-5">
+                    <label>Group name</label>
+                    <input type="text" class="form-control" placeholder="Group name" ng-model="meta.name" required>
+                </fieldset>
+
+                <fieldset class="form-group col-md-5">
+                    <label>Abbreviation of name</label>
+                    <input type="text" class="form-control" placeholder="Abbreviation of name" ng-model="meta.abbr">
+                </fieldset>
+            </div>
+
+            <div class="row">
+                <fieldset class="form-group col-md-10">
+                    <label>Description</label>
+                    <textarea class="form-control" ng-model="meta.description" placeholder="Short description"></textarea>
+                </fieldset>
+            </div>
+
+            <hr>
+
+            <div class="row preview-tables" ng-repeat="(index, table) in validated_tables track by index" ng-if="!table._delete">
+                <div class="row block">
+                    <div class="col-md-1">
+                        <h4>Table {{ ::index ***REMOVED******REMOVED***</h4>
+                    </div>
+
+                    <div class="col-md-9 form-inline">
+                        <button type="button" ng-click="addRow(table)"
+                            class="btn btn-default">
+                            <i class="glyphicon glyphicon-plus"></i> Add row
+                        </button>
+
+                        <button type="button" ng-click="addColumn(table)"
+                            class="btn btn-default">
+                            <i class="glyphicon glyphicon-plus"></i> Add column
+                        </button>
+
+                        <div class="input-group" title="This will add another column, filled with the CUI codes based on the entries in a given column" ng-show="! isEmpty(table.header)">
+                            <select class="form-control" placeholder="Calculate CUI codes" ng-model="_cui_col_index">
+                              <option ng-repeat="(k, v) in table.header" value="{{ k ***REMOVED******REMOVED***">{{ v ***REMOVED******REMOVED***</option>
+                            </select>
+
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-primary" ng-click="getCUI(table, _cui_col_index)">
+                                    <i class="glyphicon glyphicon-search"></i>
+                                    Find CUI codes
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="button" ng-click="removeTable(index)"
+                            class="btn btn-default btn-danger">
+                            <i class="glyphicon glyphicon-trash"></i> Delete table
+                        </button>
+                    </div>
+                </div>
+
+
+                <table class="table">
+                    <!-- Allow user defined header -->
+                    <tr>
+                        <th class="col-md-1"></th>
+
+                        <th ng-repeat="(col_index, _) in table.rows[0] track by col_index" class="text-center" ng-if="col_index != 'meta'">
+                            <div class="col-md-8">
+                                <input
+                                    type="text" class="form-control"
+                                    ng-model="table['header'][col_index]"
+                                    placeholder="Header column {{ col_index ***REMOVED******REMOVED***">
+                            </div>
+
+                            <button class="btn btn-danger btn-sm"
+                                type="button"
+                                ng-click="removeColumn(table, col_index)">X</button>
+                        </th>
+                    </tr>
+
+                    <tr ng-repeat="row in table.rows track by $index">
+                        <td class="col-md-1">
+                            <input type="checkbox" class="checkbox" ng-model="row['meta'].checked">
+                        </td>
+
+                        <td ng-repeat="(col_index, col) in row track by col_index" ng-if="col_index != 'meta'">
+                            <input type="text" class="form-control" ng-value='col' ng-model="row[col_index]">
+                        </td>
+                    </tr>
+                </table>
+
+                <hr>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary btn-lg" ng-click="submit(neo4j, meta, validated_tables)">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="raw-data ng-cloak" ng-if="showDangerzone" ng-controller="dangerzone">
+        <h1>Dangerzone</h1>
+
+        <form ng-submit="destroy()" class="block well">
+            <h3>Re-index <small>This will remove all added entries</small></h3>
+
+            <div class="row">
+                <fieldset class="form-group col-md-5">
+                    <label>Neo4j username</label>
+                    <input type="text" class="form-control" placeholder="Enter username" ng-model="data.neo4j.username">
+                </fieldset>
+
+                <fieldset class="form-group col-md-5">
+                    <label>Password</label>
+                    <input type="password" class="form-control" placeholder="Password" ng-model="data.neo4j.password">
+                </fieldset>
+            </div>
+
+            <button type="submit" class="btn btn-danger">Delete neo4j nodes</button>
+        </form>
+
+        <form ng-submit="removeGroup(group_name)" class="block well" ng-show="allGroups.length">
+            <h3>Remove group <small>This will remove a group and its concepts</small></h3>
+
+            <div class="row">
+                <fieldset class="form-group col-md-5">
+                    <label>Neo4j username</label>
+                    <input type="text" class="form-control" placeholder="Enter username" ng-model="data.neo4j.username">
+                </fieldset>
+
+                <fieldset class="form-group col-md-5">
+                    <label>Password</label>
+                    <input type="password" class="form-control" placeholder="Password" ng-model="data.neo4j.password">
+                </fieldset>
+            </div>
+
+            <div class="row">
+                <fieldset class="form-group col-md-10">
+                    <label>Select group:</label>
+
+                    <select class="form-control" placeholder="Calculate CUI codes" ng-model="data.group_name">
+                      <option ng-repeat="group in allGroups">{{ group.name ***REMOVED******REMOVED***</option>
+                    </select>
+                </fieldset>
+            </div>
+
+            <button type="submit" class="btn btn-danger">Remove group</button>
+        </form>
+    </div>
+
+    <div class="row block ng-cloak" ng-show="error">
+        <p class="text-warning">Something went wrong...</p>
+        <pre>{{ error | json ***REMOVED******REMOVED***</pre>
+    </div>
+
+</div> <!-- /container -->
+
+<script src="app.js"></script>
+<script src="controllers/form.js"></script>
+<script src="controllers/danger.js"></script>
+
+<script src="services/CRUD.js"></script>
+<script src="services/Build.js"></script>
+<script src="services/Convert.js"></script>
+
+
+<script src="bower_components/autogrow/autogrow.min.js"></script>
+<script>
+***REMOVED*** Plugins
+    $("textarea").autogrow({
+        "animate": false,
+        "onInitialize": true
+***REMOVED***);
+</script>
+
+</body>
+</html>

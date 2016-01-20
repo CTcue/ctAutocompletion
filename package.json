@@ -26,7 +26,8 @@
     "koa": "1.1.0",
     "koa-cors": "0.0.16",
     "koa-router": "5.2.3",
-    "lodash": "^3.10.1"
+    "lodash": "^3.10.1",
+    "neo4j": "^2.0.0-RC2"
   ***REMOVED***,
   "devDependencies": {
     "supertest": "*",
