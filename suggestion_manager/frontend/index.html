@@ -196,8 +196,11 @@
             <button type="submit" class="btn btn-danger">Delete neo4j nodes</button>
         </form>
 
-        <form ng-submit="removeGroup(group_name)" class="block well" ng-show="allGroups.length">
+        <form class="block well">
             <h3>Remove group <small>This will remove a group and its concepts</small></h3>
+
+
+            <button type="button" class="btn btn-primary" ng-click="getGroups()">Find groups</button>
 
             <div class="row">
                 <fieldset class="form-group col-md-5">
@@ -221,7 +224,7 @@
                 </fieldset>
             </div>
 
-            <button type="submit" class="btn btn-danger">Remove group</button>
+            <button type="button" class="btn btn-danger" ng-click="removeGroup(group_name)">Remove group</button>
         </form>
     </div>
 
