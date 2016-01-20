@@ -18,8 +18,6 @@ app.controller('dangerzone', function ($scope, $rootScope, neo4j, CRUD) {
 
 
     $scope.removeGroup = function() {
-        console.log($scope.data);
-
         CRUD.post("remove-group", $scope.data)
             .then(function(result) {
                 $rootScope.msg = "Group removed";
