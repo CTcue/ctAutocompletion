@@ -1,4 +1,7 @@
+
+var secretConfig = '../../ctcue-config/';
 var config = {}
+
 
 if (process.env.NODE_ENV === 'production') {
   config.host = '178.62.230.23';
@@ -11,5 +14,7 @@ else {
 
 config.path    = 'http://'+ config.host + ':' + config.port;
 config.elastic = "http://localhost:9200";
+
+config.neo4j = require(secretConfig + 'neo4j');
 
 module.exports = config;

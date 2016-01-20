@@ -154,7 +154,7 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
         CRUD.post("add", requestObj)
             .then(function(result) {
                 $rootScope.error = false;
-                $rootSscope.msg = result.data.msg;
+                $rootScope.msg = result.data.msg;
 
                 // Reset stuff
                 $scope.url   = "";
