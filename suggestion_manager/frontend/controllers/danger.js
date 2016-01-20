@@ -30,12 +30,13 @@ app.controller('dangerzone', function ($scope, $rootScope, neo4j, CRUD) {
     // Load groups for selection
     $scope.allGroups = [];
 
-    CRUD.post("list-groups", $scope.data)
-        .then(function(result) {
-            $scope.allGroups = result.data.groups || [];
-        },
-        function(err) {
-            $rootScope.error = err;
-        })
-
+    $scope.getGroups = function() {
+        CRUD.post("list-groups", $scope.data)
+            .then(function(result) {
+                $scope.allGroups = result.data.groups || [];
+            },
+            function(err) {
+                $rootScope.error = err;
+            })
+    }
 });

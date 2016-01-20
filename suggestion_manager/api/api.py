@@ -183,6 +183,7 @@ def list():
             groups.append(node.properties)
 
     except Exception as err:
+        print err
         return Response('Provide valid neo4j credentials (or maybe it is turned off)', 400)
 
     return Response(json.dumps({"groups": groups}), 200)
