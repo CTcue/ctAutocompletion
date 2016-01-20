@@ -6,11 +6,11 @@ var app = angular.module("ctNeo4j", [
 
 angular.module('app.config', [])
     .constant('api', {
-        "path": "http://localhost:4083"
+        "path": "https://ctcue.com/suggest_manager_api"
 ***REMOVED***)
     .constant('neo4j', {
         "username" : "neo4j",
-        "password" : "test123"
+        "password" : ""
 ***REMOVED***)
     .constant("UMLS", {
         "url"          : "https://ctcue.com/umls/",
