@@ -1,6 +1,6 @@
 
 module.exports = function *(next) {
-    var maxLength = 512;
+    var maxLength = 1024;
 
     if (this.req.method === 'POST') {
         this.request.body = {};
@@ -43,7 +43,7 @@ module.exports = function *(next) {
             return;
         }
 
-        if (!req_body.hasOwnProperty("query") || typeof req_body.query !== "string") {
+        if (! req_body.hasOwnProperty("query")) {
             this.status = 400;
             this.body = 'Please provide a valid request object: { "query": "Your search term" }';
             return;

@@ -1,0 +1,29 @@
+{
+  "name": "demo",
+  "homepage": "https://github.com/CTcue/ctData",
+  "authors": [
+    "Fabiën <fabientesselaar@gmail.com>"
+  ],
+  "description": "Cool tool to upload domain info to neo4j",
+  "main": "app.js",
+  "moduleType": [],
+  "keywords": [
+    "neo4j",
+    "demo"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.8",
+    "jquery": "~2.2.0",
+    "bootstrap": "~3.3.6",
+    "autogrow": "~1.0.3"
+  }
+}

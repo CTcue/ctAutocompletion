@@ -45,9 +45,11 @@ router['post']('/autocomplete', autocomplete);
     "query" : "C1269683"
   }'
 */
-var expander     = require('./controllers/expand.js');
+var expander = require('./controllers/expand.js');
 router['post']('/expand', expander);
 
+var suggester = require('./controllers/suggest.js');
+router['post']('/suggest', suggester);
 
 
 app.use(router.routes());
