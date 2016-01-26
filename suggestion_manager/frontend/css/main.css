@@ -1,30 +1,68 @@
 body {
-  padding-top: 20px;
+  float:left;
+  width:100%;
+
+  margin:0;
   padding-bottom: 40px;
+
+  font-family: Helvetica, Arial, sans-serif;
+
+  color: #444;
+  overflow-y: scroll;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  margin:0 auto;
+  width:92%;
+}
+
+.header, .row {
+  display:block;
+  float:left;
+  width:100%;
+}
+
+form .row {
+  margin:10px 0;
 }
 
 .header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e5e5e5;
+  padding: 10px 0;
   margin-bottom: 20px;
+
+  border-bottom: 1px solid #e5e5e5;
 }
 
-.header .text-muted {
+.header h3, .header a {
   margin-top: 0;
-  margin-bottom: 0;
-  line-height: 40px;
+  margin-bottom:0;
+  line-height: 30px;
 }
 
-.form-buttons {
-    margin:20px 0;
+.header h3 {
+  float:left;
+  color:#222;
 }
-
-.raw-data {
-    margin-top:40px;
+.header a {
+  float:right;
 }
 
 .block {
-  margin:30px 0;
+  float:left;
+  margin:14px 0;
+}
+
+.spaced {
+  margin:14px 0 24px 0 !important;
+}
+
+.spaced h4 {
+  line-height: 36px;
+  margin: 0;
 }
 
 .checkbox {
@@ -38,31 +76,10 @@ body {
   cursor:pointer;
 }
 
-th .checkbox {
-  float:left;
+th .danger {
+  opacity: 0.5;
 }
 
-th .btn-danger {
-  float:right;
-  margin-right: 5%;
-
-  opacity:0.3;
-}
-
-th .btn-danger:hover {
-  opacity: 0.8;
-}
-
-
-.form-buttons {
-  margin-top:20px;
-  padding-top:20px;
-  border-top:1px solid #eee;
-}
-
-.form-buttons button {
-  float:right;
-}
 
 .loading-indicator {
   display: table;
@@ -87,4 +104,118 @@ th .btn-danger:hover {
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
+}
+
+button {
+  cursor: pointer;
+  background:#eee;
+  opacity: .9;
+  border:1px solid #ccc;
+
+}
+
+button:hover {
+  opacity: 1;
+}
+
+label {
+  font-weight: bold;
+  font-size: 80%;
+
+  margin-bottom:5px;
+  display:block;
+}
+
+button, input, textarea, select {
+  border-radius: 2px;
+
+  border:1px solid #ccc;
+  padding: 7px 10px;
+
+  font-size:15px;
+  line-height: 20px;
+
+  margin:0;
+}
+
+input, textarea, select {
+    min-width: 320px;
+}
+
+textarea {
+  min-height: 80px;
+}
+
+.inline input {
+  margin-right:4px;
+}
+
+#submit {
+  font-size: 120%;
+  padding: 14px;
+}
+
+
+
+table input {
+  min-width: 24px;
+  float:left;
+  width:80%;
+}
+
+table td, table th {
+  min-width: 32px;
+}
+
+table .small {
+  width:30px;
+}
+
+table .last td {
+  padding-top:10px;
+}
+
+
+.align-left {
+  float:left;
+}
+
+.align-right {
+  float:right;
+}
+
+.centered {
+  text-align: center;
+}
+
+
+.full { width: 100%; }
+.half { width:50%; }
+
+
+
+
+.navy, .blue {
+  color: #fff;
+  border: 1px solid #165582;
+}
+
+.navy {
+  background: #001f3f;
+}
+
+.blue {
+  background: #0074D9;
+}
+
+.danger {
+  background: #FF4136;
+  color:#fff;
+  border: 1px solid #B53232;
+}
+
+.green {
+  color:#fff;
+  background: #2ECC40;
+  border: 1px solid #18A737;
 }

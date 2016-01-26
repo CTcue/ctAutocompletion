@@ -1,1 +1,1 @@
-cp -rf ./frontend /var/www/suggest_manager_frontend
+rsync -a ./frontend /var/www/suggest_manager_frontend

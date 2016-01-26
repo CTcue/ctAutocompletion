@@ -24,7 +24,7 @@ ctServices.factory('Build', function () {
                 var rows = [];
 
                 // Parse rows
-                for (var j=0; j<tables[i].length; j++) {
+                for (var j=0; j < tables[i].length; j++) {
                     var is_empty = tables[i][j].filter(function(s) { return s.trim(); })
                     if (is_empty.length === 0) {
                         continue;
