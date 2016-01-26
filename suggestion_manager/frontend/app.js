@@ -6,8 +6,8 @@ var app = angular.module("ctNeo4j", [
 
 angular.module('app.config', [])
     .constant('api', {
-    ***REMOVED*** "path": "https://ctcue.com/suggest_manager_api"
-        "path": "http://localhost:4083"
+        "path": "https://ctcue.com/suggest_manager_api"
+    ***REMOVED*** "path": "http://localhost:4083"
 ***REMOVED***)
     .constant('neo4j', {
         "username" : "neo4j",
