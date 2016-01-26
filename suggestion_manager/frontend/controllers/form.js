@@ -30,6 +30,15 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
 ***REMOVED***
 
 
+    $scope.custom = function() {
+        $scope.validated_tables = Build.tables([[ [".."] ]]);
+
+        $scope.meta["name"] = "";
+        $scope.meta["description"] = "";
+        $scope.meta["url"] = "";
+***REMOVED***
+
+
     $scope.addRow = function(table) {
         var row_copy = angular.copy(table.rows[0]) || {***REMOVED***;
 

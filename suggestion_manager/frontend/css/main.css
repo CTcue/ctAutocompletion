@@ -1,30 +1,68 @@
 body {
-  padding-top: 20px;
+  float:left;
+  width:100%;
+
+  margin:0;
   padding-bottom: 40px;
+
+  font-family: Helvetica, Arial, sans-serif;
+
+  color: #444;
+  overflow-y: scroll;
+***REMOVED***
+
+* {
+  box-sizing: border-box;
+***REMOVED***
+
+.container {
+  margin:0 auto;
+  width:92%;
+***REMOVED***
+
+.header, .row {
+  display:block;
+  float:left;
+  width:100%;
+***REMOVED***
+
+form .row {
+  margin:10px 0;
 ***REMOVED***
 
 .header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e5e5e5;
+  padding: 10px 0;
   margin-bottom: 20px;
+
+  border-bottom: 1px solid #e5e5e5;
 ***REMOVED***
 
-.header .text-muted {
+.header h3, .header a {
   margin-top: 0;
-  margin-bottom: 0;
-  line-height: 40px;
+  margin-bottom:0;
+  line-height: 30px;
 ***REMOVED***
 
-.form-buttons {
-    margin:20px 0;
+.header h3 {
+  float:left;
+  color:#222;
 ***REMOVED***
-
-.raw-data {
-    margin-top:40px;
+.header a {
+  float:right;
 ***REMOVED***
 
 .block {
-  margin:30px 0;
+  float:left;
+  margin:14px 0;
+***REMOVED***
+
+.spaced {
+  margin:14px 0 24px 0 !important;
+***REMOVED***
+
+.spaced h4 {
+  line-height: 36px;
+  margin: 0;
 ***REMOVED***
 
 .checkbox {
@@ -38,31 +76,10 @@ body {
   cursor:pointer;
 ***REMOVED***
 
-th .checkbox {
-  float:left;
+th .danger {
+  opacity: 0.5;
 ***REMOVED***
 
-th .btn-danger {
-  float:right;
-  margin-right: 5%;
-
-  opacity:0.3;
-***REMOVED***
-
-th .btn-danger:hover {
-  opacity: 0.8;
-***REMOVED***
-
-
-.form-buttons {
-  margin-top:20px;
-  padding-top:20px;
-  border-top:1px solid #eee;
-***REMOVED***
-
-.form-buttons button {
-  float:right;
-***REMOVED***
 
 .loading-indicator {
   display: table;
@@ -87,4 +104,118 @@ th .btn-danger:hover {
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
+***REMOVED***
+
+button {
+  cursor: pointer;
+  background:#eee;
+  opacity: .9;
+  border:1px solid #ccc;
+
+***REMOVED***
+
+button:hover {
+  opacity: 1;
+***REMOVED***
+
+label {
+  font-weight: bold;
+  font-size: 80%;
+
+  margin-bottom:5px;
+  display:block;
+***REMOVED***
+
+button, input, textarea, select {
+  border-radius: 2px;
+
+  border:1px solid #ccc;
+  padding: 7px 10px;
+
+  font-size:15px;
+  line-height: 20px;
+
+  margin:0;
+***REMOVED***
+
+input, textarea, select {
+    min-width: 320px;
+***REMOVED***
+
+textarea {
+  min-height: 80px;
+***REMOVED***
+
+.inline input {
+  margin-right:4px;
+***REMOVED***
+
+#submit {
+  font-size: 120%;
+  padding: 14px;
+***REMOVED***
+
+
+
+table input {
+  min-width: 24px;
+  float:left;
+  width:80%;
+***REMOVED***
+
+table td, table th {
+  min-width: 32px;
+***REMOVED***
+
+table .small {
+  width:30px;
+***REMOVED***
+
+table .last td {
+  padding-top:10px;
+***REMOVED***
+
+
+.align-left {
+  float:left;
+***REMOVED***
+
+.align-right {
+  float:right;
+***REMOVED***
+
+.centered {
+  text-align: center;
+***REMOVED***
+
+
+.full { width: 100%; ***REMOVED***
+.half { width:50%; ***REMOVED***
+
+
+
+
+.navy, .blue {
+  color: #fff;
+  border: 1px solid #165582;
+***REMOVED***
+
+.navy {
+  background: #001f3f;
+***REMOVED***
+
+.blue {
+  background: #0074D9;
+***REMOVED***
+
+.danger {
+  background: #FF4136;
+  color:#fff;
+  border: 1px solid #B53232;
+***REMOVED***
+
+.green {
+  color:#fff;
+  background: #2ECC40;
+  border: 1px solid #18A737;
 ***REMOVED***
