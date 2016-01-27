@@ -158,12 +158,31 @@ def clear():
         # Index your data
         db.cypher.execute("CREATE INDEX ON :Group(name)")
         db.cypher.execute("CREATE INDEX ON :Concept(name)")
+        db.cypher.execute("CREATE INDEX ON :Concept(cui)")
 
     except Exception as err:
         print err
         return Response('Provide valid neo4j credentials (or maybe it is turned off)', 400)
 
     return Response('Neo4j is cleared', 200)
+
+
+# API endpoint to update neo4j indexes etc.
+@app.route('/update-indexes', methods=['POST'])
+def update_indexes():
+    try:
+        body = request.get_json(force=True)
+        authenticate("localhost:7474", body["neo4j"]["username"], body["neo4j"]["password"])
+        db = Graph()
+
+        # Index your data
+        db.cypher.execute("CREATE INDEX ON :Group(name)")
+        db.cypher.execute("CREATE INDEX ON :Concept(name)")
+        db.cypher.execute("CREATE INDEX ON :Concept(cui)")
+    except Exception as err:
+        pass
+
+    return Response('Indexes updated.', 200)
 
 
 @app.route('/list-groups', methods=['POST'])
