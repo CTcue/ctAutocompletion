@@ -156,12 +156,14 @@
         </form>
     </div>
 
-    <div class="row ng-cloak" ng-if="showDangerzone" ng-controller="dangerzone">
+    <div class="row dangerzone ng-cloak" ng-if="showDangerzone" ng-controller="dangerzone">
         <h1>Dangerzone</h1>
 
-        <form ng-submit="destroy()" class="half align-left">
-            <h3>Re-index</h3>
-            <small>This will remove all added entries</small>
+        <form ng-submit="destroy()" class="third align-left">
+            <div class="title">
+                <h3>Re-index</h3>
+                <small>This will remove all added entries</small>
+            </div>
 
             <div class="row">
                 <label>Neo4j username</label>
@@ -178,9 +180,11 @@
             </div>
         </form>
 
-        <form class="half align-right">
-            <h3>Remove group</h3>
-            <small>This will remove a group and its concepts</small>
+        <form class="third align-mid">
+            <div class="title">
+                <h3>Remove group</h3>
+                <small>This will remove a group and its concepts</small>
+            </div>
 
             <div class="row">
                 <label>Neo4j username</label>
@@ -204,6 +208,27 @@
                 <button type="button" class="danger" ng-click="removeGroup(group_name)">
                     Remove group
                 </button>
+            </div>
+        </form>
+
+        <form ng-submit="updateIndexes()" class="third align-right">
+            <div class="title">
+                <h3>Update indexes</h3>
+                <small>Creates indexes on your concepts</small>
+            </div>
+
+            <div class="row">
+                <label>Neo4j username</label>
+                <input type="text" class="form-control" placeholder="Enter username" ng-model="data.neo4j.username">
+            </div>
+
+            <div class="row">
+                <label>Password</label>
+                <input type="password" class="form-control" placeholder="Password" ng-model="data.neo4j.password">
+            </div>
+
+            <div class="row">
+                <button type="submit" class="navy">Update</button>
             </div>
         </form>
     </div>

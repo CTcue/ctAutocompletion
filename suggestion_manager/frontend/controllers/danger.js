@@ -16,6 +16,16 @@ app.controller('dangerzone', function ($scope, $rootScope, neo4j, CRUD) {
             })
     }
 
+    $scope.updateIndexes = function() {
+        CRUD.post("update-indexes", $scope.data)
+            .then(function(result) {
+                $rootScope.msg = result.data;
+            },
+            function(err) {
+                $rootScope.error = err;
+            })
+    }
+
 
     $scope.removeGroup = function() {
         CRUD.post("remove-group", $scope.data)
