@@ -10,19 +10,40 @@ var db = new neo4j.GraphDatabase({
 
 
 module.exports = function *() {
-    // var query = 'MATCH (t1:Concept { name:{A} }), (t2:Concept { name:{B} }), p = allShortestPaths((t1)-[:is_part_of*..2]-(t2)) return p, ID(p)';
-    var query = 'MATCH (t1:Concept { name:{A} }), (t2:Concept { name:{B} }), (g:Group), (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2), g<-[:is_part_of]-(r) return t1, t2, g, ID(g) as ID, COLLECT(r) as terms'
     var params = this.request.body.query;
+    var cypherObj = false;
 
-    var cypherObj = {
-        "query"  : query,
-        "params" : {
-            "A": params[0],
-            "B": params[1]
-        },
+    // Query can be a list of terms or list of object with cui + string
+    if (typeof params[0] === "string") {
+        var query = 'MATCH (t1:Concept { name:{A} }), (t2:Concept { name:{B} }), (g:Group), (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2), g<-[:is_part_of]-(r) return t1, t2, g, ID(g) as ID, COLLECT(r) as terms'
 
-        "lean": true
-    };
+        var cypherObj = {
+            "query"  : query,
+            "params" : {
+                "A": params[0].toLowerCase(),
+                "B": params[1].toLowerCase()
+            },
+
+            "lean": true
+        };
+    }
+    else if (typeof params[0] === "object" && params[0].hasOwnProperty("cui")) {
+        var query = 'MATCH (t1:Concept { cui:{A} }), (t2:Concept { cui:{B} }), (g:Group), (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2), g<-[:is_part_of]-(r) return t1, t2, g, ID(g) as ID, COLLECT(r) as terms'
+
+        var cypherObj = {
+            "query"  : query,
+            "params" : {
+                "A": params[0].cui || "",
+                "B": params[1].cui || ""
+            },
+
+            "lean": true
+        };
+    }
+    else {
+        return this.body = [];
+    }
+
 
     var result = yield function(callback) {
         db.cypher(cypherObj, function(err, paths) {
