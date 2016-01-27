@@ -11,39 +11,12 @@ var db = new neo4j.GraphDatabase({
 
 module.exports = function *() {
     var params = this.request.body.query;
-    var cypherObj = false;
 
-***REMOVED*** Query can be a list of terms or list of object with cui + string
-    if (typeof params[0] === "string") {
-        var query = 'MATCH (t1:Concept { name:{A***REMOVED*** ***REMOVED***), (t2:Concept { name:{B***REMOVED*** ***REMOVED***), (g:Group), (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2), g<-[:is_part_of]-(r) return t1, t2, g, ID(g) as ID, COLLECT(r) as terms'
-
-        var cypherObj = {
-            "query"  : query,
-            "params" : {
-                "A": params[0].toLowerCase(),
-                "B": params[1].toLowerCase()
-        ***REMOVED***,
-
-            "lean": true
-    ***REMOVED***;
-***REMOVED***
-    else if (typeof params[0] === "object" && params[0].hasOwnProperty("cui")) {
-        var query = 'MATCH (t1:Concept { cui:{A***REMOVED*** ***REMOVED***), (t2:Concept { cui:{B***REMOVED*** ***REMOVED***), (g:Group), (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2), g<-[:is_part_of]-(r) return t1, t2, g, ID(g) as ID, COLLECT(r) as terms'
-
-        var cypherObj = {
-            "query"  : query,
-            "params" : {
-                "A": params[0].cui || "",
-                "B": params[1].cui || ""
-        ***REMOVED***,
-
-            "lean": true
-    ***REMOVED***;
-***REMOVED***
-    ***REMOVED***
+    if (params.length < 2) {
         return this.body = [];
 ***REMOVED***
 
+    var cypherObj = buildCypherObj(params);
 
     var result = yield function(callback) {
         db.cypher(cypherObj, function(err, paths) {
@@ -79,3 +52,49 @@ module.exports = function *() {
 
     this.body = result;
 ***REMOVED***;
+
+
+function buildCypherObj(params) {
+    var cypherObj = false;
+
+    var A = checkParam(params[0]);
+    var B = checkParam(params[1]);
+
+    if (A && B) {
+        cypherObj = {
+            "query"  : buildQuery(A["type"], B["type"]),
+            "params" : {
+                "A": A["str"],
+                "B": B["str"]
+        ***REMOVED***,
+
+            "lean": true
+    ***REMOVED***;
+***REMOVED***
+
+    return cypherObj;
+***REMOVED***
+
+function checkParam(param) {
+    if (typeof param === "string") {
+        return { "type": "name", "str": param ***REMOVED***;
+***REMOVED***
+
+    if (typeof param === "object") {
+        if (param.hasOwnProperty("cui") && param.cui.length > 1) {
+            return { "type": "cui", "str": param.cui ***REMOVED***;
+    ***REMOVED***
+
+        return { "type": "name", "str": param.str || param.name || "" ***REMOVED***;
+***REMOVED***
+
+    return false;
+***REMOVED***
+
+function buildQuery(keyA, keyB) {
+    return `MATCH (t1:Concept { ${keyA***REMOVED***: {A***REMOVED*** ***REMOVED***), (t2:Concept { ${keyB***REMOVED***: {B***REMOVED*** ***REMOVED***),
+            (g:Group),
+            (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2),
+            g<-[:is_part_of]-(r)
+            return t1, t2, g, ID(g) as ID, COLLECT(r) as terms`
+***REMOVED***
