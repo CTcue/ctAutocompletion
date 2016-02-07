@@ -39,12 +39,16 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
 ***REMOVED***
 
 
-    $scope.addRow = function(table) {
+    var addRowFn = function(table, val) {
+        if (typeof val === "undefined") {
+            val = "";
+    ***REMOVED***
+
         var row_copy = angular.copy(table.rows[0]) || {***REMOVED***;
 
     ***REMOVED*** Create empty object with same keys as first row
         for (var k in row_copy) {
-            row_copy[k] = "";
+            row_copy[k] = val;
     ***REMOVED***
 
         row_copy["meta"] = {
@@ -53,6 +57,8 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
 
         table.rows.push(row_copy)
 ***REMOVED***
+    $scope.addRow = addRowFn;
+
 
     function newKeyName(table) {
     ***REMOVED*** Get name for new column
@@ -136,11 +142,31 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
     ***REMOVED***
 ***REMOVED***
 
+
+***REMOVED*** Copy paste text and split it into usable rows
+    $scope.parseForRows = function(text, table) {
+    ***REMOVED*** If custom table -> uncheck first "empty" row
+        if (table.rows.length === 1 && table.rows[0].hasOwnProperty("0") && table.rows[0][0] === "..") {
+            table.rows[0]["meta"]["checked"] = false;
+    ***REMOVED***
+
+        var split = text
+            .trim()
+            .split("\n")
+            .map(function(s) { return s.replace(/^[^A-Za-z]+/, ""); ***REMOVED***)
+            .filter(function(s) { return s && s.length > 2; ***REMOVED***)
+            .map(function(s) { return s.split(/[,\t]| and | en | of | or /); ***REMOVED***)
+            .reduce(function(res, s) { return res.concat(s) ***REMOVED***, []) // Flatten
+
+        for (var i=0; i<split.length; i++) {
+            addRowFn(table, split[i].trim());
+    ***REMOVED***
+***REMOVED***
+
 ***REMOVED***////////////
 ***REMOVED*** Save table data + info to neo4j
 
     $scope.submit = function(neo4j, meta, tables) {
-
         if (!meta || !meta.hasOwnProperty("name")) {
             $rootScope.error = "The group name is required.";
             return;

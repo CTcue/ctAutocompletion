@@ -25,6 +25,7 @@
     </div>
 
     <div ng-controller="formController" class="row">
+
         <div class="loading-indicator ng-cloak" ng-if="isLoading">
             <h3>LOADING...</h3>
         </div>
@@ -147,7 +148,14 @@
                     </tr>
                 </table>
 
+                <div class="row parse">
+                    <label>Paste data here</label>
+                    <textarea class="full" ng-model="__data" placeholder="Parse data for new rows"></textarea>
 
+                    <button type="button" class="blue" ng-click="parseForRows(__data, table); __data=''; ">
+                        Parse rows
+                    </button>
+                </div>
             </div>
 
             <div class="row block">
