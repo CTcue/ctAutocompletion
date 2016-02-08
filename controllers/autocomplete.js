@@ -4,6 +4,7 @@
 var config  = require('../config/config.js');
 
 var guess_origin = require("./lib/guess_origin");
+var Trie = require('./lib/trie');
 var _ = require("lodash");
 
 var elastic = require('elasticsearch');
@@ -15,13 +16,8 @@ var elasticClient = new elastic.Client({
 const source = ["cui", "str", "exact", "pref", "source", "types"];
 
 // Build regex objects for demographic check
-var DEMOGRAPHICS = [];
-for (var k in config.demographic_types) {
-    DEMOGRAPHICS.push({
-        "exp"  : new RegExp("^" + k.toLowerCase()),
-        "type" : config.demographic_types[k]
-    })
-}
+var DEMOGRAPHICS = new Trie(config.demographic_types);
+
 
 module.exports = function *() {
   var query = this.request.body.query;
@@ -166,22 +162,19 @@ function findSpecial(query) {
     var _query = query.trim().toLowerCase();
 
     return function(callback) {
+        var result = false;
+        var match = DEMOGRAPHICS.search(_query)
 
-        // Check if query matches a demographic option
-        for (var i=0; i < DEMOGRAPHICS.length; i++) {
-            if (DEMOGRAPHICS[i]["exp"].test(_query)) {
-                callback(false, {
-                    "str"      : query,
+        if (match.length > 0) {
+            var result = {
+                    "str"      : match[0]["key"],
                     "pref"     : "demographic",
                     "cui"      : "custom",
                     "category" : "demographic",
-                    "category_type" : DEMOGRAPHICS[i]["type"]
-                });
-
-                break;
+                    "category_type" : match[0]["value"]
             }
         }
 
-        callback(false, false);
+        callback(false, result);
     }
 }
