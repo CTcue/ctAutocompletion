@@ -150,6 +150,8 @@ _combined = re.compile("(\[(%s)\]|\((%s)\))" % ("|".join(block_cat), "|".join(br
 
 endsWith = [
     "NAO",
+    "\(NAO\)",
+    "\(NOS\)",
     "nao",
     "[Dd]is",
     "[Zz]iekte van",
@@ -193,10 +195,15 @@ def check_row(row):
     ]
 
     crazy_sources = [
+        "CHV",
+        "PSY",
         "ICD9",
         "ICD9CM",
+        "NCI_FDA",
         "NCI_CTCAE",
-        "NCI_CDISC"
+        "NCI_CDISC",
+        "ICPC2P",
+        "SNOMEDCT_VET"
     ]
 
     # Skip records that are too long, have Pat.mo.dnt things in it or aren't prefered/obsolete
@@ -206,6 +213,7 @@ def check_row(row):
         not re.search(r"(nos|NOS)$", row['STR']) and \
         row['ISPREF'] == 'Y' and \
         row['LAT'] in languages and \
+        row['TTY'] not in ["PM"] and \
         row['TTY'] not in obsolete and \
         row['SAB'] not in crazy_sources
 
@@ -213,8 +221,11 @@ def check_row(row):
 def can_skip_cat(sty):
     skip_categories = [
         "Age Group",
+        "Temporal Concept",
+        "Organism Attribute",
         "Intellectual Product",
         "Food",
+        "Plant",
         "Mammal",
         "Geographic Area",
         "Governmental or Regulatory Activity",

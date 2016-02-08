@@ -78,6 +78,11 @@ if __name__ == '__main__':
 
         counter += 1
 
+        # for co in conso:
+        #     print co
+
+        # raw_input("...")
+
         if counter % 100 == 0:
             helpers.bulk(elastic, bulk)
             bulk = []

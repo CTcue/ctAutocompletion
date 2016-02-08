@@ -14,18 +14,33 @@ var elasticClient = new elastic.Client({
 
 const source = ["cui", "str", "exact", "pref", "source", "types"];
 
+// Build regex objects for demographic check
+var DEMOGRAPHICS = [];
+for (var k in config.demographic_types) {
+    DEMOGRAPHICS.push({
+        "exp"  : new RegExp("^" + k.toLowerCase()),
+        "type" : config.demographic_types[k]
+***REMOVED***)
+***REMOVED***
+
 module.exports = function *() {
   var query = this.request.body.query;
 
+  // Check special matches, such as demographic options
+  var specialMatches = yield findSpecial(query);
+
+  // Lookup matches in Elasticsearch
   var exactMatches = yield findExact(query);
   var closeMatches = yield findMatches(query);
 
   this.body = {
     "took": exactMatches.took + closeMatches.took,
+    "special": specialMatches,
+
     "hits": _.uniq(exactMatches.hits.concat(closeMatches.hits), "exact")
   ***REMOVED***
-
 ***REMOVED***;
+
 
 function findExact(query) {
     var wantedTerm = query.trim().toLowerCase();
@@ -67,6 +82,7 @@ function findExact(query) {
     ***REMOVED***);
 ***REMOVED***
 ***REMOVED***
+
 
 function findMatches(query) {
     var origin = guess_origin(query);
@@ -112,7 +128,7 @@ function findMatches(query) {
                         ***REMOVED*** Negative weight for some categories
                             {
                                 "filter": {
-                                    "terms": { "types": ["Health Care Activity", "Temporal Concept", "Biomedical Occupation or Discipline"] ***REMOVED***
+                                    "terms": { "types": ["Health Care Activity", "Biomedical Occupation or Discipline"] ***REMOVED***
                             ***REMOVED***,
                                 "weight": 0.7
                         ***REMOVED***
@@ -132,7 +148,7 @@ function findMatches(query) {
             var result = [];
 
             if (hits && hits.total > 0) {
-                for (var i=0; i<hits.hits.length; i++) {
+                for (var i=0; i < hits.hits.length; i++) {
                     result.push(hits.hits[i]._source);
             ***REMOVED***
         ***REMOVED***
@@ -142,5 +158,30 @@ function findMatches(query) {
                 "hits": result
         ***REMOVED***);
     ***REMOVED***);
+***REMOVED***
+***REMOVED***
+
+
+function findSpecial(query) {
+    var _query = query.trim().toLowerCase();
+
+    return function(callback) {
+
+    ***REMOVED*** Check if query matches a demographic option
+        for (var i=0; i < DEMOGRAPHICS.length; i++) {
+            if (DEMOGRAPHICS[i]["exp"].test(_query)) {
+                callback(false, {
+                    "str"      : query,
+                    "pref"     : "demographic",
+                    "cui"      : "custom",
+                    "category" : "demographic",
+                    "category_type" : DEMOGRAPHICS[i]["type"]
+            ***REMOVED***);
+
+                break;
+        ***REMOVED***
+    ***REMOVED***
+
+        callback(false, false);
 ***REMOVED***
 ***REMOVED***

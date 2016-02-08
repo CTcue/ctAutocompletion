@@ -77,7 +77,7 @@ function buildCypherObj(params) {
 
 function checkParam(param) {
     if (typeof param === "string") {
-        return { "type": "name", "str": param ***REMOVED***;
+        return { "type": "name", "str": param.toLowerCase() ***REMOVED***;
 ***REMOVED***
 
     if (typeof param === "object") {
