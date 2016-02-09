@@ -39,6 +39,8 @@ router['get']('/', function *() {
 var autocomplete = require('./controllers/autocomplete.js');
 router['post']('/autocomplete', autocomplete);
 
+var term_lookup = require('./controllers/term_lookup.js');
+router['post']('/term_lookup', term_lookup);
 
 /*
   curl -XPOST 178.62.230.23/autocomplete -d '{
