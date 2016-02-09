@@ -167,11 +167,11 @@ function findSpecial(query) {
 
         if (match.length > 0) {
             var result = {
-                    "str"      : match[0]["key"],
-                    "pref"     : "demographic",
-                    "cui"      : "custom",
-                    "category" : "demographic",
-                    "category_type" : match[0]["value"]
+                "str"      : match[0]["key"],
+                "pref"     : "demographic",
+                "cui"      : "custom",
+                "category" : "demographic",
+                "category_type" : match[0]["value"]
         ***REMOVED***
     ***REMOVED***
 
