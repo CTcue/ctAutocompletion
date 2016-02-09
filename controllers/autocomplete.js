@@ -168,9 +168,19 @@ function findSpecial(query) {
         if (match.length > 0) {
             var split = match[0]["value"].split(":");
 
+            var label = split[0];
+            var value = false;
+
+            if (split[1]) {
+                label = split[0] + ": " + split[1];
+
+                value = {};
+                value[split[0]] = split[1];
+            }
+
             var result = {
-                "str"      : split[0],
-                "value"    : split[1] || "",
+                "str"      : label,
+                "value"    : value,
                 "pref"     : "demographic",
                 "cui"      : "custom",
                 "category" : "demographic"
