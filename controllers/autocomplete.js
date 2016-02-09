@@ -166,12 +166,14 @@ function findSpecial(query) {
         var match = DEMOGRAPHICS.search(_query)
 
         if (match.length > 0) {
+            var split = match[0]["value"].split(":");
+
             var result = {
-                "str"      : match[0]["key"],
+                "str"      : split[0],
+                "value"    : split[1] || "",
                 "pref"     : "demographic",
                 "cui"      : "custom",
-                "category" : "demographic",
-                "category_type" : match[0]["value"]
+                "category" : "demographic"
         ***REMOVED***
     ***REMOVED***
 
