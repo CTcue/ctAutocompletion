@@ -1,4 +1,6 @@
 
+var _ = require("lodash");
+
 var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client({
     "apiVersion" : "1.4"
@@ -6,8 +8,12 @@ var elasticClient = new elastic.Client({
 
 var getCategory = require("./lib/category.js");
 
-const source = ["str", "types"];
-
+const source = ["str", "lang", "types"];
+const language_map = {
+  "DUT" : "dutch",
+  "ENG" : "english",
+  "default": "custom"
+***REMOVED***;
 
 module.exports = function *() {
 
@@ -39,13 +45,41 @@ module.exports = function *() {
   if (result && result.length > 0) {
       var types = result[0]._source.types;
 
+      var terms = {
+          "english" : [],
+          "dutch"   : [],
+          "custom"  : []
+  ***REMOVED***;
+
+  ***REMOVED*** Group terms by language
+      for (var i=0; i < result.length; i++) {
+          var lang = result[i]["_source"]["lang"];
+
+          if (! language_map.hasOwnProperty(lang)) {
+              lang = "default";
+      ***REMOVED***
+
+          terms[language_map[lang]].push(result[i]["_source"]["str"]);
+  ***REMOVED***
+
+
+  ***REMOVED*** - Remove empty key/values
+  ***REMOVED*** - Sort terms by their length
+      for (var k in terms) {
+          if (! terms[k].length) {
+              delete terms[k];
+      ***REMOVED***
+          ***REMOVED***
+              terms[k] = _.sortBy(terms[k], "length");
+      ***REMOVED***
+  ***REMOVED***
+
+
       return this.body = {
-        "type"      : "-",
         "category"  : getCategory(types),
-        "terms"     : result.map(function(item) { return item._source.str; ***REMOVED***)
+        "terms"     : terms
   ***REMOVED***;
   ***REMOVED***
 
   this.body = { "type": "", "category": "", "terms": [] ***REMOVED***
 ***REMOVED***;
-
