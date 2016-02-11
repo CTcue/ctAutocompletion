@@ -50,6 +50,10 @@ router['post']('/term_lookup', term_lookup);
 var expander = require('./controllers/expand.js');
 router['post']('/expand', expander);
 
+// Similar to expander, but groups + sorts result by language
+var expandGrouped = require('./controllers/expand_grouped.js');
+router['post']('/expand-grouped', expandGrouped);
+
 var suggester = require('./controllers/suggest.js');
 router['post']('/suggest', suggester);
 
