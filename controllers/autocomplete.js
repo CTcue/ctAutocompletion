@@ -179,7 +179,7 @@ function findSpecial(query) {
             }
 
             var result = {
-                "str"      : "demographic",
+                "str"      : label,
                 "value"    : value,
                 "pref"     : "demographic",
                 "cui"      : "custom",
