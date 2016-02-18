@@ -31,6 +31,14 @@ module.exports = function *() {
 function findExact(query) {
     var wantedTerm = query.trim().toLowerCase();
 
+    var fuzziness = 0;
+    if (query.length > 10) {
+        fuzziness = 2;
+***REMOVED***
+    else if (query.length > 5) {
+        fuzziness = 1;
+***REMOVED***
+
 ***REMOVED*** Filter out CUI codes that the user already selected
     return function(callback) {
         var elastic_query =  {
@@ -42,7 +50,8 @@ function findExact(query) {
                 "fuzzy" : {
                     "exact" : {
                         "value": wantedTerm,
-                        "fuzziness": (wantedTerm.length > 5 ? 2 : 0)
+                        "fuzziness": fuzziness,
+                        "prefix_length": 4
                 ***REMOVED***
             ***REMOVED***
         ***REMOVED***
