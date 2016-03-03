@@ -1,5 +1,12 @@
 
+var config  = require('../config/config.js');
+var neo4j = require('neo4j');
 var _ = require("lodash");
+
+var db = new neo4j.GraphDatabase({
+    url: 'http://localhost:7474',
+    auth: config.neo4j
+});
 
 var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client({
@@ -17,6 +24,8 @@ const language_map = {
 
 module.exports = function *() {
 
+  var body = this.request.body.query;
+
   var result = yield function(callback) {
       elasticClient.search({
           "index" : 'autocomplete',
@@ -27,7 +36,7 @@ module.exports = function *() {
           "body" : {
               "query" : {
                   "term" : {
-                      "cui" : this.request.body.query
+                      "cui" : body
                    }
                }
           }
@@ -41,6 +50,31 @@ module.exports = function *() {
           }
       });
   };
+
+
+  // For now, only get the "Dislikes" to uncheck stuff
+  var uncheck = yield function(callback) {
+    var cypherObj = {
+      "query": "MATCH (s:Synonym {cui: {_CUI_} })<-[r:DISLIKES]-(u:User) WITH s, count(s) as amount WHERE amount > 1 RETURN s.str as term, s.label as label",
+
+      "params": {
+        "_CUI_": body
+      },
+
+      "lean": true
+    }
+
+    db.cypher(cypherObj, function(err, res) {
+        if (err) {
+            console.log(err);
+            callback(false, []);
+        }
+        else {
+            callback(false, res);
+        }
+    });
+  }
+
 
   if (result && result.length > 0) {
       var types = result[0]._source.types;
@@ -77,9 +111,11 @@ module.exports = function *() {
 
       return this.body = {
         "category"  : getCategory(types),
-        "terms"     : terms
+        "terms"     : terms,
+        "uncheck"   : uncheck
       };
   }
 
-  this.body = { "type": "", "category": "", "terms": [] }
+  this.body = { "type": "", "category": "", "terms": [], "uncheck": [] };
 };
+
