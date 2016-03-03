@@ -32,7 +32,7 @@ module.exports = function *() {
   this.body = {
     "took": exactMatches.took + closeMatches.took,
     "special": specialMatches,
-
+    "error"  : exactMatches.hasOwnProperty("error"),
     "hits": _.uniq(exactMatches.hits.concat(closeMatches.hits), "exact")
   ***REMOVED***
 ***REMOVED***;
@@ -62,6 +62,10 @@ function findExact(query) {
     ***REMOVED***;
 
         elasticClient.search(queryObj, function(err, res) {
+            if (err) {
+                return callback(false, { "error": true, "took": 10, "hits": []***REMOVED***)
+        ***REMOVED***
+
             var hits = res.hits;
             var result = [];
 
@@ -140,6 +144,10 @@ function findMatches(query) {
     ***REMOVED***;
 
         elasticClient.search(queryObj, function(err, res) {
+            if (err) {
+                return callback(false, { "error": true, "took": 10, "hits": []***REMOVED***)
+        ***REMOVED***
+
             var hits = res.hits;
             var result = [];
 
