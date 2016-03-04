@@ -60,7 +60,6 @@ router['post']('/suggest', suggester);
 
 var recommender = require('./controllers/recommend.js');
 router['post']('/recommend/add', recommender.add);
-router['post']('/recommend/list', recommender.list);
 
 
 app.use(router.routes());

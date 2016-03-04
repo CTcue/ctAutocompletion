@@ -20,9 +20,6 @@ exports.add = function *() {
         return this.body = false;
 ***REMOVED***
 
-***REMOVED*** TODO check if user added custom term
-
-
     var result = yield function(callback) {
         db.cypher(cypherObj, function(err, res) {
             if (err) {
@@ -34,6 +31,7 @@ exports.add = function *() {
         ***REMOVED***
     ***REMOVED***);
 ***REMOVED***
+
 
     this.body = result;
 ***REMOVED***;
@@ -82,11 +80,3 @@ function getDateToday() {
     var date = new Date();
     return date.getFullYear() + "." + (date.getMonth()+1) + "." + date.getDay();
 ***REMOVED***
-
-exports.list = function *() {
-    var params = this.request.body.query;
-
-    console.log("LIST")
-    this.body = true;
-***REMOVED***;
-

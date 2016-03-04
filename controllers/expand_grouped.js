@@ -17,105 +17,113 @@ var getCategory = require("./lib/category.js");
 
 const source = ["str", "lang", "types"];
 const language_map = {
-  "DUT" : "dutch",
-  "ENG" : "english",
-  "default": "custom"
+    "DUT" : "dutch",
+    "ENG" : "english",
+    "default": "custom"
 ***REMOVED***;
 
 module.exports = function *() {
 
-  var body = this.request.body.query;
+    var body = this.request.body.query;
 
-  var result = yield function(callback) {
-      elasticClient.search({
-          "index" : 'autocomplete',
-          "size": 100,
+    var result = yield function(callback) {
+        elasticClient.search({
+            "index" : 'autocomplete',
+            "size": 100,
 
-          "_source": source,
+            "_source": source,
 
-          "body" : {
-              "query" : {
-                  "term" : {
-                      "cui" : body
-               ***REMOVED***
-           ***REMOVED***
-      ***REMOVED***
-  ***REMOVED***,
-      function(err, resp) {
-          if (resp && !!resp.hits && resp.hits.total > 0) {
-            callback(false, resp.hits.hits);
-      ***REMOVED***
-          ***REMOVED***
-            callback(err, []);
-      ***REMOVED***
-  ***REMOVED***);
-  ***REMOVED***;
+            "body" : {
+                "query" : {
+                    "term" : {
+                        "cui" : body
+                 ***REMOVED***
+             ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***,
+        function(err, resp) {
+            if (resp && !!resp.hits && resp.hits.total > 0) {
+                callback(false, resp.hits.hits);
+        ***REMOVED***
+            ***REMOVED***
+                callback(err, []);
+        ***REMOVED***
+    ***REMOVED***);
+***REMOVED***;
 
 
-  // For now, only get the "Dislikes" to uncheck stuff
-  var uncheck = yield function(callback) {
-    var cypherObj = {
-      "query": "MATCH (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User) WITH s, count(s) as amount WHERE amount > 1 RETURN s.str as term, s.label as label",
+***REMOVED*** For now, only get the "Dislikes" to uncheck stuff
+    var uncheck = yield function(callback) {
 
-      "params": {
-        "_CUI_": body
-  ***REMOVED***,
+        var cypherObj = {
+            "query": `MATCH
+                        (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
+                      WITH
+                        type(r) as rel, s, count(s) as amount
+                      WHERE
+                        amount > 1
+                      RETURN
+                        s.str as term, s.label as label, rel, amount`,
 
-      "lean": true
+            "params": {
+              "_CUI_": body
+        ***REMOVED***,
+
+            "lean": true
+    ***REMOVED***
+
+        db.cypher(cypherObj, function(err, res) {
+            if (err) {
+                console.log(err);
+                callback(false, []);
+        ***REMOVED***
+            ***REMOVED***
+                callback(false, res);
+        ***REMOVED***
+    ***REMOVED***);
 ***REMOVED***
 
-    db.cypher(cypherObj, function(err, res) {
-        if (err) {
-            console.log(err);
-            callback(false, []);
-    ***REMOVED***
+
+    if (result && result.length > 0) {
+        var types = result[0]._source.types;
+
+        var terms = {
+            "english" : [],
+            "dutch"   : [],
+            "custom"  : []
+    ***REMOVED***;
+
+    ***REMOVED*** Group terms by language
+        for (var i=0; i < result.length; i++) {
+            var lang = result[i]["_source"]["lang"];
+
+            if (! language_map.hasOwnProperty(lang)) {
+                lang = "default";
         ***REMOVED***
-            callback(false, res);
+
+            terms[language_map[lang]].push(result[i]["_source"]["str"]);
     ***REMOVED***
-***REMOVED***);
-  ***REMOVED***
 
 
-  if (result && result.length > 0) {
-      var types = result[0]._source.types;
-
-      var terms = {
-          "english" : [],
-          "dutch"   : [],
-          "custom"  : []
-  ***REMOVED***;
-
-  ***REMOVED*** Group terms by language
-      for (var i=0; i < result.length; i++) {
-          var lang = result[i]["_source"]["lang"];
-
-          if (! language_map.hasOwnProperty(lang)) {
-              lang = "default";
-      ***REMOVED***
-
-          terms[language_map[lang]].push(result[i]["_source"]["str"]);
-  ***REMOVED***
+    ***REMOVED*** - Remove empty key/values
+    ***REMOVED*** - Sort terms by their length
+        for (var k in terms) {
+            if (! terms[k].length) {
+                delete terms[k];
+        ***REMOVED***
+            ***REMOVED***
+                terms[k] = _.sortBy(terms[k], "length");
+        ***REMOVED***
+    ***REMOVED***
 
 
-  ***REMOVED*** - Remove empty key/values
-  ***REMOVED*** - Sort terms by their length
-      for (var k in terms) {
-          if (! terms[k].length) {
-              delete terms[k];
-      ***REMOVED***
-          ***REMOVED***
-              terms[k] = _.sortBy(terms[k], "length");
-      ***REMOVED***
-  ***REMOVED***
+        return this.body = {
+          "category"  : getCategory(types),
+          "terms"     : terms,
+          "uncheck"   : uncheck
+    ***REMOVED***;
+***REMOVED***
 
-
-      return this.body = {
-        "category"  : getCategory(types),
-        "terms"     : terms,
-        "uncheck"   : uncheck
-  ***REMOVED***;
-  ***REMOVED***
-
-  this.body = { "type": "", "category": "", "terms": [], "uncheck": [] ***REMOVED***;
+    this.body = { "type": "", "category": "", "terms": [], "uncheck": [] ***REMOVED***;
 ***REMOVED***;
 
