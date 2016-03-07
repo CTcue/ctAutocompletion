@@ -5,8 +5,35 @@
   <p>An overview of user added concepts and terms. If concepts and terms are added more often, you can include them to UMLS.</p>
 </div>
 
-<div class="row">
+<form class="block" ng-show="active_term" ng-submit="submit(active_term)">
+    <small>If CUI is "custom", it will be added as a new concept</small>
 
+    <div class="full">
+        <div class="align-left third">
+            <label>CUI</label>
+            <input type="text" class="form-control" placeholder="CUI" ng-model="active_term.synonym.cui">
+        </div>
+
+        <div class="align-mid third">
+            <label>Label</label>
+            <input type="text" class="form-control" placeholder="Label" ng-model="active_term.synonym.label">
+        </div>
+
+        <div class="align-right third">
+            <label>Term/Synonym</label>
+            <input type="text" class="form-control" placeholder="Term/Synonym" ng-model="active_term.synonym.term">
+        </div>
+    </div>
+
+    <div class="block full">
+      <button class="navy" id="submit">
+        Save term
+      </button>
+    </div>
+</form>
+
+
+<div class="row">
     <table class="table">
         <tr>
             <th>User</th>
@@ -33,10 +60,12 @@
 
             <td><code>{{ ::item.created | date:'dd MMMM yyyy' ***REMOVED******REMOVED***<code></td>
 
-            <td></td>
+            <td>
+                <button class="green" ng-click="setActive(item)">
+                    Add
+                </button>
+            </td>
         </tr>
     </table>
 </div>
 
-
-<link href="css/concepts.css" rel="stylesheet">

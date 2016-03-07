@@ -31,3 +31,19 @@
   border-bottom: 1px dashed #ccc;
 ***REMOVED***
 
+.table button {
+  opacity: 0.5;
+***REMOVED***
+
+.table button:hover {
+  opacity: 1.0;
+***REMOVED***
+
+
+form.block {
+  float:left;
+  width:100%;
+
+  border:1px solid #ccc;
+  padding:12px;
+***REMOVED***

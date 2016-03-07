@@ -58,7 +58,7 @@ h1 {
 ***REMOVED***
 
 .sidebar li {
-  padding:14px 8px 14px 12px;
+  padding:14px 8px 14px 20px;
   font-weight: bold;
   font-size: 90%;
 
@@ -238,9 +238,9 @@ button.green {
 
 
 [ui-view].ng-enter, [ui-view].ng-leave {
-  -webkit-transition:all .3s ease-in-out;
-  -moz-transition:all .3s ease-in-out;
-  transition:all .3s ease-in-out;
+  -webkit-transition: opacity .2s ease-in-out;
+  -moz-transition: opacity .2s ease-in-out;
+  transition: opacity .2s ease-in-out;
 ***REMOVED***
 
 [ui-view].ng-enter {
