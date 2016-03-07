@@ -31,3 +31,19 @@
   border-bottom: 1px dashed #ccc;
 }
 
+.table button {
+  opacity: 0.5;
+}
+
+.table button:hover {
+  opacity: 1.0;
+}
+
+
+form.block {
+  float:left;
+  width:100%;
+
+  border:1px solid #ccc;
+  padding:12px;
+}
