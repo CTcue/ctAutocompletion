@@ -8,8 +8,10 @@ var db = new neo4j.GraphDatabase({
     auth: config.neo4j
 ***REMOVED***);
 
+var mongoDb = require('../lib/database');
+var table   = mongoDb.table('umls');
 
-// Skip all CTcue suggestions (ie. log into different environment for updating recommendations)
+
 
 exports.add = function *() {
     var params = this.request.body.query;
@@ -30,6 +32,18 @@ exports.add = function *() {
                 callback(false, res);
         ***REMOVED***
     ***REMOVED***);
+***REMOVED***
+
+***REMOVED*** If relation added -> store it in mongoDb for concept_manager
+    if (result && params.relation === "LIKES") {
+        var data = {
+            "user"     : params.user,
+            "synonym"  : params.synonym,
+            "isCustom" : (params.hasOwnProperty("isCustom") && params.isCustom),
+            "created"  : new Date()
+    ***REMOVED***;
+
+        var added = yield table.insert(data);
 ***REMOVED***
 
 

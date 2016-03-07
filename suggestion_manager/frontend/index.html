@@ -8,262 +8,53 @@
 
     <link href="css/main.css" rel="stylesheet">
 
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
 </head>
-<body ng-app="ctNeo4j">
-<div class="container">
-    <div class="header">
-        <h3>Concept management</h3>
+<body ng-app="ConceptManager">
+    <div class="sidebar">
+        <ul>
+            <li id="logo">
+                <img src="css/ctcue-logo.png" height="50px" width="auto" />
+            </li>
 
-        <a href="#" ng-click="showDangerzone = !showDangerzone">Show dangerzone</a>
+            <li ui-sref='concepts' ui-sref-active='active'>
+                Concepts
+            </li>
+
+            <li ui-sref='related-groups' ui-sref-active='active'>
+                Related terms
+            </li>
+
+            <li ui-sref='dangerzone' ui-sref-active='active'>
+                Dangerzone
+            </li>
+        </ul>
     </div>
 
-    <div class="row block ng-cloak" ng-if="msg">
-        <h3>All good</h3>
-        <pre>{{ msg | json ***REMOVED******REMOVED***</pre>
+    <div ui-view class="container">
+
     </div>
-
-    <div ng-controller="formController" class="row">
-
-        <div class="loading-indicator ng-cloak" ng-if="isLoading">
-            <h3>LOADING...</h3>
-        </div>
-
-        <form class="row">
-            <div class="half align-left inline">
-                <input type="text" class="align-left" placeholder="Wikipedia url to extract info from" ng-model="url">
-
-                <button type="button" class="blue" ng-click="extract(url)">
-                    Extract data
-                </button>
-            </div>
-
-            <div class="half align-right">
-                <button type="button" class="green align-right" ng-click="custom()">
-                    Custom group
-                </button>
-            </div>
-        </form>
-
-        <!-- <pre>{{ validated_tables | json ***REMOVED******REMOVED***</pre> -->
-
-        <form ng-if="validated_tables && !isLoading" class="row ng-cloak">
-            <h3>Data</h3>
-            <p>You can manipulate the data, only columns with a custom header defined are saved. On submit, the data is inserted as a Group with Concept(s).</p>
-
-            <div class="row">
-                <div class="half align-left">
-                    <label>Neo4j username</label>
-                    <input type="text" class="form-control" placeholder="Enter username" ng-model="neo4j.username">
-                </div>
-
-                <div class="form-group col-md-5">
-                    <label>Password</label>
-                    <input type="text" class="form-control" placeholder="Password" ng-model="neo4j.password">
-                </div>
-            </div>
-
-            <div class="row">
-                <input type="hidden" ng-model="meta.url">
-
-                <div class="half align-left">
-                    <label>Group name</label>
-                    <input type="text" class="form-control" placeholder="Group name" ng-model="meta.name" required>
-                </div>
-
-                <div class="half align-right">
-                    <label>Abbreviation of name</label>
-                    <input type="text" class="form-control" placeholder="Abbreviation of name" ng-model="meta.abbr">
-                </div>
-            </div>
-
-            <div class="row">
-                <label>Description</label>
-                <textarea class="full" ng-model="meta.description" placeholder="Short description"></textarea>
-            </div>
-
-
-            <div class="row preview-tables" ng-repeat="(index, table) in validated_tables track by index" ng-if="!table._delete">
-                <div class="row spaced">
-                    <h4 class="align-left">Table {{ ::index ***REMOVED******REMOVED***</h4>
-
-                    <div class="align-right">
-                        <div class="align-left" style="margin-right:14px" title="This will add another column, filled with the CUI codes based on the entries in a given column" ng-show="! isEmpty(table.header)">
-                            <select class="form-control" placeholder="Calculate CUI codes" ng-model="_cui_col_index">
-                              <option ng-repeat="(k, v) in table.header" value="{{ k ***REMOVED******REMOVED***">{{ v ***REMOVED******REMOVED***</option>
-                            </select>
-
-                            <button type="button" class="btn btn-primary" ng-click="getCUI(table, _cui_col_index)">
-                                Find CUI codes
-                            </button>
-                        </div>
-
-                        <button type="button" ng-click="removeTable(index)" class="align-right danger">
-                            Delete table
-                        </button>
-                    </div>
-                </div>
-
-                <table>
-                    <!-- Allow user defined header -->
-                    <tr>
-                        <th class="small"></th>
-
-                        <th ng-repeat="(col_index, _) in table.rows[0] track by col_index" class="text-center" ng-if="col_index != 'meta'">
-                            <input
-                                type="text"
-                                ng-model="table['header'][col_index]"
-                                placeholder="Header column {{ col_index ***REMOVED******REMOVED***">
-
-                            <button type="button" class="danger" ng-click="removeColumn(table, col_index)">X</button>
-                        </th>
-
-                        <th>
-                            <button type="button" ng-click="addColumn(table)" class="align-left">
-                                + Column
-                            </button>
-                        </th>
-                    </tr>
-
-                    <tr ng-repeat="row in table.rows track by $index">
-                        <td class="small">
-                            <input type="checkbox" class="checkbox" ng-model="row['meta'].checked">
-                        </td>
-
-                        <td ng-repeat="(col_index, col) in row track by col_index" ng-if="col_index != 'meta'">
-                            <input type="text" ng-value='col' ng-model="row[col_index]">
-                        </td>
-
-                        <td></td>
-                    </tr>
-
-                    <tr class="last">
-                        <td></td>
-                        <td>
-                            <button type="button" ng-click="addRow(table)">
-                                Add row
-                            </button>
-                        </td>
-                    </tr>
-                </table>
-
-                <div class="row parse">
-                    <label>Paste data here</label>
-                    <textarea class="full" ng-model="__data" placeholder="Parse data for new rows"></textarea>
-
-                    <button type="button" class="blue" ng-click="parseForRows(__data, table); __data=''; ">
-                        Parse rows
-                    </button>
-                </div>
-            </div>
-
-            <div class="row block">
-                <button type="submit" class="navy align-right" id="submit" ng-click="submit(neo4j, meta, validated_tables)">Submit</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="row dangerzone ng-cloak" ng-if="showDangerzone" ng-controller="dangerzone">
-        <h1>Dangerzone</h1>
-
-        <form ng-submit="destroy()" class="third align-left">
-            <div class="title">
-                <h3>Re-index</h3>
-                <small>This will remove all added entries</small>
-            </div>
-
-            <div class="row">
-                <label>Neo4j username</label>
-                <input type="text" class="form-control" placeholder="Enter username" ng-model="data.neo4j.username">
-            </div>
-
-            <div class="row">
-                <label>Password</label>
-                <input type="password" class="form-control" placeholder="Password" ng-model="data.neo4j.password">
-            </div>
-
-            <div class="row">
-                <button type="submit" class="danger">Delete nodes</button>
-            </div>
-        </form>
-
-        <form class="third align-mid">
-            <div class="title">
-                <h3>Remove group</h3>
-                <small>This will remove a group and its concepts</small>
-            </div>
-
-            <div class="row">
-                <label>Neo4j username</label>
-                <input type="text" class="form-control" placeholder="Enter username" ng-model="data.neo4j.username">
-            </div>
-
-            <div class="row">
-                <label>Password</label>
-                <input type="password" class="form-control" placeholder="Password" ng-model="data.neo4j.password">
-            </div>
-
-            <div class="row">
-                <select class="align-left" placeholder="Calculate CUI codes" ng-model="data.group_name">
-                  <option ng-repeat="group in allGroups">{{ group.name ***REMOVED******REMOVED***</option>
-                </select>
-
-                <button type="button" class="align-right" ng-click="getGroups()">Find groups</button>
-            </div>
-
-            <div class="row">
-                <button type="button" class="danger" ng-click="removeGroup(group_name)">
-                    Remove group
-                </button>
-            </div>
-        </form>
-
-        <form ng-submit="updateIndexes()" class="third align-right">
-            <div class="title">
-                <h3>Update indexes</h3>
-                <small>Creates indexes on your concepts</small>
-            </div>
-
-            <div class="row">
-                <label>Neo4j username</label>
-                <input type="text" class="form-control" placeholder="Enter username" ng-model="data.neo4j.username">
-            </div>
-
-            <div class="row">
-                <label>Password</label>
-                <input type="password" class="form-control" placeholder="Password" ng-model="data.neo4j.password">
-            </div>
-
-            <div class="row">
-                <button type="submit" class="navy">Update</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="row block ng-cloak" ng-show="error">
-        <p class="text-warning">Something went wrong...</p>
-        <pre>{{ error | json ***REMOVED******REMOVED***</pre>
-    </div>
-
 </div> <!-- /container -->
 
 <script src="app.js"></script>
 <script src="controllers/form.js"></script>
 <script src="controllers/danger.js"></script>
+<script src="controllers/concept.js"></script>
 
 <script src="services/CRUD.js"></script>
 <script src="services/Build.js"></script>
 <script src="services/Convert.js"></script>
 
 
-<script src="bower_components/autogrow/autogrow.min.js"></script>
+<!-- <script src="bower_components/autogrow/autogrow.min.js"></script> -->
 <script>
 ***REMOVED*** Plugins
-    $("textarea").autogrow({
-        "animate": false,
-        "onInitialize": true
-***REMOVED***);
+***REMOVED*** $("textarea").autogrow({
+***REMOVED***     "animate": false,
+***REMOVED***     "onInitialize": true
+***REMOVED*** ***REMOVED***);
 </script>
 
 </body>

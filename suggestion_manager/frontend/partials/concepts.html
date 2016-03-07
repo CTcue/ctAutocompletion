@@ -1,0 +1,42 @@
+
+<div class="full">
+  <h1>Concepts</h1>
+
+  <p>An overview of user added concepts and terms. If concepts and terms are added more often, you can include them to UMLS.</p>
+</div>
+
+<div class="row">
+
+    <table class="table">
+        <tr>
+            <th>User</th>
+            <th>Term</th>
+            <th>CUI</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+
+        <tr ng-repeat="item in concepts | orderBy:'created':true  track by $index">
+            <td>
+                <span class="row">{{ ::item.user.name ***REMOVED******REMOVED***</span>
+                <small>{{ ::item.user.env ***REMOVED******REMOVED***</small>
+            </td>
+
+            <td>
+                <span class="row">{{ ::item.synonym.term ***REMOVED******REMOVED***</span>
+                <small>{{ ::item.synonym.label ***REMOVED******REMOVED***</small>
+            </td>
+
+            <td>
+                {{ ::item.synonym.cui ***REMOVED******REMOVED***
+            </td>
+
+            <td><code>{{ ::item.created | date:'dd MMMM yyyy' ***REMOVED******REMOVED***<code></td>
+
+            <td></td>
+        </tr>
+    </table>
+</div>
+
+
+<link href="css/concepts.css" rel="stylesheet">

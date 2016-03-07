@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4j, CRUD, Build, Convert) {
+app.controller('relatedController', function ($scope, UMLS, api, neo4j, CRUD, Build, Convert) {
 
     $scope.isLoading = false;
     $scope.url = "";
@@ -11,11 +11,11 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
 
     $scope.extract = function(wiki_url) {
         if (typeof wiki_url === "undefined" || !/wikipedia/i.test(wiki_url)) {
-            $rootScope.error = "I can only parse wikipedia pages (for now).";
+            $scope.error = "I can only parse wikipedia pages (for now).";
             return;
     ***REMOVED***
 
-        CRUD.post("extract", { "url": wiki_url ***REMOVED***)
+        CRUD.post(api.path, "extract", { "url": wiki_url ***REMOVED***)
             .then(function(result) {
                 $scope.validated_tables = Build.tables(result.data.tables || []);
 
@@ -25,7 +25,7 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
                 $scope.meta["url"] = wiki_url;
         ***REMOVED***,
             function(err) {
-                $rootScope.error = err;
+                $scope.error = err;
         ***REMOVED***)
 ***REMOVED***
 
@@ -127,7 +127,7 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
                     "query": row[col_index]
             ***REMOVED***;
 
-                $http.post(UMLS.autocomplete, queryObj)
+                CRUD.post(UMLS.url, "autocomplete", queryObj)
                     .then(function(result) {
                         var hits = result.data.hits || [];
 
@@ -138,7 +138,7 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
                             row[new_key] = "";
                     ***REMOVED***
                 ***REMOVED***)
-        ***REMOVED***)(row, col_index, new_key)
+        ***REMOVED***)(row, col_index, new_key);
     ***REMOVED***
 ***REMOVED***
 
@@ -168,9 +168,15 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
 
     $scope.submit = function(neo4j, meta, tables) {
         if (!meta || !meta.hasOwnProperty("name")) {
-            $rootScope.error = "The group name is required.";
+            $scope.error = "The group name is required.";
             return;
     ***REMOVED***
+
+        if (! $scope.neo4j.hasOwnProperty("password") || ! $scope.neo4j.password) {
+            $scope.error = "Please provide the Neo4j password";
+            return;
+    ***REMOVED***
+
 
         $scope.isLoading = true;
 
@@ -182,14 +188,14 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
 
         if (! requestObj.concepts.length) {
             $scope.isLoading = false;
-            $rootScope.error = "You at least one column header to create concepts.";
+            $scope.error = "You need at least one column with data.";
             return;
     ***REMOVED***
 
-        CRUD.post("add", requestObj)
+        CRUD.post(api.path, "add", requestObj)
             .then(function(result) {
-                $rootScope.error = false;
-                $rootScope.msg = result.data.msg;
+                $scope.error = false;
+                $scope.msg = result.data.msg;
 
             ***REMOVED*** Reset stuff
                 $scope.url   = "";
@@ -200,7 +206,7 @@ app.controller('formController', function ($scope, $rootScope, $http, UMLS, neo4
         ***REMOVED***,
             function(err) {
                 $scope.isLoading = false;
-                $rootScope.error = err;
+                $scope.error = err;
         ***REMOVED***)
 ***REMOVED***
 ***REMOVED***);
