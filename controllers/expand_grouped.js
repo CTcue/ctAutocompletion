@@ -8,10 +8,9 @@ var db = new neo4j.GraphDatabase({
     auth: config.neo4j
 });
 
+
 var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client({
-    "apiVersion" : "1.4"
-});
+var elasticClient = new elastic.Client();
 
 var getCategory = require("./lib/category.js");
 

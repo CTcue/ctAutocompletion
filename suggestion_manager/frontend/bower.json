@@ -1,10 +1,10 @@
 {
   "name": "demo",
-  "homepage": "https://github.com/CTcue/ctData",
+  "homepage": "https://github.com/CTcue/ctAutocompleton",
   "authors": [
     "Fabiën <fabientesselaar@gmail.com>"
   ],
-  "description": "Cool tool to upload domain info to neo4j",
+  "description": "Manage & upload groups of related terms into neo4j",
   "main": "app.js",
   "moduleType": [],
   "keywords": [
@@ -24,6 +24,8 @@
     "angular": "~1.4.8",
     "jquery": "~2.2.0",
     "bootstrap": "~3.3.6",
-    "autogrow": "~1.0.3"
+    "autogrow": "~1.0.3",
+    "angular-ui-router": "ui-router#~0.2.18",
+    "angular-animate": "~1.5.0"
   }
 }

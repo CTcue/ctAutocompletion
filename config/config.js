@@ -17,7 +17,13 @@ else {
 }
 
 config.path    = 'http://'+ config.host + ':' + config.port;
+
 config.elastic = "http://localhost:9200";
+
+config.mongodb = {
+    "path" : "mongodb://localhost/umls"
+};
+
 
 config.demographic_types = require(secretConfig + 'demographic_types');
 

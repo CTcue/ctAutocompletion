@@ -22,12 +22,16 @@
   "license": "ISC",
   "homepage": "https://github.com/CTcue/ctAutocompletion",
   "dependencies": {
+    "co-monk": "1.0.0",
     "elasticsearch": "8.1.0",
     "koa": "1.1.0",
     "koa-cors": "0.0.16",
     "koa-router": "5.2.3",
     "lodash": "^3.10.1",
-    "neo4j": "^2.0.0-RC2"
+    "mongodb": "^1.4.40",
+    "monk": "1.0.1",
+    "neo4j": "^2.0.0-RC2",
+    "request-json": "^0.5.5"
   },
   "devDependencies": {
     "supertest": "*",

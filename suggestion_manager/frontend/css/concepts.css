@@ -1,0 +1,33 @@
+
+.table {
+  margin:20px 0;
+
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+  border-radius:3px;
+  border: 1px solid #bbb;
+  border-bottom-width: 2px;
+}
+
+.table td {
+  border-bottom: 1px solid #eaeaea;
+}
+
+.table td, .table th {
+  padding:6px 12px;
+}
+
+.table td small {
+  color:#888;
+}
+
+
+.table th {
+  font-weight: bold;
+  color:#0017CA;
+
+  padding: 15px 12px;
+  border-bottom: 1px dashed #ccc;
+}
+

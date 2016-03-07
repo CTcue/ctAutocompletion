@@ -1,0 +1,48 @@
+form .row {
+  margin:10px 0;
+}
+
+
+table input {
+  min-width: 24px;
+  float:left;
+  width:80%;
+}
+
+table td, table th {
+  min-width: 32px;
+}
+
+table .small {
+  width:30px;
+}
+
+table .last td {
+  padding-top:10px;
+}
+
+
+.spaced {
+  margin:14px 0 24px 0 !important;
+}
+
+.spaced h4 {
+  line-height: 36px;
+  margin: 0;
+}
+
+.parse {
+  margin-top:32px;
+  padding-top:4px;
+
+  border-top:1px solid #eee;
+}
+
+
+.groups .block {
+    border:1px solid #ccc;
+    padding:12px;
+
+    float:left;
+    width:100%;
+}

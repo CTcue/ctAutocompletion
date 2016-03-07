@@ -62,6 +62,37 @@ var recommender = require('./controllers/recommend.js');
 router['post']('/recommend/add', recommender.add);
 
 
+var concept_management = require("./controllers/concepts/router")(router);
+
+
 app.use(router.routes());
 app.listen(config.port);
 console.log('listening on port %d', config.port);
+
+
+
+/////////
+// Check if Elasticsearch and Neo4j are available
+var request = require('request-json');
+
+var elasticCheck = request.createClient("http://localhost:9200");
+var elasticVersion = elasticCheck.get("", function(err, res, body) {
+    if (err) {
+        console.log("Elasticsearch is OFF");
+        console.log(err);
+    }
+    else {
+        console.log("Elasticsearch is ON");
+    }
+});
+
+var neoCheck = request.createClient("http://localhost:7474");
+var neoVersion = neoCheck.get("", function(err, res, body) {
+    if (err) {
+        console.log("Neo4j is OFF");
+        console.log(err);
+    }
+    else {
+        console.log("Neo4j is ON");
+    }
+});
