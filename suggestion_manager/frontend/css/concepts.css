@@ -1,13 +1,16 @@
 
+.table, .calendar .bar {
+  border-radius:3px;
+  border: 1px solid #bbb;
+  border-bottom-width: 2px;
+}
+
 .table {
   margin:20px 0;
 
   width: 100%;
   text-align: left;
   border-collapse: collapse;
-  border-radius:3px;
-  border: 1px solid #bbb;
-  border-bottom-width: 2px;
 }
 
 .table td {
@@ -46,4 +49,20 @@ form.block {
 
   border:1px solid #ccc;
   padding:12px;
+}
+
+.calendar {
+  float:left;
+  width:100%;
+  padding-bottom:50px;
+}
+
+.calendar .bar {
+  padding:10px;
+  line-height: 2.2em;
+}
+
+.calendar .table {
+  margin:2px 0 20px 0;
+  float:left;
 }

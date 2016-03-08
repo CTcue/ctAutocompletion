@@ -7,45 +7,53 @@ var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client();
 
 
-// Same as upload weight function
-// Except it assumes it is always of a useful type
-function calcWeight(term) {
-    return Math.round(10 * Math.log10(40 - term.length) * 1.5)
-}
-
 module.exports = function *(next) {
 
-    var data = this.request.body;
-        data.created      = new Date();
-        data.last_updated = new Date();
+    var body = this.request.body.query;
 
-    // Adds element to elasticsearch
-    var cui = data.cui || "CT" + new Date().getTime();
+    // Add element to elasticsearch
+    var cui = body.cui || "CT" + new Date().getTime();
+    var term = body.synonym.term.trim() || false;
+
+    if (! term) {
+        return this.body = false;
+    }
+
     var newDocument = {
         "index" : "autocomplete",
         "type"  : "records",
 
         "body"  : {
-              "cui" : cui,
-              "str" : data.str,
-              "suggest" : {
-                    "input": data.str,
-                    "payload": { "cui": cui },
-                    "weight" : calcWeight(data.str)
-              },
-              "source": "ctcue",
-              "votes" : 20,
-              "types" : data.types.split(",").map(function(s) { return s.trim(); })
+            "cui"   : cui,
+            "pref"  : term,               // TODO if cui is set, find UMLS preferred term
+            "str"   : term.toLowerCase(), // Indexed for autocompletion
+            "exact" : term,               // Indexed for exact term lookup
+
+            "votes"  : 10,                // Start with 10 for now
+            "lang"   : body.language || "ENG",
+            "source" : "CTcue",
+            "types"  : [body.types] || []
         }
     };
 
+
     var esResult = yield function(callback) {
         elasticClient.create(newDocument, function(err, response) {
-            callback(err, response);
+            if (err) {
+                callback(false, false);
+            }
+            else {
+                callback(false, response);
+            }
         });
     }
 
-    data._elasticId = esResult._id;
+    if (esResult) {
+        // Update document with _added and reference to elasticsearch
+        var updated = yield table.findAndModify(
+          { "_id": body._id },
+          { "$set" : {  "_added": true, "_elasticId": esResult._id } });
+    }
 
-    this.body = yield table.insert(data);
+    this.body = true;
 };

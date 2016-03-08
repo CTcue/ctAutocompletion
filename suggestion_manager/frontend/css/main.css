@@ -31,31 +31,27 @@ h1 {
   box-sizing: border-box;
 }
 
-.sidebar, .container {
-  float:left;
-  display:block;
-  height:100%;
+
+.sidebar {
+  width: 140px;
+  height:100vh;
+
+  padding-top:80px;
+  background:#00072D;
+  color:#AFB2BD;
+
+  position:fixed;
 }
 
 .container {
-  width:70%;
-  margin-left: 3%;
+  margin-left: 180px;
+
+  width:80%;
   max-width: 800px;
 
   padding:76px 0;
 }
 
-.sidebar {
-  width:8%;
-  min-width: 140px;
-
-  height:100vh;
-  flex: 1 1 auto;
-
-  padding-top:80px;
-  background:#00072D;
-  color:#AFB2BD;
-}
 
 .sidebar li {
   padding:14px 8px 14px 20px;
@@ -235,26 +231,3 @@ button.green {
   border: 1px solid #18A737;
 }
 
-
-
-[ui-view].ng-enter, [ui-view].ng-leave {
-  -webkit-transition: opacity .2s ease-in-out;
-  -moz-transition: opacity .2s ease-in-out;
-  transition: opacity .2s ease-in-out;
-}
-
-[ui-view].ng-enter {
-  opacity: 0;
-}
-
-[ui-view].ng-enter-active {
-  opacity: 1;
-}
-
-[ui-view].ng-leave {
-  opacity: 1;
-}
-
-[ui-view].ng-leave-active {
-  opacity: 0;
-}

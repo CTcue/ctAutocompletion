@@ -1,7 +1,6 @@
 // App dependencies
 var app = angular.module("ConceptManager", [
   "ui.router",
-  "ngAnimate",
   "app.config",
   "ctServices",
 ]);
