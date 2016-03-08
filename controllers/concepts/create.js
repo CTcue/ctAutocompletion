@@ -7,45 +7,53 @@ var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client();
 
 
-// Same as upload weight function
-// Except it assumes it is always of a useful type
-function calcWeight(term) {
-    return Math.round(10 * Math.log10(40 - term.length) * 1.5)
-***REMOVED***
-
 module.exports = function *(next) {
 
-    var data = this.request.body;
-        data.created      = new Date();
-        data.last_updated = new Date();
+    var body = this.request.body.query;
 
-***REMOVED*** Adds element to elasticsearch
-    var cui = data.cui || "CT" + new Date().getTime();
+***REMOVED*** Add element to elasticsearch
+    var cui = body.cui || "CT" + new Date().getTime();
+    var term = body.synonym.term.trim() || false;
+
+    if (! term) {
+        return this.body = false;
+***REMOVED***
+
     var newDocument = {
         "index" : "autocomplete",
         "type"  : "records",
 
         "body"  : {
-              "cui" : cui,
-              "str" : data.str,
-              "suggest" : {
-                    "input": data.str,
-                    "payload": { "cui": cui ***REMOVED***,
-                    "weight" : calcWeight(data.str)
-          ***REMOVED***,
-              "source": "ctcue",
-              "votes" : 20,
-              "types" : data.types.split(",").map(function(s) { return s.trim(); ***REMOVED***)
+            "cui"   : cui,
+            "pref"  : term,           ***REMOVED*** TODO if cui is set, find UMLS preferred term
+            "str"   : term.toLowerCase(), // Indexed for autocompletion
+            "exact" : term,           ***REMOVED*** Indexed for exact term lookup
+
+            "votes"  : 10,            ***REMOVED*** Start with 10 for now
+            "lang"   : body.language || "ENG",
+            "source" : "CTcue",
+            "types"  : [body.types] || []
     ***REMOVED***
 ***REMOVED***;
 
+
     var esResult = yield function(callback) {
         elasticClient.create(newDocument, function(err, response) {
-            callback(err, response);
+            if (err) {
+                callback(false, false);
+        ***REMOVED***
+            ***REMOVED***
+                callback(false, response);
+        ***REMOVED***
     ***REMOVED***);
 ***REMOVED***
 
-    data._elasticId = esResult._id;
+    if (esResult) {
+    ***REMOVED*** Update document with _added and reference to elasticsearch
+        var updated = yield table.findAndModify(
+          { "_id": body._id ***REMOVED***,
+          { "$set" : {  "_added": true, "_elasticId": esResult._id ***REMOVED*** ***REMOVED***);
+***REMOVED***
 
-    this.body = yield table.insert(data);
+    this.body = true;
 ***REMOVED***;

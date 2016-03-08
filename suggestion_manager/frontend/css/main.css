@@ -31,31 +31,27 @@ h1 {
   box-sizing: border-box;
 ***REMOVED***
 
-.sidebar, .container {
-  float:left;
-  display:block;
-  height:100%;
+
+.sidebar {
+  width: 140px;
+  height:100vh;
+
+  padding-top:80px;
+  background:#00072D;
+  color:#AFB2BD;
+
+  position:fixed;
 ***REMOVED***
 
 .container {
-  width:70%;
-  margin-left: 3%;
+  margin-left: 180px;
+
+  width:80%;
   max-width: 800px;
 
   padding:76px 0;
 ***REMOVED***
 
-.sidebar {
-  width:8%;
-  min-width: 140px;
-
-  height:100vh;
-  flex: 1 1 auto;
-
-  padding-top:80px;
-  background:#00072D;
-  color:#AFB2BD;
-***REMOVED***
 
 .sidebar li {
   padding:14px 8px 14px 20px;
@@ -235,26 +231,3 @@ button.green {
   border: 1px solid #18A737;
 ***REMOVED***
 
-
-
-[ui-view].ng-enter, [ui-view].ng-leave {
-  -webkit-transition: opacity .2s ease-in-out;
-  -moz-transition: opacity .2s ease-in-out;
-  transition: opacity .2s ease-in-out;
-***REMOVED***
-
-[ui-view].ng-enter {
-  opacity: 0;
-***REMOVED***
-
-[ui-view].ng-enter-active {
-  opacity: 1;
-***REMOVED***
-
-[ui-view].ng-leave {
-  opacity: 1;
-***REMOVED***
-
-[ui-view].ng-leave-active {
-  opacity: 0;
-***REMOVED***

@@ -36,6 +36,7 @@ exports.add = function *() {
 
 ***REMOVED*** If relation added -> store it in mongoDb for concept_manager
     if (result && params.relation === "LIKES") {
+
         var data = {
             "user"     : params.user,
             "synonym"  : params.synonym,
