@@ -22,6 +22,8 @@
   "license": "ISC",
   "homepage": "https://github.com/CTcue/ctAutocompletion",
   "dependencies": {
+    "cheerio": "^0.20.0",
+    "cheerio-tableparser": "^1.0.1",
     "co-monk": "1.0.0",
     "elasticsearch": "8.1.0",
     "koa": "1.1.0",
@@ -32,6 +34,7 @@
     "mongodb": "^1.4.40",
     "monk": "1.0.1",
     "neo4j": "^2.0.0-RC2",
+    "request": "^2.69.0",
     "request-json": "^0.5.5"
   },
   "devDependencies": {

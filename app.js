@@ -39,8 +39,10 @@ router['get']('/', function *() {
 var autocomplete = require('./controllers/autocomplete.js');
 router['post']('/autocomplete', autocomplete);
 
+
 var term_lookup = require('./controllers/term_lookup.js');
 router['post']('/term_lookup', term_lookup);
+
 
 /*
   curl -XPOST 178.62.230.23/autocomplete -d '{
@@ -63,6 +65,7 @@ router['post']('/recommend/add', recommender.add);
 
 
 var concept_management = require("./controllers/concepts/router")(router);
+var related_management = require("./controllers/related/router")(router);
 
 
 app.use(router.routes());

@@ -3,9 +3,19 @@
 
 var config  = require('../config/config.js');
 
+var neo4j = require('neo4j');
+var _ = require("lodash");
+
+var db = new neo4j.GraphDatabase({
+    url: 'http://localhost:7474',
+    auth: config.neo4j
+});
+
+
 var guess_origin = require("./lib/guess_origin");
 var Trie = require('./lib/trie');
 var _ = require("lodash");
+
 
 var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client();
@@ -18,23 +28,59 @@ var DEMOGRAPHICS = new Trie(config.demographic_types);
 
 
 module.exports = function *() {
-  var query = this.request.body.query;
+    var query = this.request.body.query;
 
-  // Check special matches, such as demographic options
-  var specialMatches = yield findSpecial(query);
+    // Check special matches, such as demographic options
+    var specialMatches = yield findSpecial(query);
 
-  // Lookup matches in Elasticsearch
-  var exactMatches = yield findExact(query);
-  var closeMatches = yield findMatches(query);
+    // Lookup matches in Elasticsearch
+    var exactMatches = yield findExact(query);
+    var closeMatches = yield findMatches(query);
 
-  this.body = {
-    "took": exactMatches.took + closeMatches.took,
-    "special": specialMatches,
-    "error"  : exactMatches.hasOwnProperty("error"),
-    "hits": _.uniq(exactMatches.hits.concat(closeMatches.hits), "exact")
-  }
+    var likes = yield findUserLikes(query);
+    console.log(likes)
+
+    this.body = {
+        "took": exactMatches.took + closeMatches.took,
+        "special": specialMatches,
+        "error"  : exactMatches.hasOwnProperty("error"),
+        "hits": _.uniq(exactMatches.hits.concat(closeMatches.hits), "exact")
+    }
 };
 
+
+function findUserLikes(query) {
+        // For now, only get the "Dislikes" to uncheck stuff
+    return function(callback) {
+
+        var cypherObj = {
+            "query": `MATCH
+                        (s:Synonym)<-[r:LIKES]-(u:User { id: { _USER_ }, env: { _ENV_ } })
+                      WHERE
+                        s.str =~ {_QUERY_}
+                      RETURN
+                        s.str as term, s.label as label, s.cui as cui`,
+
+            "params": {
+              "_USER_": "568a3288863fd6bc066278c2",
+              "_ENV_" : "ctcue",
+              "_QUERY_": "(?i)" + query + ".*"
+            },
+
+            "lean": true
+        }
+
+        db.cypher(cypherObj, function(err, res) {
+            if (err) {
+                console.log(err);
+                callback(false, []);
+            }
+            else {
+                callback(false, res);
+            }
+        });
+    }
+}
 
 function findExact(query) {
     var wantedTerm = query.trim().toLowerCase();
@@ -53,7 +99,7 @@ function findExact(query) {
             }
         };
 
-        // Search in all indexes
+
         var queryObj = {
             "index" : 'autocomplete',
             "body"  : elastic_query

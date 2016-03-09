@@ -3,7 +3,7 @@
 var verify = require("./verify");
 
 var list    = require('./list');
-var byDate  = require('./byDate');
+var extract = require('./extract');
 
 var create  = require('./create');
 var read    = require('./read');
@@ -13,33 +13,32 @@ var destroy = require('./destroy');
 
 module.exports = function(app) {
   app['get'] (
-    '/umls/list',
-    verify,
+    '/related/list',
     list
   );
 
-  app['get'] (
-    '/umls/:year/:month',
-    byDate
+  app['post'] (
+    '/related/extract',
+    extract
   );
 
-  app['post'](
-    '/umls/create',
-    create
-  );
+  // app['post'](
+  //   '/umls/create',
+  //   create
+  // );
 
-  app['get'](
-    '/umls/:id',
-    read
-  );
+  // app['get'](
+  //   '/umls/:id',
+  //   read
+  // );
 
   // app['put'](
   //   '/umls/:id',
   //   update
   // );
 
-  // app['delete'](
-  //   '/umls/:id',
-  //   destroy
-  // );
+  app['delete'](
+    '/related/group/:name',
+    destroy
+  );
 };
