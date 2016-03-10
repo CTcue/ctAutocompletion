@@ -1,14 +1,11 @@
 'use strict';
 
-var verify = require("./verify");
-
 var list    = require('./list');
 var byDate  = require('./byDate');
-
 var create  = require('./create');
-var read    = require('./read');
-var update  = require('./update');
-var destroy = require('./destroy');
+var recommend = require('./recommend');
+
+var verify = require("./verify");
 
 
 module.exports = function(app) {
@@ -20,26 +17,18 @@ module.exports = function(app) {
 
   app['get'] (
     '/umls/:year/:month',
+    verify,
     byDate
   );
 
   app['post'](
     '/umls/create',
+    verify,
     create
   );
 
-  app['get'](
-    '/umls/:id',
-    read
+  app['post'](
+    '/umls/recommend',
+    recommend
   );
-
-  // app['put'](
-  //   '/umls/:id',
-  //   update
-  // );
-
-  // app['delete'](
-  //   '/umls/:id',
-  //   destroy
-  // );
 };

@@ -14,7 +14,9 @@ app.use(cors({
         "Authorization",
         "Access-Control-Allow-Credentials",
         "If-Modified-Since",
-        "Cache-Control"
+        "Cache-Control",
+        "umls-u-token",
+        "umls-c-token"
     ]
 }));
 
@@ -58,10 +60,6 @@ router['post']('/expand-grouped', expandGrouped);
 
 var suggester = require('./controllers/suggest.js');
 router['post']('/suggest', suggester);
-
-
-var recommender = require('./controllers/recommend.js');
-router['post']('/recommend/add', recommender.add);
 
 
 var concept_management = require("./controllers/concepts/router")(router);

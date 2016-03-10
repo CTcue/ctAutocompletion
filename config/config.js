@@ -13,10 +13,18 @@ else {
   config.host = 'localhost';
   config.port = 4080;
 
-  config.neo4j = { "username": "neo4j", "password": "test123" };
+  // If need_tokens is true, you need to provide verification tokens similar to
+  // production version of `config.neo4j = require(secretConfig + 'neo4j')`
+  config.neo4j = {
+    "username": "neo4j",
+    "password": "test123",
+
+    "need_tokens": false
+  };
+
 }
 
-config.path    = 'http://'+ config.host + ':' + config.port;
+config.path = 'http://'+ config.host + ':' + config.port;
 
 config.elastic = "http://localhost:9200";
 
