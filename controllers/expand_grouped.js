@@ -50,40 +50,40 @@ module.exports = function *() {
     ***REMOVED***);
 ***REMOVED***;
 
+***REMOVED*** Custom terms don't have any "expanded" items usually
+    if (result && result.length > 0) {
+    ***REMOVED*** For now, only get the "Dislikes" to uncheck stuff
+        var uncheck = yield function(callback) {
 
-***REMOVED*** For now, only get the "Dislikes" to uncheck stuff
-    var uncheck = yield function(callback) {
+            var cypherObj = {
+                "query": `MATCH
+                            (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
+                          WITH
+                            type(r) as rel, s, count(s) as amount
+                          WHERE
+                            amount > 1
+                          RETURN
+                            s.str as term, s.label as label, rel, amount`,
 
-        var cypherObj = {
-            "query": `MATCH
-                        (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
-                      WITH
-                        type(r) as rel, s, count(s) as amount
-                      WHERE
-                        amount > 1
-                      RETURN
-                        s.str as term, s.label as label, rel, amount`,
+                "params": {
+                  "_CUI_": body
+            ***REMOVED***,
 
-            "params": {
-              "_CUI_": body
-        ***REMOVED***,
+                "lean": true
+        ***REMOVED***
 
-            "lean": true
+            db.cypher(cypherObj, function(err, res) {
+                if (err) {
+                    console.log(err);
+                    callback(false, []);
+            ***REMOVED***
+                ***REMOVED***
+                    callback(false, res);
+            ***REMOVED***
+        ***REMOVED***);
     ***REMOVED***
 
-        db.cypher(cypherObj, function(err, res) {
-            if (err) {
-                console.log(err);
-                callback(false, []);
-        ***REMOVED***
-            ***REMOVED***
-                callback(false, res);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***
 
-
-    if (result && result.length > 0) {
         var types = result[0]._source.types;
 
         var terms = {
@@ -123,6 +123,7 @@ module.exports = function *() {
     ***REMOVED***;
 ***REMOVED***
 
-    this.body = { "type": "", "category": "", "terms": [], "uncheck": [] ***REMOVED***;
+
+    this.body = { "custom": true, "terms": [], "category": "keyword", "uncheck": [] ***REMOVED***;
 ***REMOVED***;
 

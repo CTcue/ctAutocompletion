@@ -16,7 +16,8 @@ app.use(cors({
         "If-Modified-Since",
         "Cache-Control",
         "umls-u-token",
-        "umls-c-token"
+        "umls-c-token",
+        "x-user"
     ]
 ***REMOVED***));
 
