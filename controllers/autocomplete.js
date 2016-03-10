@@ -28,6 +28,9 @@ var DEMOGRAPHICS = new Trie(config.demographic_types);
 
 
 module.exports = function *() {
+    var headers = this.req.headers;
+
+
     var query = this.request.body.query;
 
     // Check special matches, such as demographic options
@@ -37,18 +40,32 @@ module.exports = function *() {
     var exactMatches = yield findExact(query);
     var closeMatches = yield findMatches(query);
 
-    // var likes = yield findUserLikes(query);
+    var likes = [];
+
+    if (headers.hasOwnProperty("x-user")) {
+        // user_id => environment
+        var user_header = headers["x-user"].split("=>");
+
+        if (user_header.length === 2 && user_header[0].length > 1 && user_header[1].length > 1) {
+            var userId = user_header[0];
+            var env    = user_header[1].toLowerCase().trim();
+
+            // Find user added contributions
+            likes = yield findUserLikes(query, userId, env);
+        }
+    }
+
 
     this.body = {
         "took": exactMatches.took + closeMatches.took,
         "special": specialMatches,
         "error"  : exactMatches.hasOwnProperty("error"),
-        "hits": _.uniq(exactMatches.hits.concat(closeMatches.hits), "exact")
+        "hits": _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), "exact")
     }
 };
 
 
-function findUserLikes(query) {
+function findUserLikes(query, userId, environment) {
         // For now, only get the "Dislikes" to uncheck stuff
     return function(callback) {
 
@@ -58,11 +75,11 @@ function findUserLikes(query) {
                       WHERE
                         s.str =~ {_QUERY_}
                       RETURN
-                        s.str as term, s.label as label, s.cui as cui`,
+                        s.str as str, s.label as label, s.cui as cui`,
 
             "params": {
-              "_USER_": "568a3288863fd6bc066278c2",
-              "_ENV_" : "ctcue",
+              "_USER_": userId,
+              "_ENV_" : environment,
               "_QUERY_": "(?i)" + query + ".*"
             },
 
@@ -75,7 +92,14 @@ function findUserLikes(query) {
                 callback(false, []);
             }
             else {
-                callback(false, res);
+                var result = res.map(function(s) {
+                    s["pref"] = s["str"];
+                    s["contributed"] = true;
+
+                    return s;
+                })
+
+                callback(false, result);
             }
         });
     }
