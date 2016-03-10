@@ -81,7 +81,7 @@ function checkParam(param) {
 ***REMOVED***
 
     if (typeof param === "object") {
-        if (param.hasOwnProperty("cui") && param.cui.length > 1) {
+        if (param.hasOwnProperty("cui") && param.cui.length > 1 && param.cui[0] === "C") {
             return { "type": "cui", "str": param.cui ***REMOVED***;
     ***REMOVED***
 

@@ -1,5 +1,5 @@
 
-var config  = require('../config/config.js');
+var config  = require('../../config/config.js');
 var neo4j = require('neo4j');
 var _ = require("lodash");
 
@@ -8,12 +8,12 @@ var db = new neo4j.GraphDatabase({
     auth: config.neo4j
 ***REMOVED***);
 
-var mongoDb = require('../lib/database');
+var mongoDb = require('../../lib/database');
 var table   = mongoDb.table('umls');
 
 
 
-exports.add = function *() {
+module.exports = function * recommend() {
     var params = this.request.body.query;
     var cypherObj = buildCypherObj(params.user, params.relation, params.synonym);
 

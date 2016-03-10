@@ -6,7 +6,7 @@ var table = db.table('umls');
 
 module.exports = function *() {
 
-    var recent = yield table.find({***REMOVED***, { "sort" : { "created": -1 ***REMOVED***, "limit": 20 ***REMOVED***);
+    var recent = yield table.find({***REMOVED***, { "sort" : { "created": -1 ***REMOVED***, "limit": 5 ***REMOVED***);
 
     var aggregated = yield function(callback) {
         table.col.aggregate([{

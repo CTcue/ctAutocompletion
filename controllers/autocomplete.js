@@ -37,8 +37,7 @@ module.exports = function *() {
     var exactMatches = yield findExact(query);
     var closeMatches = yield findMatches(query);
 
-    var likes = yield findUserLikes(query);
-    console.log(likes)
+***REMOVED*** var likes = yield findUserLikes(query);
 
     this.body = {
         "took": exactMatches.took + closeMatches.took,
