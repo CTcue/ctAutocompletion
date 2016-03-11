@@ -116,9 +116,15 @@ function findExact(query) {
             "size": 3,
 
             "query": {
-                "term" : {
-                    "exact" : wantedTerm
+            ***REMOVED*** "term" : {
+            ***REMOVED***     "exact" : wantedTerm
+            ***REMOVED*** ***REMOVED***
+                "multi_match": {
+                    "type": "most_fields",
+                    "query": wantedTerm,
+                    "fields": [ "exact", "exact.folded" ]
             ***REMOVED***
+
         ***REMOVED***
     ***REMOVED***;
 
