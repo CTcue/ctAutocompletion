@@ -116,15 +116,25 @@ function findExact(query) {
             "size": 3,
 
             "query": {
-                // "term" : {
-                //     "exact" : wantedTerm
-                // }
-                "multi_match": {
-                    "type": "most_fields",
-                    "query": wantedTerm,
-                    "fields": [ "exact", "exact.folded" ]
-                }
+                "dis_max" : {
+                    "tie_breaker" : 0.7,
 
+                    "queries" : [
+                        {
+                            "term" : {
+                                "exact" : wantedTerm
+                            },
+                        },
+
+                        {
+                            "multi_match": {
+                                "type": "most_fields",
+                                "query": wantedTerm,
+                                "fields": [ "exact", "exact.folded" ]
+                            }
+                        }
+                    ]
+                }
             }
         };
 
