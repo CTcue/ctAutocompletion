@@ -13,6 +13,11 @@
             },
 
             "analyzer": {
+                "folding": {
+                    "tokenizer": "standard",
+                    "filter": [ "lowercase", "asciifolding" ]
+                },
+
                 "autocomplete": {
                     "type":      "custom",
                     "tokenizer": "standard",
@@ -46,7 +51,14 @@
 
                 "exact": {
                     "type": "string",
-                    "analyzer" : "keyword"
+                    "analyzer": "standard",
+
+                    "fields": {
+                        "folded": {
+                            "type": "string",
+                            "analyzer": "folding"
+                         }
+                    }
                 },
 
                 "pref": {
