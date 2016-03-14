@@ -52,35 +52,40 @@ module.exports = function *() {
 
 ***REMOVED*** Custom terms don't have any "expanded" items usually
     if (result && result.length > 0) {
-    ***REMOVED*** For now, only get the "Dislikes" to uncheck stuff
-        var uncheck = yield function(callback) {
 
-            var cypherObj = {
-                "query": `MATCH
-                            (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
-                          WITH
-                            type(r) as rel, s, count(s) as amount
-                          WHERE
-                            amount > 1
-                          RETURN
-                            s.str as term, s.label as label, rel, amount`,
+        var uncheck = [];
 
-                "params": {
-                  "_CUI_": body
-            ***REMOVED***,
+        if (config.neo4j["is_active"]) {
+        ***REMOVED*** For now, only get the "Dislikes" to uncheck stuff
+            uncheck = yield function(callback) {
 
-                "lean": true
-        ***REMOVED***
+                var cypherObj = {
+                    "query": `MATCH
+                                (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
+                              WITH
+                                type(r) as rel, s, count(s) as amount
+                              WHERE
+                                amount > 1
+                              RETURN
+                                s.str as term, s.label as label, rel, amount`,
 
-            db.cypher(cypherObj, function(err, res) {
-                if (err) {
-                    console.log(err);
-                    callback(false, []);
+                    "params": {
+                      "_CUI_": body
+                ***REMOVED***,
+
+                    "lean": true
             ***REMOVED***
+
+                db.cypher(cypherObj, function(err, res) {
+                    if (err) {
+                        console.log(err);
+                        callback(false, []);
                 ***REMOVED***
-                    callback(false, res);
-            ***REMOVED***
-        ***REMOVED***);
+                    ***REMOVED***
+                        callback(false, res);
+                ***REMOVED***
+            ***REMOVED***);
+        ***REMOVED***
     ***REMOVED***
 
 

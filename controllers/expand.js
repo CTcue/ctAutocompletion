@@ -1,8 +1,6 @@
 
 var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client({
-    "apiVersion" : "1.4"
-***REMOVED***);
+var elasticClient = new elastic.Client();
 
 var getCategory = require("./lib/category.js");
 

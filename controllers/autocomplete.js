@@ -30,7 +30,6 @@ var DEMOGRAPHICS = new Trie(config.demographic_types);
 module.exports = function *() {
     var headers = this.req.headers;
 
-
     var query = this.request.body.query;
 
 ***REMOVED*** Check special matches, such as demographic options
@@ -42,7 +41,8 @@ module.exports = function *() {
 
     var likes = [];
 
-    if (headers.hasOwnProperty("x-user")) {
+
+    if (config.neo4j["is_active"] && headers.hasOwnProperty("x-user")) {
     ***REMOVED*** user_id => environment
         var user_header = headers["x-user"].split("=>");
 
@@ -55,14 +55,18 @@ module.exports = function *() {
     ***REMOVED***
 ***REMOVED***
 
-
     this.body = {
-        "took": exactMatches.took + closeMatches.took,
+        "took"   : exactMatches.took + closeMatches.took,
         "special": specialMatches,
         "error"  : exactMatches.hasOwnProperty("error"),
-        "hits": _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), "exact")
+        "hits"   : _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), "exact")
 ***REMOVED***
 ***REMOVED***;
+
+
+function escapeRegExp(str) {
+    return str.replace(/[\-\[\]\/\{\***REMOVED***\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+***REMOVED***
 
 
 function findUserLikes(query, userId, environment) {
@@ -80,7 +84,7 @@ function findUserLikes(query, userId, environment) {
             "params": {
               "_USER_": userId,
               "_ENV_" : environment,
-              "_QUERY_": "(?i)" + query + ".*"
+              "_QUERY_": "(?i)" + escapeRegExp(query) + ".*"
         ***REMOVED***,
 
             "lean": true
@@ -116,24 +120,8 @@ function findExact(query) {
             "size": 3,
 
             "query": {
-                "dis_max" : {
-                    "tie_breaker" : 0.7,
-
-                    "queries" : [
-                        {
-                            "term" : {
-                                "exact" : wantedTerm
-                        ***REMOVED***,
-                    ***REMOVED***,
-
-                        {
-                            "multi_match": {
-                                "type": "most_fields",
-                                "query": wantedTerm,
-                                "fields": [ "exact", "exact.folded" ]
-                        ***REMOVED***
-                    ***REMOVED***
-                    ]
+                "term" : {
+                    "exact" : wantedTerm
             ***REMOVED***
         ***REMOVED***
     ***REMOVED***;
