@@ -39,6 +39,7 @@ module.exports = function *() {
     ***REMOVED***);
 ***REMOVED***
 
+
     this.body = {
         "concepts": recent,
         "calendar_view": aggregated
