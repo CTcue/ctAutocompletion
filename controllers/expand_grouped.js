@@ -17,13 +17,13 @@ var getCategory = require("./lib/category.js");
 const source = ["str", "lang", "types"];
 const language_map = {
     "DUT" : "dutch",
-    "ENG" : "english",
-    "default": "custom"
+    "ENG" : "english"
 };
 
 module.exports = function *() {
 
     var body = this.request.body.query;
+
 
     var result = yield function(callback) {
         elasticClient.search({
@@ -42,39 +42,52 @@ module.exports = function *() {
         },
         function(err, resp) {
             if (resp && !!resp.hits && resp.hits.total > 0) {
-                callback(false, resp.hits.hits);
+                var hits = resp.hits.hits;
+
+                // Return ES source part only
+                if (hits.length) {
+                    var types = result[0]._source.types;
+
+                    return callback(false, [types, hits.map(s => s._source)]);
+                }
             }
-            else {
-                callback(err, []);
-            }
+
+            callback(false, false);
         });
     };
 
-    // Custom terms don't have any "expanded" items usually
-    if (result && result.length > 0) {
 
-        var uncheck = [];
+    var types       = [];
+    var found_terms = [];
 
-        if (config.neo4j["is_active"]) {
-            // For now, only get the "Dislikes" to uncheck stuff
-            uncheck = yield function(callback) {
+    if (result) {
+        types       = result[0];
+        found_terms = result[1];
+    }
+
+
+    // Check for user contributions
+    // - If the current user added custom concepts/synonyms
+    if (config.neo4j["is_active"]) {
+
+        if (this.user) {
+            var user_contributed = yield function(callback) {
 
                 var cypherObj = {
                     "query": `MATCH
-                                (s:Synonym {cui: {_CUI_} })<-[r:DISLIKES]-(u:User)
-                              WITH
-                                type(r) as rel, s, count(s) as amount
-                              WHERE
-                                amount > 1
+                                (s:Synonym {cui: {_CUI_} })<-[r:LIKES]-(u:User { id: { _USER_ }, env: { _ENV_ } })
                               RETURN
-                                s.str as term, s.label as label, rel, amount`,
+                                s.str as str, s.label as label`,
 
                     "params": {
-                      "_CUI_": body
+                        "_CUI_": body,
+                        "_USER_": this.user._id,
+                        "_ENV_" : this.user.env
                     },
 
                     "lean": true
                 }
+
 
                 db.cypher(cypherObj, function(err, res) {
                     if (err) {
@@ -86,49 +99,89 @@ module.exports = function *() {
                     }
                 });
             }
-        }
 
-
-        var types = result[0]._source.types;
-
-        var terms = {
-            "english" : [],
-            "dutch"   : [],
-            "custom"  : []
-        };
-
-        // Group terms by language
-        for (var i=0; i < result.length; i++) {
-            var lang = result[i]["_source"]["lang"];
-
-            if (! language_map.hasOwnProperty(lang)) {
-                lang = "default";
-            }
-
-            terms[language_map[lang]].push(result[i]["_source"]["str"]);
-        }
-
-
-        // - Remove empty key/values
-        // - Sort terms by their length
-        for (var k in terms) {
-            if (! terms[k].length) {
-                delete terms[k];
-            }
-            else {
-                terms[k] = _.sortBy(terms[k], "length");
+            // Add user contributions
+            if (user_contributed && user_contributed.length) {
+                found_terms = found_terms.concat(user_contributed);
             }
         }
 
 
-        return this.body = {
-          "category"  : getCategory(types),
-          "terms"     : terms,
-          "uncheck"   : uncheck
-        };
+        // Check if anyone (any user) has unchecked concepts/synonyms
+        // - Need more than 1 "downvote"
+        var uncheck = yield function(callback) {
+            var cypherObj = {
+                "query": `MATCH
+                            (s:Synonym {cui: {_CUI_} })<-[r:DISLIKES]-(u:User)
+                          WITH
+                            type(r) as rel, s, count(s) as amount
+                          WHERE
+                            amount > 1
+                          RETURN
+                            s.str as term, s.label as label, rel, amount`,
+
+                "params": {
+                  "_CUI_": body
+                },
+
+                "lean": true
+            }
+
+            db.cypher(cypherObj, function(err, res) {
+                if (err) {
+                    console.log(err);
+                    callback(false, []);
+                }
+                else {
+                    callback(false, res);
+                }
+            });
+        }
     }
 
 
-    this.body = { "custom": true, "terms": [], "category": "keyword", "uncheck": [] };
+
+    // Group terms by label / language
+    var terms = {};
+
+    for (var i=0; i < found_terms.length; i++) {
+        var t = found_terms[i];
+        var key = "custom";
+
+        console.log(t)
+
+        if (t["label"] !== "undefined") {
+            key = t["label"].toLowerCase();
+        }
+        else if (t["lang"] !== "undefined") {
+            key = language_map[t["lang"]] || "custom";
+        }
+
+
+        if (typeof terms[key] === "undefined") {
+            terms[key] = [ t["str"] ];
+        }
+        else {
+            terms[key].push(t["str"]);
+        }
+    }
+
+    // - Remove empty key/values
+    // - Sort terms by their length
+    for (var k in terms) {
+        if (! terms[k].length) {
+            delete terms[k];
+        }
+        else {
+            terms[k] = _.sortBy(terms[k], "length");
+        }
+    }
+
+
+    this.body = {
+      "category" : getCategory(types),
+      "terms"    : terms,
+      "uncheck"  : uncheck || []
+    };
 };
 

@@ -34,13 +34,38 @@ router['get']('/', function *() {
   };
 });
 
+
+var extractUserId = function *(next) {
+    this.user = false;
+
+    if (this.headers.hasOwnProperty("x-user")) {
+        // Format `user_id=>environment`
+        var user_header = this.headers["x-user"].split("=>");
+
+        try {
+            this.user = {
+                "_id": user_header[0].trim(),
+                "env": user_header[1].toLowerCase().trim()
+            };
+        }
+        catch (err) {
+            // Wrong header format
+            this.user = false;
+        }
+    }
+
+
+    yield next;
+}
+
+
 /*
   curl -XPOST 178.62.230.23/autocomplete -d '{
     "query" : "major dep"
   }'
 */
 var autocomplete = require('./controllers/autocomplete.js');
-router['post']('/autocomplete', autocomplete);
+router['post']('/autocomplete', extractUserId, autocomplete);
 
 
 var term_lookup = require('./controllers/term_lookup.js');
@@ -57,7 +82,7 @@ router['post']('/expand', expander);
 
 // Similar to expander, but groups + sorts result by language
 var expandGrouped = require('./controllers/expand_grouped.js');
-router['post']('/expand-grouped', expandGrouped);
+router['post']('/expand-grouped', extractUserId, expandGrouped);
 
 var suggester = require('./controllers/suggest.js');
 router['post']('/suggest', suggester);
