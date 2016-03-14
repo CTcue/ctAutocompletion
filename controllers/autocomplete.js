@@ -42,18 +42,11 @@ module.exports = function *() {
     var likes = [];
 
 
-    if (config.neo4j["is_active"] && headers.hasOwnProperty("x-user")) {
-    ***REMOVED*** user_id => environment
-        var user_header = headers["x-user"].split("=>");
-
-        if (user_header.length === 2 && user_header[0].length > 1 && user_header[1].length > 1) {
-            var userId = user_header[0];
-            var env    = user_header[1].toLowerCase().trim();
-
-        ***REMOVED*** Find user added contributions
-            likes = yield findUserLikes(query, userId, env);
-    ***REMOVED***
+    if (config.neo4j["is_active"] && this.user) {
+    ***REMOVED*** Find user added contributions
+        likes = yield findUserLikes(query, this.user._id, this.user.env);
 ***REMOVED***
+
 
     this.body = {
         "took"   : exactMatches.took + closeMatches.took,
@@ -97,7 +90,10 @@ function findUserLikes(query, userId, environment) {
         ***REMOVED***
             ***REMOVED***
                 var result = res.map(function(s) {
-                    s["pref"] = s["str"];
+                ***REMOVED*** For display / uniqueness test
+                    s["pref"]  = s["str"];
+                    s["exact"] = s["str"];
+
                     s["contributed"] = true;
 
                     return s;
