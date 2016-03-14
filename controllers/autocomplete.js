@@ -30,7 +30,8 @@ var DEMOGRAPHICS = new Trie(config.demographic_types);
 module.exports = function *() {
     var headers = this.req.headers;
 
-    var query = this.request.body.query;
+***REMOVED*** Remove diacritics from query
+    var query = _.deburr(this.request.body.query);
 
 ***REMOVED*** Check special matches, such as demographic options
     var specialMatches = yield findSpecial(query);
