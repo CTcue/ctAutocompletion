@@ -12,7 +12,7 @@ var db = new neo4j.GraphDatabase({
 module.exports = function *() {
     var params = this.request.body.query;
 
-    if (params.length < 2) {
+    if (params.length < 2 || !config.neo4j["is_active"]) {
         return this.body = [];
     }
 
@@ -22,7 +22,7 @@ module.exports = function *() {
         db.cypher(cypherObj, function(err, paths) {
             if (err) {
               console.log(err);
-              callback(false, [])
+              return callback(false, [])
             }
 
             var found = [];

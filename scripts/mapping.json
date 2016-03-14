@@ -14,7 +14,8 @@
 
             "analyzer": {
                 "folding": {
-                    "tokenizer": "standard",
+                    "type": "custom",
+                    "tokenizer": "keyword",
                     "filter": [ "lowercase", "asciifolding" ]
                 },
 
@@ -51,14 +52,8 @@
 
                 "exact": {
                     "type": "string",
-                    "analyzer": "standard",
-
-                    "fields": {
-                        "folded": {
-                            "type": "string",
-                            "analyzer": "folding"
-                         }
-                    }
+                    "analyzer": "folding",
+                    "search_analyzer": "keyword"
                 },
 
                 "pref": {

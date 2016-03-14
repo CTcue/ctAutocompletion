@@ -7,9 +7,7 @@ var guess_origin = require("./lib/guess_origin");
 var _ = require("lodash");
 
 var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client({
-    "apiVersion" : "1.4"
-});
+var elasticClient = new elastic.Client();
 
 
 const source = ["cui", "str", "exact", "pref"];

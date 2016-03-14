@@ -52,35 +52,40 @@ module.exports = function *() {
 
     // Custom terms don't have any "expanded" items usually
     if (result && result.length > 0) {
-        // For now, only get the "Dislikes" to uncheck stuff
-        var uncheck = yield function(callback) {
 
-            var cypherObj = {
-                "query": `MATCH
-                            (s:Synonym {cui: {_CUI_} })<-[r:DISLIKES]-(u:User)
-                          WITH
-                            type(r) as rel, s, count(s) as amount
-                          WHERE
-                            amount > 1
-                          RETURN
-                            s.str as term, s.label as label, rel, amount`,
+        var uncheck = [];
 
-                "params": {
-                  "_CUI_": body
-                },
+        if (config.neo4j["is_active"]) {
+            // For now, only get the "Dislikes" to uncheck stuff
+            uncheck = yield function(callback) {
 
-                "lean": true
+                var cypherObj = {
+                    "query": `MATCH
+                                (s:Synonym {cui: {_CUI_} })<-[r:DISLIKES]-(u:User)
+                              WITH
+                                type(r) as rel, s, count(s) as amount
+                              WHERE
+                                amount > 1
+                              RETURN
+                                s.str as term, s.label as label, rel, amount`,
+
+                    "params": {
+                      "_CUI_": body
+                    },
+
+                    "lean": true
+                }
+
+                db.cypher(cypherObj, function(err, res) {
+                    if (err) {
+                        console.log(err);
+                        callback(false, []);
+                    }
+                    else {
+                        callback(false, res);
+                    }
+                });
             }
-
-            db.cypher(cypherObj, function(err, res) {
-                if (err) {
-                    console.log(err);
-                    callback(false, []);
-                }
-                else {
-                    callback(false, res);
-                }
-            });
         }
 
 

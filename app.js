@@ -93,6 +93,8 @@ var neoVersion = neoCheck.get("", function(err, res, body) {
     if (err) {
         console.log("Neo4j is OFF");
         console.log(err);
+
+        config.neo4j["is_active"] = false;
     }
     else {
         console.log("Neo4j is ON");
