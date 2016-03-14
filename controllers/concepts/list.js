@@ -39,6 +39,7 @@ module.exports = function *() {
         });
     }
 
+
     this.body = {
         "concepts": recent,
         "calendar_view": aggregated
