@@ -46,8 +46,7 @@ module.exports = function *() {
 
             ***REMOVED*** Return ES source part only
                 if (hits.length) {
-                    var types = result[0]._source.types;
-
+                    var types = hits[0]._source.types;
                     return callback(false, [types, hits.map(s => s._source)]);
             ***REMOVED***
         ***REMOVED***
@@ -148,21 +147,20 @@ module.exports = function *() {
         var t = found_terms[i];
         var key = "custom";
 
-        console.log(t)
 
-        if (t["label"] !== "undefined") {
+        if (t.hasOwnProperty("label")) {
             key = t["label"].toLowerCase();
     ***REMOVED***
-        else if (t["lang"] !== "undefined") {
+        else if (t.hasOwnProperty("lang")) {
             key = language_map[t["lang"]] || "custom";
     ***REMOVED***
 
 
-        if (typeof terms[key] === "undefined") {
-            terms[key] = [ t["str"] ];
+        if (terms.hasOwnProperty(key)) {
+            terms[key].push(t["str"]);
     ***REMOVED***
         ***REMOVED***
-            terms[key].push(t["str"]);
+            terms[key] = [ t["str"] ];
     ***REMOVED***
 ***REMOVED***
 
