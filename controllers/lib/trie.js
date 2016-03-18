@@ -18,7 +18,6 @@ Trie.prototype.addValue = function(item, index) {
   ***REMOVED***
 
   var isObject = false;
-
   if (typeof item === 'object') {
     isObject = true;
   ***REMOVED***
@@ -26,6 +25,8 @@ Trie.prototype.addValue = function(item, index) {
   if ((isObject && index === item.key.length) || (!isObject && index === item.length)) {
     this.words += 1;
     this.value = isObject ? item.value : item;
+    this.item = item;
+
     return;
   ***REMOVED***
 
@@ -69,12 +70,7 @@ Trie.prototype.allChildWords = function(prefix) {
   return words;
 ***REMOVED***
 
-/**
- * Perform an autocomplete match
- *
- * @param {String***REMOVED*** prefix
- * @param {Number***REMOVED*** index
- */
+
 Trie.prototype.autocomplete = function(prefix, index) {
   if (!index) {
     index = 0;
@@ -107,13 +103,7 @@ var Autocomplete = function Autocomplete(elements) {
 
   elements.forEach(function(element) {
     if (typeof element === 'object') {
-      var item = {***REMOVED***
-      item.key = element[0]
-      item.value = element[1]
-
-      self.trie.addValue(item)
-***REMOVED***
-    ***REMOVED***
+      element["key"] = element["key"].toLowerCase();
       self.trie.addValue(element)
 ***REMOVED***
   ***REMOVED***)

@@ -15,7 +15,7 @@ module.exports = function *() {
                         "synonym": "$synonym.term"
                 ***REMOVED***,
 
-                    "test" : { "$addToSet" : "$synonym" ***REMOVED***,
+                    "set" : { "$addToSet" : "$synonym.cui" ***REMOVED***,
 
                     "count": { "$sum" : 1 ***REMOVED***
             ***REMOVED***
@@ -34,7 +34,7 @@ module.exports = function *() {
             ***REMOVED***
                 callback(false, docs.map(function(item) {
                     var tmp = {***REMOVED***;
-                        tmp["test"]    = item["test"]
+                        tmp["set"]     = item["set"]
                         tmp["synonym"] = item["_id"]["synonym"];
                         tmp["amount"]  = item["count"];
 

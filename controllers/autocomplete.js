@@ -23,9 +23,6 @@ var elasticClient = new elastic.Client();
 
 const source = ["cui", "str", "exact", "pref", "source", "types"];
 
-// Build regex objects for demographic check
-var DEMOGRAPHICS = new Trie(config.demographic_types);
-
 
 module.exports = function *() {
     var headers = this.req.headers;
@@ -234,32 +231,30 @@ function findMatches(query) {
 ***REMOVED***
 
 
+
+
+// Build regex objects for custom category checks
+var TRIE = new Trie(config.demographic_types.mapping);
+var LOOKUP = config.demographic_types.lookup;
+
 function findSpecial(query) {
     var _query = query.trim().toLowerCase();
 
     return function(callback) {
         var result = false;
-        var match = DEMOGRAPHICS.search(_query)
+        var match = TRIE.search(_query);
 
+    ***REMOVED*** Return first/best match if available
         if (match.length > 0) {
-            var split = match[0]["value"].split(":");
+            var best = match[0];
 
-            var label = split[0];
-            var value = false;
+        ***REMOVED*** Get category info from LOOKUP
+            if (LOOKUP.hasOwnProperty(best.value)) {
+                result = LOOKUP[best.value];
 
-            if (split[1]) {
-                label = split[0] + ": " + split[1];
-
-                value = {***REMOVED***;
-                value[split[0]] = split[1];
-        ***REMOVED***
-
-            var result = {
-                "str"      : label,
-                "value"    : value,
-                "pref"     : "demographic",
-                "cui"      : "custom",
-                "category" : "demographic"
+                result["use_template"] = true;
+                result["cui"] = "custom";
+                result["str"] = best.key;
         ***REMOVED***
     ***REMOVED***
 
