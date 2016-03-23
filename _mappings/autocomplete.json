@@ -1,0 +1,85 @@
+{
+    "settings" : {
+        "number_of_shards"   : 2,
+        "number_of_replicas" : 0,
+
+        "analysis": {
+            "filter": {
+                "autocomplete_filter": {
+                    "type"     : "edge_ngram",
+                    "min_gram" : 1,
+                    "max_gram" : 20
+                }
+            },
+
+            "analyzer": {
+                "folding": {
+                    "type": "custom",
+                    "tokenizer": "keyword",
+                    "filter": [ "lowercase", "asciifolding" ]
+                },
+
+                "autocomplete": {
+                    "type":      "custom",
+                    "tokenizer": "standard",
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "autocomplete_filter"
+                    ]
+                }
+            }
+        }
+    },
+
+    "mappings" : {
+        "records": {
+            "_all" : {
+                "enabled" : false
+            },
+
+            "properties": {
+                "cui": {
+                     "type": "string",
+                     "index" : "not_analyzed"
+                },
+
+                "str": {
+                    "type": "string",
+                    "analyzer": "autocomplete",
+                    "search_analyzer": "standard"
+                },
+
+                "exact": {
+                    "type": "string",
+                    "analyzer": "folding",
+                    "search_analyzer": "keyword"
+                },
+
+                "pref": {
+                     "type": "string",
+                     "index" : "not_analyzed"
+                },
+
+                "source": {
+                     "type": "string",
+                     "index" : "not_analyzed"
+                },
+
+                "lang": {
+                     "type": "string",
+                     "index" : "not_analyzed"
+                },
+
+                "types": {
+                     "type": "string",
+                     "index" : "not_analyzed"
+                },
+
+                "votes": {
+                      "type": "integer"
+                }
+            }
+        }
+    }
+}

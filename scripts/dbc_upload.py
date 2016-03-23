@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     print "[%s]  Creating index: `%s`." % (stamp(), args.index)
     elastic.indices.delete(index=args.index, ignore=[400, 404])
-    elastic.indices.create(index=args.index, body=json.load(open("./_mappings/dbc.json")))
+    elastic.indices.create(index=args.index, body=json.load(open("../_mappings/dbc.json")))
 
     print "[%s]  Starting upload." % stamp()
     for row in read_rows(args.file, args.delimiter):
