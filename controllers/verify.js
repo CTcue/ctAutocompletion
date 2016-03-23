@@ -1,5 +1,5 @@
 
-var config = require("../../config/config.js");
+var config = require("../config/config.js");
 
 
 module.exports = function *(next) {
@@ -10,7 +10,7 @@ module.exports = function *(next) {
     if (conf.hasOwnProperty("need_tokens") && !conf.need_tokens) {
         yield next;
 ***REMOVED***
-    else if (conf.hasOwnProperty("verification_token") && headers["umls-c-token"] === conf.verification_admin) {
+    else if (conf.hasOwnProperty("verification_token") && headers["umls-u-token"] === conf.verification_token) {
         yield next;
 ***REMOVED***
     ***REMOVED***

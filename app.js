@@ -88,10 +88,16 @@ var suggester = require('./controllers/suggest.js');
 router['post']('/suggest', suggester);
 
 
+// Management for custom terms from users
 var concept_management = require("./controllers/concepts/router")(router);
 var related_management = require("./controllers/related/router")(router);
 
 
+// DBC endpoint(s)
+var dbc = require("./controllers/dbc/router")(router);
+
+
+// Listen
 app.use(router.routes());
 app.listen(config.port);
 console.log('listening on port %d', config.port);
@@ -100,6 +106,7 @@ console.log('listening on port %d', config.port);
 
 /////////
 // Check if Elasticsearch and Neo4j are available
+
 var request = require('request-json');
 
 var elasticCheck = request.createClient("http://localhost:9200");

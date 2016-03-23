@@ -6,7 +6,7 @@ var create  = require('./create');
 var destroy = require('./destroy');
 
 // Check for admin token
-var verify = require("./verify");
+var verify = require("../verify");
 
 
 module.exports = function(app) {
