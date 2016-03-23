@@ -6,7 +6,7 @@ var create  = require('./create');
 var duplicates = require('./duplicates');
 var recommend = require('./recommend');
 
-var verify = require("./verify");
+var verify = require("../verify");
 
 
 module.exports = function(app) {
