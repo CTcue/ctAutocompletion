@@ -1,0 +1,42 @@
+{
+    "settings" : {
+        "number_of_shards"   : 2,
+        "number_of_replicas" : 0,
+
+        "analysis": {
+            "analyzer": {
+                "folding": {
+                    "type": "custom",
+                    "tokenizer": "keyword",
+                    "filter": [ "lowercase", "asciifolding" ]
+            ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***,
+
+    "mappings" : {
+        "records": {
+            "_all" : {
+                "enabled" : false
+        ***REMOVED***,
+
+            "properties": {
+                "diagnose": {
+                    "type": "string"
+            ***REMOVED***,
+
+                "code": {
+                    "type": "string",
+                    "analyzer": "folding",
+                    "search_analyzer": "keyword"
+            ***REMOVED***,
+
+                "specialism": {
+                    "type": "string",
+                    "analyzer": "folding",
+                    "search_analyzer": "keyword"
+            ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***
+***REMOVED***
