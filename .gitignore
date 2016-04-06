@@ -1,6 +1,7 @@
 lib-cov
 2015AA/
-scripts/**/
+data/
+additional_terms/
 *.rrf
 *.RRF
 *.pyc

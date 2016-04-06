@@ -4,8 +4,52 @@ import re
 import math
 import os
 
+# Class that can manages the readers from the files with
+# terms from additional sources
+class Additional_Termreader():
 
-def read_rrf(filename, header, wanted, delimiter="|"):
+    def __init__(self,filenames):
+        self.datareaders = []
+        for f in filenames:
+            self.datareaders.append(self.term_reader(f))
+
+        self.current = []
+        for dr in self.datareaders:
+            self.current.append(next(dr))
+
+    def get_terms(self,cui,group, term):
+        for i,cur in enumerate(self.current):
+            if cur and cur["cui"]==cui:
+                while cur and cur["cui"]==cui:
+
+                    # print
+                    # print cur["term"], "\t",term,"\t", cui, cur["cui"], cur["source"]
+                    # raw_input()
+
+                    # print group[-1]["STR"], group[-1]["SAB"], term, cur["term"]
+                    group.append({"STR":cur["term"],"LAT":cur["lan"],"SAB":cur["source"],"TS":"NP","TTY":"","ISPREF":"Y","CODE":"None","SCUI":"None","non_umls":True})
+
+                    try:
+                        if self.datareaders[i]:
+                            self.current[i] = next(self.datareaders[i])
+                            cur = self.current[i]
+                    except StopIteration:
+                        self.datareaders[i]=None
+                        self.current[i]=None
+                        cur = self.current[i]
+                        print "iterations ended for extra terms"
+
+
+        return group
+
+    def term_reader(self, filename):
+        with open(filename, "rb") as f:
+            datareader = csv.reader(f, encoding="utf-8", delimiter=str("|"))
+            header = next(datareader)
+            for row in datareader:
+                yield dict(zip(header,row))
+
+def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
     with open(filename, "rb") as f:
         datareader = csv.reader(f, encoding="utf-8", delimiter=str(delimiter))
         first = next(datareader)
@@ -22,6 +66,9 @@ def read_rrf(filename, header, wanted, delimiter="|"):
             if cui == tmp['CUI']:
                 group.append(row)
             else:
+                # Add the terms from different sources
+                if add_termreader!=None:
+                    group = add_termreader.get_terms(tmp['CUI'], group, tmp["STR"])
                 yield (cui, group)
 
                 # reset
@@ -29,7 +76,7 @@ def read_rrf(filename, header, wanted, delimiter="|"):
                 group = [row]
 
 
-def read_conso(umls_dir):
+def read_conso(umls_dir, add_termfiles=None):
     header = [
         "CUI",
         "LAT",
@@ -51,10 +98,16 @@ def read_conso(umls_dir):
         "CVF"
     ]
 
-    wanted = ["LAT", "SAB", "STT", "TS", "ISPREF", "TTY", "STR"]
+    wanted = ["LAT", "SAB", "TS", "ISPREF", "TTY", "STR","SCUI","CODE"]
+
+    additional_terms=None
+    if add_termfiles:
+        print "additional termfiles used", add_termfiles
+        additional_terms = Additional_Termreader(add_termfiles)
 
     filename = os.path.join(umls_dir, "MRCONSO.RRF")
-    for cui, group in read_rrf(filename, header, wanted):
+
+    for cui, group in read_rrf(filename, header, wanted, add_termreader=additional_terms):
         filtered = []
         types = []
         preferred = None
@@ -65,6 +118,7 @@ def read_conso(umls_dir):
                 preferred = g["STR"]
 
             if check_row(g):
+
                 row = { k: g[k] for k in wanted }
                 row["normal"] = normalize(row["STR"])
                 filtered.append(row)
@@ -96,8 +150,8 @@ def read_sty(umls_dir):
         yield (cui, filtered)
 
 
-def merged_rows(umls_dir):
-    return izip(read_conso(umls_dir), read_sty(umls_dir))
+def merged_rows(umls_dir, add_termfiles=None):
+    return izip(read_conso(umls_dir,add_termfiles=add_termfiles), read_sty(umls_dir))
 
 
 _digits = re.compile('\d')
@@ -168,7 +222,7 @@ def get_term(row):
     return normalize(row['STR'])
 
 
-def check_row(row):
+def check_row(row, umls=True):
     languages = ['ENG', 'DUT']
 
     obsolete = [
@@ -207,16 +261,18 @@ def check_row(row):
     ]
 
     # Skip records that are too long, have Pat.mo.dnt things in it or aren't prefered/obsolete
-    return len(row['STR']) < 32 and \
+    verdict = len(row['STR']) < 32 and \
         row['STR'].count(".") < 3 and \
         row['STR'].count(":") < 3 and \
-        not re.search(r"(nos|NOS)$", row['STR']) and \
+        not re.search(r"(nos|NOS)$", row['STR'])
+    if umls:
+        verdict = verdict and \
         row['ISPREF'] == 'Y' and \
         row['LAT'] in languages and \
         row['TTY'] not in ["PM"] and \
         row['TTY'] not in obsolete and \
         row['SAB'] not in crazy_sources
-
+    return verdict
 
 def can_skip_cat(sty):
     skip_categories = [
@@ -302,7 +358,19 @@ def normalize(term):
 
 def unique_terms(seq, key):
     seen = set()
-    return [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
+
+    non_umls=False
+    if any(["non_umls" in s for s in seq]):
+        print "non umlos terms found in unique terms"
+        non_umls=True
+
+    uniques = [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
+
+    if non_umls:
+        print [(u["STR"],u["SAB"]) for u in uniques]
+        raw_input()
+
+    return uniques
 
 
 TTY_mapping = {
@@ -552,3 +620,18 @@ def lookup(abbr):
         return TTY_mapping[abbr]
     except:
         return "UNKNOWN"
+
+
+# generator that reads CSV files and gives them back in dictionary format
+def read_rows(file_name, delimiter=",", header=None, replace_header=False):
+    with open(file_name, "rU") as f:
+        datareader = csv.reader(f, encoding="utf-8", delimiter=str(delimiter), errors='replace')
+        if not header and not replace_header:
+            header = next(datareader)
+        if replace_header:
+            x = next(datareader)
+            if header == None:
+                print "header not replaced because no header was specified"
+                header=x
+        for row in datareader:
+            yield dict(zip(header, row))
