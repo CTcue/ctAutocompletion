@@ -23,13 +23,6 @@ def get_terms():
 
     return terms
 
-def get_mappings():
-    mappings = defaultdict(list)
-
-    for r in read_rows(params["mapping_file"], delimiter="\t"):
-        mappings[r[params["map_source_id"]]].append(r[params["map_snomed_id"]])
-
-    return mappings
 
 
 
