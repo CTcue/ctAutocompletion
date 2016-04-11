@@ -58,9 +58,9 @@ def upload(umls_dir, index, add_termfiles=None):
 
         for g in utils.unique_terms(conso, 'normal'):
 
-            if "non_umls" in g:
-                print g["normal"], g["SAB"]
-                raw_input()
+            # if "non_umls" in g:
+            #     print g["normal"], g["SAB"]
+            #     raw_input()
 
             exact = g["normal"].replace("-", " ").lower()
             types = list(set(sty + types))

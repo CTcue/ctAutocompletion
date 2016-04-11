@@ -1,9 +1,8 @@
-add_termfiles = []
-                # ["additional_terms/mapped_snomed_terms.csv",
-                # "additional_terms/mapped_loinc_terms.csv",
-                # "additional_terms/mapped_customctcue_terms.csv"
+add_termfiles = ["additional_terms/mapped_snomed_terms.csv",
+                "additional_terms/mapped_loinc_terms.csv",
+                "additional_terms/mapped_customctcue_terms.csv"
                 # "additional_terms/mapped_mesh_terms.csv"
-                # ]
+                ]
 
 
 MeSH_files = {

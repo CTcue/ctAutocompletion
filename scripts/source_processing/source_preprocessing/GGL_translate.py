@@ -15,9 +15,6 @@ def get_terms():
         snomed_id = row["snomed_id"]
         term = adapt_term(row["term"])
 
-        if term != row["term"]:
-            print term, "-", row["term"]
-
         if "AND" in snomed_id:
             temp = snomed_id.split("AND")
             for t in temp:
@@ -32,5 +29,5 @@ def get_terms():
 def adapt_term(t):
     t = re.sub("^(.+)structuur$",r"\1",t)
     t = re.sub("^structuur van (.+)$",r"\1",t)
-    return t
+    return t.strip()
 
