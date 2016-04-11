@@ -6,13 +6,13 @@ import argparse
 
 
 def process_terms_and_upload(umls_dir, index, add_termfiles):
-    get_source_terms()
+    # get_source_terms()
 
-    check_sources("SNOMED")
-    # check_sources("MESH")
+    # check_sources("SNOMED")
+    check_sources("MESH")
     # check_sources("LOINC")
 
-    # map_umls.umls_mesh_mappings(umls_dir)
+    map_umls.umls_mesh_mappings(umls_dir)
     # map_umls.umls_snomed_mappings(umls_dir)
     # map_umls.umls_loinc_mappings(umls_dir)
 
