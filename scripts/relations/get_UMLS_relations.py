@@ -76,21 +76,17 @@ def extract_rels(umls_dir):
                     non_snomed_count+=1
                 counts[row["SAB"]]+=1
 
-                if row["RELA"] in ["","inverse_isa"]:
+                if row["RELA"] in ["","inverse_isa","has_expanded_form"]:
                     continue
 
                 if row["CUI1"] in used_CUIs and row["CUI2"] in used_CUIs:
                     w.writerow([row["CUI1"],row["CUI2"],row["RELA"],row["SAB"]])
 
-                    if row["SAB"] not in ["SNOMEDCT_US", "ICD10CM"]:
-                        print row["CUI1"],row["CUI2"],row["RELA"],row["SAB"]
-                        raw_input()
-
                     rel_overview.add((row["RELA"],row["SAB"]))
                     rel_count+=1
 
     with open("relations/data/overview_relation_types.csv","wb") as outf:
-        w =  csv.writer(outf, encoding="utf-8",delimiter = "|")
+        w =  csv.writer(outf, encoding="utf-8",delimiter = ",")
         w.writerow(["rel_type","rel_source"])
         for r in rel_overview:
             print r[1], "\t",r[0]
