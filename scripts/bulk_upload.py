@@ -58,10 +58,6 @@ def upload(umls_dir, index, add_termfiles=None):
 
         for g in utils.unique_terms(conso, 'normal'):
 
-            # if "non_umls" in g:
-            #     print g["normal"], g["SAB"]
-            #     raw_input()
-
             exact = g["normal"].replace("-", " ").lower()
             types = list(set(sty + types))
 
@@ -95,17 +91,61 @@ def upload(umls_dir, index, add_termfiles=None):
     helpers.bulk(elastic, bulk)
     print "[%s]  Uploading complete." % stamp()
 
+def record_CUIs(umls_dir, add_termfiles=None):
+    import unicodecsv as csv
+
+    if add_termfiles:
+        for f in add_termfiles:
+            if not os.path.isfile(f):
+                print f, "not found, terms not used in upload"
+
+        add_termfiles = [f for f in add_termfiles if os.path.isfile(f)]
+
+    output_folder = "relations/data"
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    with open(output_folder+"/used_CUIS.csv","wb") as outf:
+        w = csv.writer(outf, encoding="utf-8")
+        w.writerow(["CUI:ID(Concept)","term","types:IGNORE"])
+        for (cui, conso, types, preferred), (scui, sty) in tqdm(utils.merged_rows(umls_dir, add_termfiles)):
+
+            if not conso or utils.can_skip_cat(sty):
+                continue
+
+            for g in utils.unique_terms(conso, 'normal'):
+
+                exact = g["normal"].replace("-", " ").lower()
+                types = list(set(sty + types))
+
+                # If normalized concept is reduced to empty string
+                if not exact or exact == "":
+                    continue
+
+
+                w.writerow([cui, preferred, ";".join(types)])
+                break
+
+        print "[%s]  Recording complete." % stamp()
+
+
+
 if __name__ == '__main__':
     import config
 
     parser = argparse.ArgumentParser(description="ctAutocompletion upload script")
     parser.add_argument('--dir', dest='dir', required=True, help='Directory containing the *.RRF files from UMLS')
     parser.add_argument('--index', dest='index', default="autocomplete", help='Elasticsearch index for autocompletion')
+    parser.add_argument('--rec', dest='rec', default="upload", help='Record CUIs instead of uploading to elastic search')
     args = parser.parse_args()
 
     umls_dir = args.dir
     index = args.index
 
-    add_termfiles = config.add_termfiles
-    upload(umls_dir, index, add_termfiles)
+    if args.rec == "upload":
+        add_termfiles = config.add_termfiles
+        upload(umls_dir, index, add_termfiles)
+    else:
+        add_termfiles = config.add_termfiles
+        record_CUIs(umls_dir, add_termfiles)
 
