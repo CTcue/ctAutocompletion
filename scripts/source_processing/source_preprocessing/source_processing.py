@@ -3,6 +3,7 @@ import importlib
 from collections import defaultdict
 import os
 from source_params import output_folder
+import config
 
 def get_terms(source):
     print "import with importlib", source
@@ -24,7 +25,7 @@ def all_terms_to_file(terms, source):
                 w.writerow([t,":".join(elems)])
 
 def terms_to_file_sources():
-    sources = ["GGL_translate","LOINC","snomed_NL", "DHD"]
+    sources = ["DHD","GGL_translate","LOINC","snomed_NL"]
 
     for s in sources:
         terms = get_terms(s)

@@ -62,7 +62,7 @@ def write_terms(umls_dir, codes, filename_out,sourcename,map_key, source_out):
     print "counted terms", count
 
 def umls_mesh_mappings(umls_dir):
-    print "MESH mappings"
+    # print "MESH mappings"
 
     filename = os.path.join(input_folder,"selected_sourceterms_MESH.csv")
     codes = get_terms(filename)
@@ -70,7 +70,7 @@ def umls_mesh_mappings(umls_dir):
     write_terms(umls_dir, codes, "mapped_mesh_terms.csv","MSH","CODE", "MeSH")
 
 def umls_snomed_mappings(umls_dir):
-    print "SNOMED mappings"
+    # print "SNOMED mappings"
 
     filename = os.path.join(input_folder,"selected_sourceterms_SNOMED.csv")
     codes = get_terms(filename)
@@ -79,7 +79,7 @@ def umls_snomed_mappings(umls_dir):
     write_terms(umls_dir,codes, "mapped_snomed_terms.csv","SNOMEDCT_US","SCUI", "orig")
 
 def umls_loinc_mappings(umls_dir):
-    print "LOINC mappings"
+    # print "LOINC mappings"
 
     filename = os.path.join(input_folder,"selected_sourceterms_LOINC.csv")
     codes = get_terms(filename)

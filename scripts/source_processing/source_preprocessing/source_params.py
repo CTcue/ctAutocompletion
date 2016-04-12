@@ -36,10 +36,6 @@ LOINC_params = {
     "NL_file"       :config.LOINC_files["NL_file"],
     # path to file with english terms linked to source ids
     "EN_file"       :config.LOINC_files["EN_file"],
-     # path to file with mappings between source ids and snomed ids
-    "mapping_file"  :config.LOINC_files["mapping_file"],
-    "map_source_id" :"LOINC_id",
-    "map_snomed_id" :"Towards_id",
     "NL_source_id"  :"LOINC_NUM",
     "NL_pref_term"  :"COMPONENT", #key to field of preferred term in NL_file
     "NL_synonyms"   :"", #key to field of additional terms in NL_file, empty string if there are none

@@ -11,8 +11,9 @@ if __name__ == '__main__':
     umls_dir = args.dir
 
     # Check if used_cuis is available
-    if not os.path.isfile("relations/data/used_CUIs.csv"):
-        print "used_CUIs is not available, running CUI extraction from bulk upload first."
+    CUI_file = "relations/data/used_CUIs.csv"
+    if not os.path.isfile(CUI_file) or os.stat(CUI_file).st_size == 0:
+        print "used_CUIs is not available or empty, running CUI extraction from bulk upload first."
         from bulk_upload import record_CUIs
         record_CUIs(umls_dir)
 

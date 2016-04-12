@@ -27,7 +27,7 @@ def get_CUIS():
     with open("relations/data/relations_types.csv","wb") as outf:
         w =  csv.writer(outf, encoding="utf-8",delimiter = "|")
         w.writerow([":START_ID(Concept)",":END_ID(CONCEPT_TYPE)",":TYPE"])
-        for r in tqdm(read_rows("relations/data/used_CUIs.csv", header=["CUI","term","types"], replace_header=True)):
+        for r in tqdm(read_rows("relations/data/used_CUIs.csv",delimiter="|", header=["CUI","term","types"], replace_header=True)):
             cuis.add(r["CUI"])
             cur_types = r["types"].split(";")
             types.update(cur_types)
@@ -43,10 +43,10 @@ def get_CUIS():
     with open("relations/data/neo4j_upload.txt","wb") as outf:
         w =  csv.writer(outf, encoding="utf-8",delimiter = "|")
         upload = "<ABSOLUTE PATH TO neo4j/bin/neo4j-import.bat> --into snomed.db --id-type string "
-        upload += "--nodes:Concept used_CUIs.csv "
+        upload += "--nodes:Concept used_CUIs.csv --nodes:Concept custom_concepts.csv "
         upload += "--nodes:Type concepts_types.csv "
-        upload += "--relationships relations_concepts.csv "
-        upload += "--relationships relations_types.csv"
+        upload += "--relationships relations_concepts.csv --relationships custom_concept_relations.csv "
+        upload += "--relationships relations_types.csv --relationships custom_concept_type_relations.csv"
         w.writerow([upload])
 
     print "CUIs done"
