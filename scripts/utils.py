@@ -359,16 +359,7 @@ def normalize(term):
 def unique_terms(seq, key):
     seen = set()
 
-    non_umls=False
-    if any(["non_umls" in s for s in seq]):
-        print "non umlos terms found in unique terms"
-        non_umls=True
-
     uniques = [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
-
-    if non_umls:
-        print [(u["STR"],u["SAB"]) for u in uniques]
-        raw_input()
 
     return uniques
 

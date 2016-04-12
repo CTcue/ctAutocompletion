@@ -42,10 +42,13 @@ class Consumer(multiprocessing.Process):
 
     def process_terms(self, terms, source):
         results = []
+
         for t in terms:
             result = check_term(t["term"], t["source_locs"], source)
+
             if result:
                 results.append(result)
+
         return results
 
 

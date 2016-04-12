@@ -51,6 +51,10 @@ def upload(umls_dir, index, add_termfiles=None):
     elastic.indices.create(index=index, body=json.load(open("../_mappings/autocomplete.json")))
 
     print "[%s]  Starting upload." % stamp()
+
+    from collections import defaultdict
+    source_counts = defaultdict(int)
+
     for (cui, conso, types, preferred), (scui, sty) in tqdm(utils.merged_rows(umls_dir, add_termfiles)):
 
         if not conso or utils.can_skip_cat(sty):
@@ -82,6 +86,9 @@ def upload(umls_dir, index, add_termfiles=None):
                 "types"  : types
         ***REMOVED***)
 
+            if re.search("-ct",g["SAB"]):
+                source_counts[g["SAB"]]+=1
+
         counter += 1
 
         if counter % 100 == 0:
@@ -90,6 +97,8 @@ def upload(umls_dir, index, add_termfiles=None):
 
     helpers.bulk(elastic, bulk)
     print "[%s]  Uploading complete." % stamp()
+
+    print source_counts
 
 def record_CUIs(umls_dir, add_termfiles=None):
     import unicodecsv as csv
@@ -106,7 +115,7 @@ def record_CUIs(umls_dir, add_termfiles=None):
         os.makedirs(output_folder)
 
     with open(output_folder+"/used_CUIS.csv","wb") as outf:
-        w = csv.writer(outf, encoding="utf-8")
+        w = csv.writer(outf, encoding="utf-8", delimiter=str("|"))
         w.writerow(["CUI:ID(Concept)","term","types:IGNORE"])
         for (cui, conso, types, preferred), (scui, sty) in tqdm(utils.merged_rows(umls_dir, add_termfiles)):
 
@@ -137,15 +146,19 @@ if __name__ == '__main__':
     parser.add_argument('--dir', dest='dir', required=True, help='Directory containing the *.RRF files from UMLS')
     parser.add_argument('--index', dest='index', default="autocomplete", help='Elasticsearch index for autocompletion')
     parser.add_argument('--rec', dest='rec', default="upload", help='Record CUIs instead of uploading to elastic search')
+    parser.add_argument('--no_add_terms', dest='no_add_terms', default="false", help='Record CUIs instead of uploading to elastic search')
     args = parser.parse_args()
 
     umls_dir = args.dir
     index = args.index
 
-    if args.rec == "upload":
-        add_termfiles = config.add_termfiles
-        upload(umls_dir, index, add_termfiles)
+    if args.no_add_terms:
+        add_termfiles=[]
     else:
         add_termfiles = config.add_termfiles
+
+    if args.rec == "upload":
+        upload(umls_dir, index, add_termfiles)
+    else:
         record_CUIs(umls_dir, add_termfiles)
 

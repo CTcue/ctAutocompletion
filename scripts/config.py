@@ -4,6 +4,7 @@ add_termfiles = ["additional_terms/mapped_snomed_terms.csv",
                 "additional_terms/mapped_mesh_terms.csv"
                 ]
 
+# sources = {"GGL_translate":(""),"LOINC","snomed_NL", "DHD"***REMOVED***
 
 MeSH_files = {
     "NL_file1"      : "/Users/CTcue/ctcue_code/data/mesh_NTvG/MH2007_vertaling.csv",
