@@ -19,12 +19,10 @@ module.exports = function getCategoryByTypes(types) {
     }
 
     var dbc        = ["DBC", "dbc", "zorgproduct"];
-    var diagnosis  = ["disorder", "Disease or Syndrome", "diagnosis", "Disease/Finding"];
     var medication = ["medication", "Pharmacologic Substance", "product"];
     var labresult  = ["Finding", "Laboratory Procedure", "Laboratory or Test Result", "Chemical/Ingredient"];
 
     return inList(types, dbc, "dbc")               ||
-           inList(types, diagnosis, "diagnosis")   ||
            inList(types, medication, "medication") ||
            inList(types, labresult, "labresult")   ||
            "keyword";
