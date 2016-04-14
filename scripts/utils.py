@@ -167,7 +167,7 @@ def read_sty(umls_dir):
 
 
 def merged_rows(umls_dir, add_termfiles=None):
-    return izip(read_conso(umls_dir,add_termfiles=add_termfiles), read_sty(umls_dir))
+    return izip(read_conso(umls_dir, add_termfiles=add_termfiles), read_sty(umls_dir))
 
 
 _digits = re.compile('\d')
