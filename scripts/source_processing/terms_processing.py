@@ -188,6 +188,7 @@ def check_term(t, source_locs, source):
 
 
 def all_terms_to_file(terms, sourcegroup):
+    print "terms to file", os.path.join(output_folder,"selected_sourceterms_")
     with open(os.path.join(output_folder,"selected_sourceterms_"+sourcegroup+".csv"),"ab") as of:
         w = csv.writer(of,delimiter="|",encoding="utf-8")
         for t, source_lan in terms.iteritems():
@@ -198,7 +199,7 @@ def all_terms_to_file(terms, sourcegroup):
                         x["source_id"]=str(x["source_id"])
                     elems.append(x["source_id"]+"&"+x["lan"]+"&"+x["source"])
                 w.writerow([t,":".join(elems)])
-
+    print "terms written to file "
 
 def edit_distance(str1, str2):
     """Make a Levenshtein Distances Matrix"""

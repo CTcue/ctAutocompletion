@@ -3,12 +3,15 @@ import unicodecsv as csv
 import re
 import math
 import os
+from pprint import pprint
 
 # Class that can manages the readers from the files with
 # terms from additional sources
 class Additional_Termreader():
 
     def __init__(self,filenames):
+        self.fnames=filenames
+
         self.datareaders = []
         for f in filenames:
             self.datareaders.append(self.term_reader(f))
@@ -22,12 +25,8 @@ class Additional_Termreader():
             if cur and cur["cui"]==cui:
                 while cur and cur["cui"]==cui:
 
-                    # print
-                    # print cur["term"], "\t",term,"\t", cui, cur["cui"], cur["source"]
-                    # raw_input()
 
-                    # print group[-1]["STR"], group[-1]["SAB"], term, cur["term"]
-                    group.append({"STR":cur["term"],"LAT":cur["lan"],"SAB":cur["source"],"TS":"NP","TTY":"","ISPREF":"Y","CODE":"None","SCUI":"None","non_umls":True***REMOVED***)
+                    group.append({"STR":cur["term"],"LAT":self.set_lan(cur["lan"]),"SAB":cur["source"],"TS":"NP","TTY":"","ISPREF":"Y","CODE":"None","SCUI":"None","non_umls":True***REMOVED***)
 
                     try:
                         if self.datareaders[i]:
@@ -37,17 +36,29 @@ class Additional_Termreader():
                         self.datareaders[i]=None
                         self.current[i]=None
                         cur = self.current[i]
-                        print "iterations ended for extra terms"
+                        print "iterations ended for extra terms", self.fnames[i]
 
+        # if cui == "C0037369":
+        #     print "result term reader", cui
+        #     pprint(group)
 
         return group
 
     def term_reader(self, filename):
+        print "term reader initialized", filename
         with open(filename, "rb") as f:
             datareader = csv.reader(f, encoding="utf-8", delimiter=str("|"))
             header = next(datareader)
             for row in datareader:
-                yield dict(zip(header,row))
+                result_row = dict(zip(header,row))
+                yield result_row
+
+    def set_lan(self, lan):
+        if lan == "en":
+            return "ENG"
+        if lan == "nl":
+            return "DUT"
+        return lan
 
 def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
     with open(filename, "rb") as f:
@@ -68,7 +79,7 @@ def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
             else:
                 # Add the terms from different sources
                 if add_termreader!=None:
-                    group = add_termreader.get_terms(tmp['CUI'], group, tmp["STR"])
+                    group = add_termreader.get_terms(cui, group, tmp["STR"])
                 yield (cui, group)
 
                 # reset
@@ -102,15 +113,18 @@ def read_conso(umls_dir, add_termfiles=None):
 
     additional_terms=None
     if add_termfiles:
-        print "additional termfiles used", add_termfiles
         additional_terms = Additional_Termreader(add_termfiles)
 
     filename = os.path.join(umls_dir, "MRCONSO.RRF")
 
     for cui, group in read_rrf(filename, header, wanted, add_termreader=additional_terms):
+        # print "curr cui",cui
         filtered = []
         types = []
         preferred = None
+
+        # if cui == "C0037369":
+        #     print "smoking found in read conso", [g["STR"] for g in group]
 
         for g in group:
             # Get first "english preferred" term available
@@ -129,6 +143,8 @@ def read_conso(umls_dir, add_termfiles=None):
                 if match and match.groups():
                     types.append(match.groups()[0].strip(" [()]"))
 
+        # if cui == "C0037369":
+        #     print "smoking yielded in read conso", [g["STR"] for g in filtered]
         yield (cui, filtered, types, preferred)
 
 
@@ -356,10 +372,18 @@ def normalize(term):
     return term.strip(" ,-")
 
 
-def unique_terms(seq, key):
+def unique_terms(seq, key, cui=None):
     seen = set()
 
+    # if cui and cui == "C0037369":
+    #     print "before unique"
+    #     print [x["normal"] for x in seq]
+
     uniques = [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
+
+    # if cui and cui == "C0037369":
+    #     print "after unique"
+    #     print [x["normal"] for x in seq]
 
     return uniques
 

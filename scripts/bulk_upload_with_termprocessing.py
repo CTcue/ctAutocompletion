@@ -25,21 +25,23 @@ def iterative_process_terms_and_upload(umls_dir, index, add_termfiles):
     get_source_terms()
 
     for i,tf in enumerate(add_termfiles):
+        print i, tf, add_termfiles[:i+1]
         if "snomed" in tf:
             print "\nAdd DHD, ggl_translate, snomed_NL"
             check_sources("SNOMED")
             map_umls.umls_snomed_mappings(umls_dir)
-        elif "mesh" in tf:
-            print "\nAdd mesh"
-            check_sources("MESH")
-            map_umls.umls_mesh_mappings(umls_dir)
         elif "loinc" in tf:
             print "\nAdd loinc"
             check_sources("LOINC")
             map_umls.umls_loinc_mappings(umls_dir)
+        if "mesh" in tf:
+            print "\nAdd mesh"
+            check_sources("MESH")
+            map_umls.umls_mesh_mappings(umls_dir)
 
-        print "upload"
-        upload(umls_dir, index, add_termfiles=add_termfiles[:i+1])
+        if "mesh" in tf:
+            print "upload"
+            upload(umls_dir, index, add_termfiles=add_termfiles[:i+1])
 
 
 
