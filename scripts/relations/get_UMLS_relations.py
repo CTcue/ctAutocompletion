@@ -2,22 +2,23 @@ from utils import read_rrf, read_rows
 import unicodecsv as csv
 from tqdm import *
 
-rel_header = [ "CUI1",
-            "AUI1",
-            "STYPE1",
-            "REL",
-            "CUI2",
-            "AUI2",
-            "STYPE2",
-            "RELA",
-            "RUI",
-            "SRUI",
-            "SAB",
-            "SL",
-            "RG",
-            "DIR",
-            "SUPPRESS",
-            "CVF"
+rel_header = [
+    "CUI1",
+    "AUI1",
+    "STYPE1",
+    "REL",
+    "CUI2",
+    "AUI2",
+    "STYPE2",
+    "RELA",
+    "RUI",
+    "SRUI",
+    "SAB",
+    "SL",
+    "RG",
+    "DIR",
+    "SUPPRESS",
+    "CVF"
 ]
 
 def get_CUIS():
