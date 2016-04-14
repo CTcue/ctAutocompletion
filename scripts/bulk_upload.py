@@ -36,6 +36,7 @@ def stamp():
 def upload(umls_dir, index, add_termfiles=None):
 
     if add_termfiles:
+        print "additional termfiles used", add_termfiles
         for f in add_termfiles:
             if not os.path.isfile(f):
                 print f, "not found, terms not used in upload"
@@ -57,10 +58,22 @@ def upload(umls_dir, index, add_termfiles=None):
 
     for (cui, conso, types, preferred), (scui, sty) in tqdm(utils.merged_rows(umls_dir, add_termfiles)):
 
+        # if 37300 < int(cui[-6:]) < 37500:
+        #     print "cui in range", cui
+        # if cui == "C0037369":
+        #     print "smoking found in upload  script"
+        # if 37500 < int(cui[-6:]):
+        #     raw_input()
+
         if not conso or utils.can_skip_cat(sty):
             continue
 
-        for g in utils.unique_terms(conso, 'normal'):
+        # if cui == "C0037369":
+        #     print "smoking found and accepted"
+        #     from pprint import pprint
+        #     pprint(conso)
+
+        for g in utils.unique_terms(conso, 'normal', cui):
 
             exact = g["normal"].replace("-", " ").lower()
             types = list(set(sty + types))
@@ -68,6 +81,9 @@ def upload(umls_dir, index, add_termfiles=None):
             # If normalized concept is reduced to empty string
             if not exact or exact == "":
                 continue
+
+            # if cui == "C0037369":
+            #     print g
 
             bulk.append({
                 "_index": index,
@@ -152,7 +168,8 @@ if __name__ == '__main__':
     umls_dir = args.dir
     index = args.index
 
-    if args.no_add_terms:
+    if args.no_add_terms != "false":
+        print "no additional term files used"
         add_termfiles=[]
     else:
         add_termfiles = config.add_termfiles

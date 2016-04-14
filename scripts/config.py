@@ -1,8 +1,10 @@
-add_termfiles = ["additional_terms/mapped_snomed_terms.csv",
-                "additional_terms/mapped_loinc_terms.csv",
-                "additional_terms/mapped_customctcue_terms.csv"
-                "additional_terms/mapped_mesh_terms.csv"
+add_termfiles = ["snomed",
+                "loinc",
+                "customctcue",
+                "mesh"
                 ]
+
+add_termfiles = ["additional_terms/mapped_"+atf+"_terms.csv" for atf in add_termfiles]
 
 # sources = {"GGL_translate":(""),"LOINC","snomed_NL", "DHD"}
 
@@ -21,7 +23,7 @@ snomed_NL_files = {
 }
 
 GGL_translate_files = {
-    "term_file"     :"/Users/CTcue/ctcue_code/data/google_translate_snomed/google_translated_terms_with_ids.csv", #path to file with dutch terms linked to source ids
+    "term_file"     :"/Users/CTcue/ctcue_code/data/google_translate_snomed/google_translated_terms_with_ids.csv"
 }
 
 LOINC_files = {

@@ -10,7 +10,7 @@ var elastic = require('elasticsearch');
 var elasticClient = new elastic.Client();
 
 
-const source = ["cui", "str", "exact", "pref"];
+const source = ["cui", "str", "exact", "pref","types"];
 
 
 module.exports = function *() {
