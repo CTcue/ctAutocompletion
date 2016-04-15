@@ -4,6 +4,7 @@ import unicodecsv as csv
 from tqdm import *
 from collections import defaultdict
 import os
+from relations.relation_utils import rel_header_farmacoterms as pharma_header
 
 mapping_header = ["cui","term","lan","source"]
 
@@ -43,6 +44,8 @@ def get_terms(filename):
 
 
 def write_terms(umls_dir, codes, filename_out,sourcename,map_key, source_out):
+    unique_terms = set()
+
     count = 0
     write_source=source_out
     with open(os.path.join(output_folder,filename_out),"wb") as outf:
@@ -57,9 +60,11 @@ def write_terms(umls_dir, codes, filename_out,sourcename,map_key, source_out):
                         write_source =t[2]
                     count +=1
                     w.writerow([mapping["cui"],t[0],map_language(t[1]),write_source+"-ct"])
+                    unique_terms.add(t[0])
             except KeyError:
-                pass
+                continue
     print "counted terms", count
+    log_unique_terms(unique_terms, sourcename)
 
 def umls_mesh_mappings(umls_dir):
     # print "MESH mappings"
@@ -85,6 +90,44 @@ def umls_loinc_mappings(umls_dir):
     codes = get_terms(filename)
 
     write_terms(umls_dir, codes, "mapped_loinc_terms.csv","LNC","CODE", "LOINC")
+
+def umls_pharma_mappings():
+    sourcename = "pharma_kompas"
+    filename = "relations/data/farmaco_grouped_terms.csv"
+    term_by_cui = defaultdict(set)
+    unique_terms=set()
+
+    for r in read_rows(filename, delimiter="|",header=pharma_header):
+
+        if r["cuis"]=="":
+            continue
+
+        cuis = r["cuis"].split(";")
+        for cui in cuis:
+            term_by_cui[cui].add(r["term"])
+
+    cuis = list(term_by_cui.keys())
+    cuis.sort()
+
+    with open("additional_terms/mapped_pharma_kompas_terms.csv","wb") as outf:
+        w = csv.writer(outf, encoding="utf-8",delimiter="|")
+        w.writerow(mapping_header)
+        for cui in cuis:
+            for term in term_by_cui[cui]:
+                w.writerow([cui,term,"DUT",sourcename+"-ct"])
+
+    log_unique_terms(unique_terms, sourcename)
+# cui|term|lan|source
+# C0362109|amoxicilline+clavulanaat|DUT|LOINC-ct
+
+
+def log_unique_terms(unique_terms, source):
+    outfname = os.path.join(input_folder,"unique_mapped_terms_"+source+".csv")
+    with open(outfname,"wb") as outf:
+        w = csv.writer(outf, delimiter="|",encoding="utf-8")
+        for t in unique_terms:
+            w.writerow([t])
+
 
 def map_language(l):
     if l == "en":

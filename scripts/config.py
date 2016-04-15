@@ -1,4 +1,5 @@
-add_termfiles = ["snomed",
+add_termfiles = ["pharma_kompas",
+                "snomed",
                 "loinc",
                 "customctcue",
                 "mesh"
