@@ -3,9 +3,64 @@ import unicodecsv as csv
 import re
 import math
 import os
+from pprint import pprint
+
+# Class that can manages the readers from the files with
+# terms from additional sources
+class Additional_Termreader():
+
+    def __init__(self,filenames):
+        self.fnames=filenames
+
+        self.datareaders = []
+        for f in filenames:
+            self.datareaders.append(self.term_reader(f))
+
+        self.current = []
+        for dr in self.datareaders:
+            self.current.append(next(dr))
+
+    def get_terms(self,cui,group, term):
+        for i,cur in enumerate(self.current):
+            if cur and cur["cui"]==cui:
+                while cur and cur["cui"]==cui:
 
 
-def read_rrf(filename, header, wanted, delimiter="|"):
+                    group.append({"STR":cur["term"],"LAT":self.set_lan(cur["lan"]),"SAB":cur["source"],"TS":"NP","TTY":"","ISPREF":"Y","CODE":"None","SCUI":"None","non_umls":True***REMOVED***)
+
+                    try:
+                        if self.datareaders[i]:
+                            self.current[i] = next(self.datareaders[i])
+                            cur = self.current[i]
+                    except StopIteration:
+                        self.datareaders[i]=None
+                        self.current[i]=None
+                        cur = self.current[i]
+                        print "iterations ended for extra terms", self.fnames[i]
+
+        # if cui == "C0037369":
+        #     print "result term reader", cui
+        #     pprint(group)
+
+        return group
+
+    def term_reader(self, filename):
+        print "term reader initialized", filename
+        with open(filename, "rb") as f:
+            datareader = csv.reader(f, encoding="utf-8", delimiter=str("|"))
+            header = next(datareader)
+            for row in datareader:
+                result_row = dict(zip(header,row))
+                yield result_row
+
+    def set_lan(self, lan):
+        if lan == "en":
+            return "ENG"
+        if lan == "nl":
+            return "DUT"
+        return lan
+
+def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
     with open(filename, "rb") as f:
         datareader = csv.reader(f, encoding="utf-8", delimiter=str(delimiter))
         first = next(datareader)
@@ -22,6 +77,9 @@ def read_rrf(filename, header, wanted, delimiter="|"):
             if cui == tmp['CUI']:
                 group.append(row)
             else:
+                # Add the terms from different sources
+                if add_termreader!=None:
+                    group = add_termreader.get_terms(cui, group, tmp["STR"])
                 yield (cui, group)
 
                 # reset
@@ -29,7 +87,7 @@ def read_rrf(filename, header, wanted, delimiter="|"):
                 group = [row]
 
 
-def read_conso(umls_dir):
+def read_conso(umls_dir, add_termfiles=None):
     header = [
         "CUI",
         "LAT",
@@ -51,13 +109,22 @@ def read_conso(umls_dir):
         "CVF"
     ]
 
-    wanted = ["LAT", "SAB", "STT", "TS", "ISPREF", "TTY", "STR"]
+    wanted = ["LAT", "SAB", "TS", "ISPREF", "TTY", "STR","SCUI","CODE"]
+
+    additional_terms=None
+    if add_termfiles:
+        additional_terms = Additional_Termreader(add_termfiles)
 
     filename = os.path.join(umls_dir, "MRCONSO.RRF")
-    for cui, group in read_rrf(filename, header, wanted):
+
+    for cui, group in read_rrf(filename, header, wanted, add_termreader=additional_terms):
+        # print "curr cui",cui
         filtered = []
         types = []
         preferred = None
+
+        # if cui == "C0037369":
+        #     print "smoking found in read conso", [g["STR"] for g in group]
 
         for g in group:
             # Get first "english preferred" term available
@@ -65,6 +132,7 @@ def read_conso(umls_dir):
                 preferred = g["STR"]
 
             if check_row(g):
+
                 row = { k: g[k] for k in wanted ***REMOVED***
                 row["normal"] = normalize(row["STR"])
                 filtered.append(row)
@@ -75,6 +143,8 @@ def read_conso(umls_dir):
                 if match and match.groups():
                     types.append(match.groups()[0].strip(" [()]"))
 
+        # if cui == "C0037369":
+        #     print "smoking yielded in read conso", [g["STR"] for g in filtered]
         yield (cui, filtered, types, preferred)
 
 
@@ -96,8 +166,8 @@ def read_sty(umls_dir):
         yield (cui, filtered)
 
 
-def merged_rows(umls_dir):
-    return izip(read_conso(umls_dir), read_sty(umls_dir))
+def merged_rows(umls_dir, add_termfiles=None):
+    return izip(read_conso(umls_dir, add_termfiles=add_termfiles), read_sty(umls_dir))
 
 
 _digits = re.compile('\d')
@@ -168,7 +238,7 @@ def get_term(row):
     return normalize(row['STR'])
 
 
-def check_row(row):
+def check_row(row, umls=True):
     languages = ['ENG', 'DUT']
 
     obsolete = [
@@ -207,16 +277,18 @@ def check_row(row):
     ]
 
     # Skip records that are too long, have Pat.mo.dnt things in it or aren't prefered/obsolete
-    return len(row['STR']) < 32 and \
+    verdict = len(row['STR']) < 32 and \
         row['STR'].count(".") < 3 and \
         row['STR'].count(":") < 3 and \
-        not re.search(r"(nos|NOS)$", row['STR']) and \
+        not re.search(r"(nos|NOS)$", row['STR'])
+    if umls:
+        verdict = verdict and \
         row['ISPREF'] == 'Y' and \
         row['LAT'] in languages and \
         row['TTY'] not in ["PM"] and \
         row['TTY'] not in obsolete and \
         row['SAB'] not in crazy_sources
-
+    return verdict
 
 def can_skip_cat(sty):
     skip_categories = [
@@ -300,9 +372,20 @@ def normalize(term):
     return term.strip(" ,-")
 
 
-def unique_terms(seq, key):
+def unique_terms(seq, key, cui=None):
     seen = set()
-    return [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
+
+    # if cui and cui == "C0037369":
+    #     print "before unique"
+    #     print [x["normal"] for x in seq]
+
+    uniques = [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
+
+    # if cui and cui == "C0037369":
+    #     print "after unique"
+    #     print [x["normal"] for x in seq]
+
+    return uniques
 
 
 TTY_mapping = {
@@ -552,3 +635,18 @@ def lookup(abbr):
         return TTY_mapping[abbr]
     except:
         return "UNKNOWN"
+
+
+# generator that reads CSV files and gives them back in dictionary format
+def read_rows(file_name, delimiter=",", header=None, replace_header=False):
+    with open(file_name, "rU") as f:
+        datareader = csv.reader(f, encoding="utf-8", delimiter=str(delimiter), errors='replace')
+        if not header and not replace_header:
+            header = next(datareader)
+        if replace_header:
+            x = next(datareader)
+            if header == None:
+                print "header not replaced because no header was specified"
+                header=x
+        for row in datareader:
+            yield dict(zip(header, row))
