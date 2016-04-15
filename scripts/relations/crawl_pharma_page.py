@@ -36,9 +36,6 @@ def dictify(ul):
 
 def extract():
 
-
-
-
     print "get html"
     html = urllib2.urlopen(url_pharma).read()
     soup = BeautifulSoup(html, "html.parser")
@@ -93,7 +90,7 @@ def to_file(w, result, i, prev_concept, concepts):
             terms = clean_terms(v)
             for t in terms:
                 print "add term",t, i
-                w.writerow((t, prev_concept))
+                w.writerow((t, i))
             i+=1
 
     return i, concepts
@@ -103,6 +100,7 @@ def clean_terms(terms):
     cleaned = []
     for t in terms:
         t = re.sub("\([^\)]+\)","",t)
+        t = re.sub("in ((niet[ -])?gepegyleerde )?liposomen","")
         cleaned.extend(t.split("/"))
     cleaned = list(set([c.strip() for c in cleaned]))
     cleaned.sort()
@@ -152,6 +150,12 @@ def map_terms():
                     print "all_true", r["cui"]
                     mapped = True
 
+                if len(hits)>2 and not mapped:
+                    temp = hits[0]["cui"]
+                    if all(h["cui"]==temp for h in hits[1:]) and any(h["exact"]==r["term"] for h in hits):
+                        r["cui"]=[temp]
+                        mapped = True
+
                 if not mapped:
                     print r["term"]
                     for i,h in enumerate(hits):
@@ -193,8 +197,17 @@ def map_terms():
 
 def temp_separate():
     from collections import defaultdict
-    terms = defaultdict(set)
-    term_rels = defaultdict(set)
+    terms = defaultdict(lambda: {"rels":set(),"cuis":set()})
+
+    concepts = defaultdict(list)
+    for r in read_rows("data/farmaco_terms.csv", header = ["term","pharma_concept"]):
+        concepts[r["term"]].append(r["pharma_concept"])
+
+    added_cuis = defaultdict(list)
+    for r in read_rows("data/farmaco_terms_to_do_mapping_DONE.csv", header = ["cuis","term"]):
+        print r
+        if r["cuis"]!="":
+            added_cuis[r["term"]].extend(r["cuis"].split(";"))
 
     for r in read_rows("data/farmaco_mapped_terms_backup.csv", header = ["cuis","term","pharma_concept"]):
         cuis = [x for x in r["cuis"].split(";") if x!='']
@@ -204,28 +217,25 @@ def temp_separate():
         if len(cuis)>1 and cui_mistake:
             cuis = ["".join(cuis)]
 
-        # print cuis
-        terms[r["term"]].update(cuis)
-        term_rels[r["term"]].update(r["pharma_concept"])
+        if cuis == []:
+            cuis = added_cuis[r["term"]]
+
+        terms[r["term"]]["cuis"].update(cuis)
+        terms[r["term"]]["rels"].update(concepts[r["term"]])
 
     all_terms = list(terms.keys())
 
     with open("data/farmaco_grouped_terms.csv", "wb") as outf:
         w = csv.writer(outf, delimiter="|", encoding="utf-8")
         for i,t in enumerate(all_terms):
-            w.writerow([i, t,";".join(terms[t])])
-
-    with open("data/farmaco_term_rels.csv", "wb") as outf:
-        w = csv.writer(outf, delimiter="|", encoding="utf-8")
-        for i,t in enumerate(all_terms):
-            w.writerow([i,";".join(term_rels[t])])
+            w.writerow([";".join(terms[t]["cuis"]), t,";".join(terms[t]["rels"])])
 
     with open("data/farmaco_terms_to_do_mapping.csv","wb") as outf:
         w = csv.writer(outf, delimiter="|", encoding="utf-8")
-        for term, cuis in terms.iteritems():
-            print cuis, len(cuis)
-            if len(cuis)==0:
-                w.writerow([term])
+        for term, info in terms.iteritems():
+            print info["cuis"], len(info["cuis"])
+            if len(info["cuis"])==0:
+                w.writerow([term, ";".join(terms[t]["rels"])])
 
 
 
@@ -245,6 +255,7 @@ def read_rows(file_name, delimiter="|", header=None, replace_header=False):
 
 
 if __name__ == '__main__':
+
     # extract()
 
     # map_terms()

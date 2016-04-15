@@ -138,6 +138,10 @@ if __name__ == '__main__':
             helpers.bulk(elastic, bulk)
             bulk = []
 
+        # REMOVE THIS
+        if counter > 10:
+            break
+
     helpers.bulk(elastic, bulk)
     print "[%s]  Uploading complete." % stamp()
 
