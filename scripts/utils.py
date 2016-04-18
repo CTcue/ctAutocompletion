@@ -3,7 +3,7 @@ import unicodecsv as csv
 import re
 import math
 import os
-from pprint import pprint
+
 
 # Class that can manages the readers from the files with
 # terms from additional sources
@@ -38,9 +38,7 @@ class Additional_Termreader():
                         cur = self.current[i]
                         print "iterations ended for extra terms", self.fnames[i]
 
-        # if cui == "C0037369":
-        #     print "result term reader", cui
-        #     pprint(group)
+
 
         return group
 
@@ -60,9 +58,11 @@ class Additional_Termreader():
             return "DUT"
         return lan
 
-def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
+
+def read_rrf(filename, header, wanted, delimiter="|"):
     with open(filename, "rb") as f:
         datareader = csv.reader(f, encoding="utf-8", delimiter=str(delimiter))
+
         first = next(datareader)
         tmp = dict(zip(header, first))
         row = { k: tmp[k] for k in wanted ***REMOVED***
@@ -77,9 +77,6 @@ def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
             if cui == tmp['CUI']:
                 group.append(row)
             else:
-                # Add the terms from different sources
-                if add_termreader!=None:
-                    group = add_termreader.get_terms(cui, group, tmp["STR"])
                 yield (cui, group)
 
                 # reset
@@ -87,7 +84,7 @@ def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
                 group = [row]
 
 
-def read_conso(umls_dir, add_termfiles=None):
+def read_conso(umls_dir):
     header = [
         "CUI",
         "LAT",
@@ -111,20 +108,16 @@ def read_conso(umls_dir, add_termfiles=None):
 
     wanted = ["LAT", "SAB", "TS", "ISPREF", "TTY", "STR","SCUI","CODE"]
 
-    additional_terms=None
-    if add_termfiles:
-        additional_terms = Additional_Termreader(add_termfiles)
+    # additional_terms=None
+    # if add_termfiles:
+    #     additional_terms = Additional_Termreader(add_termfiles)
 
     filename = os.path.join(umls_dir, "MRCONSO.RRF")
 
-    for cui, group in read_rrf(filename, header, wanted, add_termreader=additional_terms):
-        # print "curr cui",cui
+    for cui, group in read_rrf(filename, header, wanted):
         filtered = []
         types = []
         preferred = None
-
-        # if cui == "C0037369":
-        #     print "smoking found in read conso", [g["STR"] for g in group]
 
         for g in group:
             # Get first "english preferred" term available
@@ -132,7 +125,6 @@ def read_conso(umls_dir, add_termfiles=None):
                 preferred = g["STR"]
 
             if check_row(g):
-
                 row = { k: g[k] for k in wanted ***REMOVED***
                 row["normal"] = normalize(row["STR"])
                 filtered.append(row)
@@ -143,8 +135,6 @@ def read_conso(umls_dir, add_termfiles=None):
                 if match and match.groups():
                     types.append(match.groups()[0].strip(" [()]"))
 
-        # if cui == "C0037369":
-        #     print "smoking yielded in read conso", [g["STR"] for g in filtered]
         yield (cui, filtered, types, preferred)
 
 
@@ -166,8 +156,8 @@ def read_sty(umls_dir):
         yield (cui, filtered)
 
 
-def merged_rows(umls_dir, add_termfiles=None):
-    return izip(read_conso(umls_dir, add_termfiles=add_termfiles), read_sty(umls_dir))
+def merged_rows(umls_dir):
+    return izip(read_conso(umls_dir), read_sty(umls_dir))
 
 
 _digits = re.compile('\d')
