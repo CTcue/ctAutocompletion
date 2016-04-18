@@ -104,9 +104,14 @@ function findUserLikes(query, userId, environment) {
 }
 
 function findExact(query) {
-    var wantedTerm = query.trim().toLowerCase();
+    // Exact term is indexed without dashes
+    var wantedTerm = query
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
 
-    // Filter out CUI codes that the user already selected
+
     return function(callback) {
         var elastic_query =  {
             "_source": source,
@@ -119,7 +124,6 @@ function findExact(query) {
                 }
             }
         };
-
 
         var queryObj = {
             "index" : 'autocomplete',
