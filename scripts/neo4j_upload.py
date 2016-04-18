@@ -9,6 +9,7 @@ from py2neo.packages.httpstream import http
 # To avoid socket timeout when clearing the old graph
 http.socket_timeout = 9999
 
+
 def stamp():
     return time.strftime("%Y-%m-%d %H:%M")
 
@@ -60,7 +61,7 @@ def upload(umls_dir):
             MERGE (b:Concept { cui: '%s' })
             WITH a, b
                 CREATE (b)-[:%s]->(a)
-            RETURN a,b
+            RETURN a, b
         """ % (row["CUI1"], row["CUI2"], row["RELA"])
         tx.append(cypher)
 
