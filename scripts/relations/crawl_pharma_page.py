@@ -238,6 +238,19 @@ def temp_separate():
                 w.writerow([term, ";".join(terms[t]["rels"])])
 
 
+def generate_neo4j_files():
+    relations = set()
+
+    with open("data/neo4j_farmaco_concepts.csv","wb") as outf:
+        w = csv.writer(outf,encoding="utf-8",delimiter="|")
+        w.writerow("")
+        for r in read_rows("data/farmaco_concepts.csv", header = ["term","id","parents"]):
+            w.writerow()
+
+
+    for r in read_rows("data/farmaco_grouped_terms.csv"):
+
+
 
 # generator that reads CSV files and gives them back in dictionary format
 def read_rows(file_name, delimiter="|", header=None, replace_header=False):
