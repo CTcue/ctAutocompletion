@@ -38,10 +38,6 @@ class Additional_Termreader():
                         cur = self.current[i]
                         print "iterations ended for extra terms", self.fnames[i]
 
-        # if cui == "C0037369":
-        #     print "result term reader", cui
-        #     pprint(group)
-
         return group
 
     def term_reader(self, filename):
