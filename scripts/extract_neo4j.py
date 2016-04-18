@@ -1,4 +1,4 @@
-from relations.get_UMLS_relations import extract_rels
+from relations.get_UMLS_relations import extract_rels, write_neo4j_query, read_CUIS
 import argparse
 import os
 
@@ -18,3 +18,6 @@ if __name__ == '__main__':
         record_CUIs(umls_dir)
 
     extract_rels(umls_dir)
+
+
+
