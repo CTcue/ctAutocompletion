@@ -138,7 +138,6 @@ def record_CUIs(umls_dir, add_termfiles=None):
         print "[%s]  Recording complete." % stamp()
 
 
-
 if __name__ == '__main__':
     import config
 
