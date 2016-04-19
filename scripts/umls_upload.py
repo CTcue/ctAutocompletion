@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 from elasticsearch import Elasticsearch, helpers
-from py2neo import neo4j, authenticate
+from py2neo import neo4j, authenticate, Graph
 from multiprocessing import Pool
 from functools import partial
 from tqdm import *
@@ -13,6 +13,7 @@ import time
 import json
 import re
 import os
+import sys
 
 
 
@@ -90,7 +91,6 @@ def batch_importer(graph, statements):
 
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Import UMLS MRREL relations into ctAutocompletion")
     parser.add_argument('--dir', dest='dir', required=True, help='Directory containing the UMLS *.RRF files')
@@ -100,19 +100,26 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 
+    try:
+        authenticate("localhost:7474", "neo4j", "test123")
+        db = Graph()
+    except Exception as err:
+        print 'Provide a valid neo4j username and password'
+        sys.exit(0)
+
+
+
     counter = 0
     usedCui = set();
-    elastic = Elasticsearch()
 
-    print "[%s]  Creating index: `%s`." % (stamp(), args.index)
-    elastic.indices.delete(index=args.index, ignore=[400, 404])
-    elastic.indices.create(index=args.index, body=json.load(open("../_mappings/autocomplete.json")))
+    # elastic = Elasticsearch()
 
+    # print "[%s]  Creating index: `%s`." % (stamp(), args.index)
+    # elastic.indices.delete(index=args.index, ignore=[400, 404])
+    # elastic.indices.create(index=args.index, body=json.load(open("../_mappings/autocomplete.json")))
+    # print "[%s]  Starting upload." % stamp()
 
-    print "[%s]  Starting upload." % stamp()
-
-
-    bulk = []
+    # bulk = []
 
     for (cui, conso, types, preferred), (scui, sty) in tqdm(utils.merged_rows(args.dir)):
         if not conso or utils.can_skip_cat(sty):
@@ -120,36 +127,36 @@ if __name__ == '__main__':
 
         usedCui.add(cui)
 
-        for g in utils.unique_terms(conso, 'normal'):
-            exact = g["normal"].replace("-", " ").lower()
-            types = list(set(sty + types))
+        # for g in utils.unique_terms(conso, 'normal'):
+        #     exact = g["normal"].replace("-", " ").lower()
+        #     types = list(set(sty + types))
 
-            # If normalized concept is reduced to empty string
-            if not exact or exact == "":
-                continue
+        #     # If normalized concept is reduced to empty string
+        #     if not exact or exact == "":
+        #         continue
 
-            bulk.append({
-                "_index" : args.index,
-                "_type"  : "records",
-                "cui"    : cui,
-                "pref"   : preferred,    # UMLS preferred term
-                "str"    : g["normal"],  # Indexed for autocompletion
-                "exact"  : exact,        # Indexed for exact term lookup
-                "lang"   : g["LAT"],
-                "source" : g["SAB"],
-                "types"  : types
-            })
+        #     bulk.append({
+        #         "_index" : args.index,
+        #         "_type"  : "records",
+        #         "cui"    : cui,
+        #         "pref"   : preferred,    # UMLS preferred term
+        #         "str"    : g["normal"],  # Indexed for autocompletion
+        #         "exact"  : exact,        # Indexed for exact term lookup
+        #         "lang"   : g["LAT"],
+        #         "source" : g["SAB"],
+        #         "types"  : types
+        #     })
 
-        counter += 1
+        # counter += 1
 
-        if counter > 50:
-            counter = 0
-            helpers.bulk(elastic, bulk)
-            bulk = []
+        # if counter > 50:
+        #     counter = 0
+        #     helpers.bulk(elastic, bulk)
+        #     bulk = []
 
 
     # Insert remaining concepts
-    helpers.bulk(elastic, bulk)
+    # helpers.bulk(elastic, bulk)
 
     print "[%s]  Uploading complete, added %s CUI's" % (stamp(), len(usedCui))
 
@@ -158,40 +165,32 @@ if __name__ == '__main__':
     # NEO4J #
     #########
 
-    # try:
-    #     authenticate("localhost:7474", "neo4j", "test123")
-    #     db = Graph()
-    # except Exception as err:
-    #     print 'Provide a valid Neo4j username and password'
+    # Clear all neo4j entries
+    db.delete_all()
+    db.cypher.execute("CREATE constraint ON (c:Concept) assert c.cui is unique")
 
 
-    # # Clear all neo4j entries
-    # db.delete_all()
-    # db.cypher.execute("CREATE constraint ON (c:Concept) assert c.cui is unique")
+    counter = 0
+    batch_size = 50
+    statements = []
 
+    print "[%s] Begin read of MRREL" % stamp()
 
-    # counter = 0
-    # batch_size = 30
-    # statements = []
+    for row in tqdm(utils.read_rows(args.dir + "/MRREL.RRF", header=rel_header, delimiter="|")):
+        if canSkip(row):
+            continue
 
-    # print "[%s] Begin read of MRREL" % stamp()
+        if not row["CUI1"] in usedCui or not row["CUI2"] in usedCui:
+            continue
 
-    # for row in tqdm(utils.read_rows(args.dir + "/MRREL.RRF", header=rel_header, delimiter="|")):
-    #     if canSkip(row):
-    #         continue
+        counter += 1
+        statements.append((row["CUI1"], row["CUI2"], row["RELA"]))
 
-    #     if not row["CUI1"] in usedCui or not row["CUI2"] in usedCui:
-    #         continue
+        if counter > batch_size:
+            batch_importer(db, statements)
+            statements = []
+            counter = 0
 
-    #     counter += 1
-    #     statements.append((row["CUI1"], row["CUI2"], row["RELA"]))
-
-    #     if counter > batch_size:
-    #         batch_importer(db, statements)
-    #         statements = []
-    #         counter = 0
-
-    # # Import remaining statements
-    # batch_importer(db, statements)
-
-    # print "[%s] Complete batch import of relations" % stamp()
+    # Import remaining statements
+    batch_importer(db, statements)
+    print "[%s] Complete batch import of relations" % stamp()

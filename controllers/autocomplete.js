@@ -107,7 +107,7 @@ function findExact(query) {
     // Exact term is indexed without dashes
     var wantedTerm = query
         .replace(/-/g, " ")
-        .replace(/s+/g, " ")
+        .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
 
