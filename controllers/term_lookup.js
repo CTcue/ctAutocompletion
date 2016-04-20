@@ -1,14 +1,20 @@
 
 /** Module dependencies. */
 
-var config  = require('../config/config.js');
+const config  = require('../config/config.js');
 
-var guess_origin = require("./lib/guess_origin");
-var _ = require("lodash");
+const guess_origin = require("./lib/guess_origin");
+const _ = require("lodash");
 
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
-
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+    }
+  ]
+});
 
 const source = ["cui", "str", "exact", "pref","types"];
 

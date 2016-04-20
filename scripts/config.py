@@ -1,13 +1,16 @@
-add_termfiles = ["pharma_kompas",
-                "snomed",
-                "loinc",
-                "customctcue",
-                "mesh"
-                ]
+add_termfiles = [
+    "pharma_kompas",
+    "snomed",
+    "loinc",
+    "customctcue",
+    "mesh"
+]
 
-add_termfiles = ["additional_terms/mapped_"+atf+"_terms.csv" for atf in add_termfiles]
+add_termfiles = ["additional_terms/mapped_" + atf + "_terms.csv" for atf in add_termfiles]
 
-# sources = {"GGL_translate":(""),"LOINC","snomed_NL", "DHD"}
+
+###
+# Lydia's hardcoded file paths
 
 MeSH_files = {
     "NL_file1"      : "/Users/CTcue/ctcue_code/data/mesh_NTvG/MH2007_vertaling.csv",

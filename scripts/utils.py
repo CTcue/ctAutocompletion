@@ -3,16 +3,15 @@ import unicodecsv as csv
 import re
 import math
 import os
-from pprint import pprint
+
 
 # Class that can manages the readers from the files with
 # terms from additional sources
 class Additional_Termreader():
-
-    def __init__(self,filenames):
-        self.fnames=filenames
-
+    def __init__(self, filenames):
+        self.fnames = filenames
         self.datareaders = []
+
         for f in filenames:
             self.datareaders.append(self.term_reader(f))
 
@@ -20,13 +19,21 @@ class Additional_Termreader():
         for dr in self.datareaders:
             self.current.append(next(dr))
 
-    def get_terms(self,cui,group, term):
-        for i,cur in enumerate(self.current):
-            if cur and cur["cui"]==cui:
-                while cur and cur["cui"]==cui:
-
-
-                    group.append({"STR":cur["term"],"LAT":self.set_lan(cur["lan"]),"SAB":cur["source"],"TS":"NP","TTY":"","ISPREF":"Y","CODE":"None","SCUI":"None","non_umls":True})
+    def get_terms(self, cui, group, term):
+        for i, cur in enumerate(self.current):
+            if cur and cur["cui"] == cui:
+                while cur and cur["cui"] == cui:
+                    group.append({
+                        "STR": cur["term"],
+                        "LAT": self.set_lan(cur["lan"]),
+                        "SAB": cur["source"],
+                        "TS" : "NP",
+                        "TTY": "",
+                        "ISPREF":"Y",
+                        "CODE":"None",
+                        "SCUI":"None",
+                        "non_umls": True
+                    })
 
                     try:
                         if self.datareaders[i]:
@@ -39,6 +46,7 @@ class Additional_Termreader():
                         print "iterations ended for extra terms", self.fnames[i]
 
         return group
+
 
     def term_reader(self, filename):
         print "term reader initialized", filename
@@ -55,6 +63,7 @@ class Additional_Termreader():
         if lan == "nl":
             return "DUT"
         return lan
+
 
 def read_rrf(filename, header, wanted, delimiter="|", add_termreader=None):
     with open(filename, "rb") as f:
@@ -107,28 +116,22 @@ def read_conso(umls_dir, add_termfiles=None):
 
     wanted = ["LAT", "SAB", "TS", "ISPREF", "TTY", "STR","SCUI","CODE"]
 
-    additional_terms=None
+    additional_terms = None
     if add_termfiles:
         additional_terms = Additional_Termreader(add_termfiles)
 
     filename = os.path.join(umls_dir, "MRCONSO.RRF")
 
     for cui, group in read_rrf(filename, header, wanted, add_termreader=additional_terms):
-        # print "curr cui",cui
         filtered = []
         types = []
         preferred = None
 
-        # if cui == "C0037369":
-        #     print "smoking found in read conso", [g["STR"] for g in group]
-
         for g in group:
-            # Get first "english preferred" term available
             if not preferred and g["TS"] == "P" and g["LAT"] == "ENG":
                 preferred = g["STR"]
 
             if check_row(g):
-
                 row = { k: g[k] for k in wanted }
                 row["normal"] = normalize(row["STR"])
                 filtered.append(row)
@@ -139,8 +142,6 @@ def read_conso(umls_dir, add_termfiles=None):
                 if match and match.groups():
                     types.append(match.groups()[0].strip(" [()]"))
 
-        # if cui == "C0037369":
-        #     print "smoking yielded in read conso", [g["STR"] for g in filtered]
         yield (cui, filtered, types, preferred)
 
 
@@ -358,7 +359,6 @@ def normalize(term):
     # Using "PF preferred terms" most machine variants
     # (i.e. First last is notated as Last, First)
     # However, the dutch terms are all labeled as PF?
-
     term, n = re.subn(r"(\w+), ([a-zA-Z- ]+)-$", r"\2\1", term, flags=re.U)
 
     # If replacements made, also lowercase it or you get Tumor, Buik- => BuikTumor
@@ -370,18 +370,7 @@ def normalize(term):
 
 def unique_terms(seq, key, cui=None):
     seen = set()
-
-    # if cui and cui == "C0037369":
-    #     print "before unique"
-    #     print [x["normal"] for x in seq]
-
-    uniques = [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
-
-    # if cui and cui == "C0037369":
-    #     print "after unique"
-    #     print [x["normal"] for x in seq]
-
-    return uniques
+    return [x for x in seq if x[key].lower() not in seen and not seen.add(x[key].lower())]
 
 
 TTY_mapping = {

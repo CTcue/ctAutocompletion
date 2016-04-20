@@ -25,11 +25,17 @@ else {
 
 // Assume neo4j is active
 config.neo4j["is_active"] = true;
-
-
 config.path = 'http://'+ config.host + ':' + config.port;
 
 config.elastic = "http://localhost:9200";
+
+try {
+    config.elastic_shield = require(secretConfig + 'local_elasticsearch_shield')._shield;
+}
+catch (err) {
+    // console.log("Cannot find elasticsearch authentication");
+    config.elastic_shield = "";
+}
 
 config.mongodb = {
     "path" : "mongodb://localhost/umls"
