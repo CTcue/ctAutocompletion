@@ -17,8 +17,15 @@ var Trie = require('./lib/trie');
 var _ = require("lodash");
 
 
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+***REMOVED***
+  ]
+***REMOVED***);
 
 
 const source = ["cui", "str", "exact", "pref", "source", "types"];

@@ -1,18 +1,25 @@
 
-var config  = require('../config/config.js');
-var neo4j = require('neo4j');
-var _ = require("lodash");
+const config  = require('../config/config.js');
+const neo4j = require('neo4j');
+const _ = require("lodash");
 
-var db = new neo4j.GraphDatabase({
+const db = new neo4j.GraphDatabase({
     url: 'http://localhost:7474',
     auth: config.neo4j
 ***REMOVED***);
 
 
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+***REMOVED***
+  ]
+***REMOVED***);
 
-var getCategory = require("./lib/category.js");
+const getCategory = require("./lib/category.js");
 
 const source = ["str", "lang", "types"];
 const language_map = {

@@ -1,8 +1,17 @@
 
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
+const config  = require('../config/config.js');
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+***REMOVED***
+  ]
+***REMOVED***);
 
 var getCategory = require("./lib/category.js");
+
 
 const source = ["str", "types"];
 
@@ -38,9 +47,9 @@ module.exports = function *() {
       var types = result[0]._source.types;
 
       return this.body = {
-        "type"      : "-",
-        "category"  : getCategory(types),
-        "terms"     : result.map(function(item) { return item._source.str; ***REMOVED***)
+          "type"     : "-",
+          "category" : getCategory(types),
+          "terms"    : result.map(function(item) { return item._source.str; ***REMOVED***)
   ***REMOVED***;
   ***REMOVED***
 
