@@ -71,19 +71,23 @@ def get_CUIS(neo4jstyle=True):
                         wrel.writerow([cui, t, "of_type"])
                         rel_overview.add(t)
 
-        with open("relations/data/overview_relation_types.csv","wb") as outf:
+        with open("relations/data/overview_concept_types.csv","wb") as outf:
             w =  csv.writer(outf, encoding="utf-8",delimiter = ",")
             w.writerow(["rel_type","rel_source"])
             for r in rel_overview:
                 w.writerow([r])
 
 
-        return list(cuis.keys())
+        return set(cuis.keys())
 
     return cuis
 
 
 def canSkip(row, used_CUIs):
+
+    if row["SAB"] not in ["SNOMEDCT_US", "ICD10CM"]:
+        return True
+
 
     if row["CUI1"]=="" or row["CUI2"]=="":
         return True
@@ -91,11 +95,18 @@ def canSkip(row, used_CUIs):
     if row["CUI1"] == row["CUI2"]:
         return True
 
-    if row["SAB"] not in ["SNOMEDCT_US", "ICD10CM"]:
+
+    if row["RELA"] in ["inverse_isa","has_expanded_form", "was_a"]:
         return True
 
-    if row["RELA"] in ["","inverse_isa","has_expanded_form", "was_a"]:
+    if row["SAB"] == "" and row["SAB"]!="ICD10CM":
         return True
+
+    if row["SAB"]=="ICD10CM":
+        if row["REL"] == "CHD":
+            row["RELA"]="is_a_ICD10"
+        else:
+            return True
 
     if row["CUI1"] in used_CUIs and row["CUI2"] in used_CUIs:
         return False
