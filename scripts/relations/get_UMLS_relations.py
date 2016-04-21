@@ -61,7 +61,7 @@ def extract_rels(umls_dir):
                 continue
 
             counts[(row["SAB"],row["RELA"])]+=1
-            w.writerow([row["CUI1"],row["CUI2"],row["RELA"],row["SAB"]])
+            w.writerow([row["CUI2"], row["CUI1"],row["RELA"],row["SAB"]])
 
             rel_count+=1
 
