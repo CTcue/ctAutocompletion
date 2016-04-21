@@ -82,7 +82,8 @@ def get_CUIS(neo4jstyle=True):
 
     return cuis
 
-
+useless_relations = ["inverse_isa","has_expanded_form",
+                    "was_a", "mapped_to", "mapped_from"]
 def canSkip(row, used_CUIs):
 
     if row["SAB"] not in ["SNOMEDCT_US", "ICD10CM"]:
@@ -96,7 +97,7 @@ def canSkip(row, used_CUIs):
         return True
 
 
-    if row["RELA"] in ["inverse_isa","has_expanded_form", "was_a"]:
+    if row["RELA"] in useless_relations:
         return True
 
     if row["SAB"] == "" and row["SAB"]!="ICD10CM":
