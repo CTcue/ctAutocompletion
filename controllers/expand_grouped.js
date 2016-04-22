@@ -8,9 +8,15 @@ var db = new neo4j.GraphDatabase({
     auth: config.neo4j
 });
 
-
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+    }
+  ],
+});
 
 var getCategory = require("./lib/category.js");
 
