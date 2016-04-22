@@ -7,6 +7,19 @@ import argparse
 import time
 import json
 
+_auth = ("", "")
+
+try:
+    basepath = os.path.dirname(__file__)
+    config_filename = os.path.abspath(os.path.join(basepath, "..", "..", "ctcue-config", "local_elasticsearch_shield.json"))
+
+    with open(config_filename) as config:
+        _config = json.load(config)
+        _auth   = _config["_shield"].split(":")
+
+except Exception as err:
+    print err
+
 
 def read_rows(filename, delimiter=";"):
     with open(filename, "rb") as f:
@@ -29,7 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('--index', dest='index', default="dbc_zorgproduct", help='Elasticsearch index for DBC')
     args = parser.parse_args()
 
-    elastic = Elasticsearch()
+    elastic = Elasticsearch(http_auth=_auth)
     bulk = []
     counter = 1
 
