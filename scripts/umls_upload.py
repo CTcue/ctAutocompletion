@@ -16,6 +16,16 @@ import os
 import sys
 
 
+try:
+    basepath = os.path.dirname(__file__)
+    config_filename = os.path.abspath(os.path.join(basepath, "..", "..", "ctcue-config", "local_elasticsearch_shield.json"))
+
+    with open(config_filename) as config:
+        _config = json.load(config)
+        _auth   = _config["_shield"].split(":")
+
+except Exception as err:
+    print err
 
 """
 MRCONSO contains rows with cui, source and term
@@ -112,7 +122,7 @@ if __name__ == '__main__':
     counter = 0
     usedCui = set();
 
-    # elastic = Elasticsearch()
+    # elastic = Elasticsearch(http_auth=_auth)
 
     # print "[%s]  Creating index: `%s`." % (stamp(), args.index)
     # elastic.indices.delete(index=args.index, ignore=[400, 404])

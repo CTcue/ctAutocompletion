@@ -3,6 +3,11 @@
 from __future__ import unicode_literals
 from elasticsearch import Elasticsearch, helpers
 from py2neo import neo4j, authenticate, Graph
+
+# Fix timeout problem
+from py2neo.packages.httpstream import http
+http.socket_timeout = 9999
+
 from multiprocessing import Pool
 from functools import partial
 from tqdm import *
@@ -14,6 +19,19 @@ import re
 import os
 import sys
 
+_auth = ("", "")
+
+try:
+    basepath = os.path.dirname(__file__)
+    config_filename = os.path.abspath(os.path.join(basepath, "..", "..", "ctcue-config", "local_elasticsearch_shield.json"))
+
+    with open(config_filename) as config:
+        _config = json.load(config)
+        _auth   = _config["_shield"].split(":")
+
+except Exception as err:
+    print err
+
 
 def stamp():
     return time.strftime("%Y-%m-%d %H:%M")
@@ -23,7 +41,7 @@ def canSkip(row):
     if row["CUI1"] == row["CUI2"]:
         return True
 
-    if not row["SAB"] in ["SNOMEDCT_US", "ICD10PCS", "ICD10CM"]:
+    if row["SAB"] not in ["SNOMEDCT_US", "ICD10PCS", "ICD10CM"]:
         return True
 
     if row["RELA"] in ["", "same_as", "inverse_isa", "has_expanded_form", "was_a"]:
@@ -53,11 +71,11 @@ def batch_importer(graph, statements):
 # Upload MRCONSO + additional terms to Elasticsearch
 # Returns set of CUI's inserted
 def insert_autocompletion(args, add_termfiles=None):
-    print "[%s]  Creating index: `%s`." % (stamp(), args.index)
-    elastic = Elasticsearch()
-    elastic.indices.delete(index=args.index, ignore=[400, 404])
-    elastic.indices.create(index=args.index, body=json.load(open("../_mappings/autocomplete.json")))
-    print "[%s]  Starting upload." % stamp()
+    # print "[%s]  Creating index: `%s`." % (stamp(), args.index)
+    # elastic = Elasticsearch(http_auth=_auth)
+    # elastic.indices.delete(index=args.index, ignore=[400, 404])
+    # elastic.indices.create(index=args.index, body=json.load(open("../_mappings/autocomplete.json")))
+    # print "[%s]  Starting upload." % stamp()
 
 
     counter = 0
@@ -70,36 +88,38 @@ def insert_autocompletion(args, add_termfiles=None):
 
         usedCui.add(cui)
 
-        for g in utils.unique_terms(conso, 'normal', cui):
-            exact = g["normal"].replace("-", " ").lower()
-            types = list(set(sty + types))
+        # for g in utils.unique_terms(conso, 'normal', cui):
+        #     exact = g["normal"].replace("-", " ").lower()
+        #     types = list(set(sty + types))
 
-            # If normalized concept is reduced to empty string
-            if not exact or exact == "":
-                continue
+        #     # If normalized concept is reduced to empty string
+        #     if not exact or exact == "":
+        #         continue
 
-            bulk.append({
-                "_index" : args.index,
-                "_type"  : "records",
-                "cui"    : cui,
-                "pref"   : preferred,   # UMLS preferred term
-                "str"    : g["normal"], # Indexed for autocompletion
-                "exact"  : exact,       # Indexed for exact term lookup
-                "lang"   : g["LAT"],
-                "source" : g["SAB"],
-                "votes"  : 10,
-                "types"  : types
-        ***REMOVED***)
+        #     bulk.append({
+        #         "_index" : args.index,
+        #         "_type"  : "records",
+        #         "cui"    : cui,
+        #         "pref"   : preferred,   # UMLS preferred term
+        #         "str"    : g["normal"], # Indexed for autocompletion
+        #         "exact"  : exact,       # Indexed for exact term lookup
+        #         "lang"   : g["LAT"],
+        #         "source" : g["SAB"],
+        #         "votes"  : 10,
+        #         "types"  : types
+        # ***REMOVED***)
 
-        counter += 1
+        # counter += 1
 
-        if counter > 50:
-            counter = 0
-            helpers.bulk(elastic, bulk)
-            bulk = []
+        # if counter > 50:
+        #     counter = 0
+        #     helpers.bulk(elastic, bulk)
+        #     bulk = []
 
-    helpers.bulk(elastic, bulk)
-    print "[%s]  Uploading complete." % stamp()
+    # helpers.bulk(elastic, bulk)
+    # print "[%s]  Uploading complete." % stamp()
+
+    return usedCui
 
 
 def insert_suggestions(args, db, usedCui):
@@ -163,27 +183,24 @@ if __name__ == '__main__':
         authenticate("localhost:7474", args.username, args.password)
         db = Graph()
 
-        # Clear all neo4j entries
-        # db.delete_all()
+        # Clear all neo4j entries (can be a bit slow)
+        print "[%s] Deleting nodes" % stamp()
 
-        print "Deleting nodes"
-        nodesLeft = 100
-        while nodesLeft > 0:
+        remaining = 100
+        while remaining > 0:
             res = db.cypher.execute("""
                 MATCH (n)
                 OPTIONAL MATCH (n)-[r]-()
-                WITH n, r LIMIT 50000
-                DELETE n, r
+                WITH n,r LIMIT 10000
+                DELETE n,r
                 RETURN count(n) as cc
             """)
-            nodesLeft = res[0]["cc"]
+            remaining = res[0]["cc"]
 
-        print "Deleted all nodes"
+        print "[%s] Deleting completed" % stamp()
 
         db.cypher.execute("CREATE constraint ON (c:Concept) assert c.cui is unique")
         db.cypher.execute("CREATE constraint ON (f:Farma_concept) assert f.id is unique")
-
-        print "Created indexes"
 
     except Exception as err:
         print err
@@ -192,18 +209,36 @@ if __name__ == '__main__':
 
 
     # Get additional term files (if they can be found in `additional_terms` directory)
-    add_termfiles = []
+    # add_termfiles = []
 
-    for f in [ "pharma_kompas", "snomed", "loinc", "customctcue", "mesh"]:
-        filename = os.path.abspath(os.path.join(os.path.dirname(__file__), "additional_terms", "mapped_" + f + "_terms.csv"))
+    # for f in [ "pharma_kompas", "snomed", "loinc", "customctcue", "mesh"]:
+    #     filename = os.path.abspath(os.path.join(os.path.dirname(__file__), "additional_terms", "mapped_" + f + "_terms.csv"))
 
-        if os.path.exists(filename):
-            add_termfiles.append(filename)
+    #     if os.path.exists(filename):
+    #         add_termfiles.append(filename)
 
 
     # Update elasticsearch
-    usedCui = insert_autocompletion(args, add_termfiles)
+    # usedCui = insert_autocompletion(args, add_termfiles)
 
     # Add relations into neo4j
-    insert_suggestions(args, db, usedCui)
+    # insert_suggestions(args, db, usedCui)
 
+    print "[%s] Begin load CSV" % stamp()
+
+    # db.cypher.execute("""
+    #     USING PERIODIC COMMIT
+    #     LOAD CSV FROM 'file:///D:/ctcue/ctAutocompletion/scripts/neo4j_csvs_forbulkupload/umls_concepts.csv' AS line
+    #     CREATE (:Concept { cui: line[0] ***REMOVED***)
+    # """)
+
+    db.cypher.execute("""
+        USING PERIODIC COMMIT
+        LOAD CSV FROM 'file:///D:/ctcue/ctAutocompletion/scripts/neo4j_csvs_forbulkupload/relations_concepts.csv' AS line
+        MATCH (a:Concept { cui: line[0] ***REMOVED***), (b:Concept { cui: line[1] ***REMOVED***)
+        CREATE (a)-[:ISA]->(b)
+    """)
+
+
+
+    print "[%s] CSV loading completed." % stamp()
