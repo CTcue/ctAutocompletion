@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 from elasticsearch import Elasticsearch, helpers
 from mrjob.job import MRJob
+import ConfigParser
 import json
 import time
 import os
@@ -29,12 +30,12 @@ skip_categories = [
     "Self-help or Relief Organization"
 ]
 
+
 class AggregatorJob(MRJob):
     """
     Groups unique synonyms by CUI.
     Output format: (CUI, [STR, STR, ...])
     """
-    # INPUT_PROTOCOL = TextProtocol
 
     def mapper(self, key, value):
         split = value.decode("utf-8").split("|")
@@ -66,6 +67,12 @@ class AggregatorJob(MRJob):
 
             yield CUI, ["A", STR]
 
+        # Additional Terms header
+        elif len(split) == 5:
+            (CUI, STR, LAT, SAB, _) = split
+
+            yield CUI, ["A", STR]
+
         # MRSTY Header
         elif len(split) == 7:
             (CUI, TUI, STN, STY, ATUI, CVF, _) = split
@@ -85,34 +92,78 @@ class AggregatorJob(MRJob):
             elif value[0] == "B":
                 types.add(value[1])
 
+        if not terms or not types:
+            return
+
         # Check types
-        if not terms or not types or any((x for x in types if x in skip_categories)):
+        if any((x for x in types if x in skip_categories)):
             return
 
         out = "%s\t%s\t%s" % (key, "|".join(types), "|".join(terms))
         print out.encode("utf-8")
 
 
+def absPath(*path):
+    basepath = os.path.dirname(__file__)
+    return os.path.abspath(os.path.join(basepath, *path))
+
+def isFile(*path):
+    return os.path.isfile(absPath(*path))
+
 
 if __name__ == "__main__":
-    _auth = ("", "")
-    index = "autocomplete2"
 
-    try:
-        basepath = os.path.dirname(__file__)
-        config_filename = os.path.abspath(os.path.join(basepath, "..", "..", "ctcue-config", "local_elasticsearch_shield.json"))
-
-        with open(config_filename) as config:
-            _config = json.load(config)
-            _auth   = _config["_shield"].split(":")
-
-    except Exception as err:
-        # print err
-        pass
+    # Read default config file
+    config = ConfigParser.ConfigParser()
+    config.readfp(open('config.cfg'))
 
 
-    elastic = Elasticsearch(http_auth=_auth)
-    elastic.indices.delete(index=index, ignore=[400, 404])
-    elastic.indices.create(index=index, body=json.load(open("../_mappings/autocomplete.json")))
+    # _auth = ("", "")
+    # index = "autocomplete2"
 
-    AggregatorJob.run()
+    # try:
+    #     basepath = os.path.dirname(__file__)
+    #     config_filename = os.path.abspath(os.path.join(basepath, "..", "..", "ctcue-config", "local_elasticsearch_shield.json"))
+
+    #     with open(config_filename) as config:
+    #         _config = json.load(config)
+    #         _auth   = _config["_shield"].split(":")
+
+    # except Exception as err:
+    #     # print err
+    #     pass
+
+    # Check if local config file exists
+    if not isFile("./local_config.cfg"):
+        print "No local config file found. Let's make one:"
+
+        # Check for UMLS terms
+        if not isFile(config.get("data_directories", "umls"), "MRCONSO.RRF"):
+            _dir = raw_input("Where is your UMLS directory?\n[UMLS_DIR] ")
+            config.set('data_directories', "umls", _dir)
+
+        print "\n\t- UMLS data directory set to %s" % config.get("data_directories", "umls")
+
+
+        # Check additional terms
+        if not isFile(config.get("data_directories", "additional_terms"), "mapped_customctcue_terms.csv"):
+            _dir = raw_input("Do you have an additional_terms directory?\n[TERMS_DIR] ")
+            config.set('data_directories', "additional_terms", _dir)
+
+        print "\n\t- Additional terms directory set to %s" % config.get("data_directories", "additional_terms")
+
+
+
+        # Write local config file
+    else:
+        config.read('local_config.cfg')
+        print absPath(config.get("data_directories", "umls"))
+
+
+    # elastic = Elasticsearch(http_auth=_auth)
+    # elastic.indices.delete(index=index, ignore=[400, 404])
+    # elastic.indices.create(index=index, body=json.load(open("../_mappings/autocomplete.json")))
+
+
+
+    # AggregatorJob.run()

@@ -2,12 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from elasticsearch import Elasticsearch, helpers
 from mrjob.job import MRJob
-import json
-import time
-import os
-
 
 skip_categories = [
     "Age Group",
@@ -29,12 +24,12 @@ skip_categories = [
     "Self-help or Relief Organization"
 ]
 
+
 class AggregatorJob(MRJob):
     """
     Groups unique synonyms by CUI.
     Output format: (CUI, [STR, STR, ...])
     """
-    # INPUT_PROTOCOL = TextProtocol
 
     def mapper(self, key, value):
         split = value.decode("utf-8").split("|")
@@ -66,6 +61,12 @@ class AggregatorJob(MRJob):
 
             yield CUI, ["A", STR]
 
+        # Additional Terms header
+        elif len(split) == 4:
+            (CUI, STR, LAT, SAB) = split
+
+            yield CUI, ["A", STR]
+
         # MRSTY Header
         elif len(split) == 7:
             (CUI, TUI, STN, STY, ATUI, CVF, _) = split
@@ -85,34 +86,16 @@ class AggregatorJob(MRJob):
             elif value[0] == "B":
                 types.add(value[1])
 
+        if not terms or not types:
+            return
+
         # Check types
-        if not terms or not types or any((x for x in types if x in skip_categories)):
+        if any((x for x in types if x in skip_categories)):
             return
 
         out = "%s\t%s\t%s" % (key, "|".join(types), "|".join(terms))
         print out.encode("utf-8")
 
 
-
 if __name__ == "__main__":
-    _auth = ("", "")
-    index = "autocomplete2"
-
-    try:
-        basepath = os.path.dirname(__file__)
-        config_filename = os.path.abspath(os.path.join(basepath, "..", "..", "ctcue-config", "local_elasticsearch_shield.json"))
-
-        with open(config_filename) as config:
-            _config = json.load(config)
-            _auth   = _config["_shield"].split(":")
-
-    except Exception as err:
-        # print err
-        pass
-
-
-    elastic = Elasticsearch(http_auth=_auth)
-    elastic.indices.delete(index=index, ignore=[400, 404])
-    elastic.indices.create(index=index, body=json.load(open("../_mappings/autocomplete.json")))
-
     AggregatorJob.run()
