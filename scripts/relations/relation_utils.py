@@ -46,6 +46,7 @@ def get_CUIS(neo4jstyle=True):
         cur_types = [re.sub("[,\\/]", "", t) for t in cur_types]
         types.update(cur_types)
         cuis[r["CUI"]]["types"].extend(cur_types)
+        cuis[r["CUI"]]["term"]=r["term"]
 
     if neo4jstyle:
 
@@ -60,13 +61,13 @@ def get_CUIS(neo4jstyle=True):
             with open("relations/data/rels_concept_type.csv","wb") as outf_rel:
 
                 w =  csv.writer(outf, encoding="utf-8",delimiter = "|")
-                w.writerow(["cui:ID(Concept)"])
+                w.writerow(["cui:ID(Concept)","term"])
 
                 wrel = csv.writer(outf_rel, encoding="utf-8",delimiter = "|")
                 wrel.writerow([":START_ID(Concept)",":END_ID(Concept_Type)",":TYPE"])
 
                 for cui in cuis:
-                    w.writerow([cui])
+                    w.writerow([cui,cuis[cui]["term"]])
                     for t in cuis[cui]["types"]:
                         wrel.writerow([cui, t, "of_type"])
                         rel_overview.add(t)
