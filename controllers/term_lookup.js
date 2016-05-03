@@ -6,8 +6,15 @@ var config  = require('../config/config.js');
 var guess_origin = require("./lib/guess_origin");
 var _ = require("lodash");
 
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+    }
+  ],
+});
 
 
 const source = ["cui", "str", "exact", "pref","types"];
@@ -21,7 +28,8 @@ module.exports = function *() {
 
   this.body = {
     "took": exactMatches.took,
-    "hits": exactMatches.hits
+    "hits": exactMatches.hits,
+    "error": exactMatches.error || false
   }
 };
 
@@ -62,6 +70,14 @@ function findExact(query) {
         };
 
         elasticClient.search(queryObj, function(err, res) {
+            if (err) {
+                return callback(false, {
+                    "took": 0,
+                    "hits": [],
+                    "error": err
+                })
+            }
+
             var hits = res.hits;
             var result = [];
 
@@ -71,7 +87,7 @@ function findExact(query) {
                 }
             }
 
-            callback(err, {
+            callback(false, {
                 "took": res.took,
                 "hits": result
             });
