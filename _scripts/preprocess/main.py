@@ -1,30 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 from mrjob.job import MRJob
 from collections import defaultdict
+from normalize import normalize
+from semantic import get_group
+from skip_categories import skip_categories
+import re
+import os
+import tempfile
 
 
-skip_categories = [
-    "Age Group",
-    "Temporal Concept",
-    "Organism Attribute",
-    "Intellectual Product",
-    "Food",
-    "Plant",
-    "Mammal",
-    "Geographic Area",
-    "Governmental or Regulatory Activity",
-    "Health Care Related Organization",
-    "Organization",
-    "Patient or Disabled Group",
-    "Population Group",
-    "Qualitative Concept",
-    "Quantitative Concept",
-    "Regulation or Law",
-    "Self-help or Relief Organization"
-]
+# Set tmp dir to relative directory from script
+basepath = os.path.dirname(__file__)
+tmp_dir  = os.path.abspath(os.path.join(basepath, "tmp"))
+tempfile.tempdir = tmp_dir
+
 
 
 class AggregatorJob(MRJob):
@@ -37,12 +28,6 @@ class AggregatorJob(MRJob):
         split = value.decode("utf-8").split("|")
 
 
-        # TODO
-        # - Parse string for 'types'
-        # - Normalize strings (Lowercase, unless short + full uppercase)
-
-
-
         # MRCONSO Header
         if len(split) == 19:
             (CUI, LAT, TS, LUI, STT, SUI, ISPREF, AUI, SAUI, SCUI, SDUI, SAB, TTY, CODE, STR, SRL, SUPPRESS, CVF, _) = split
@@ -50,7 +35,7 @@ class AggregatorJob(MRJob):
             if len(STR) > 32:
                 return
 
-            if ISPREF != 'Y':
+            if ISPREF != 'Y' or STT != "PF":
                 return
 
             # Language
@@ -64,14 +49,17 @@ class AggregatorJob(MRJob):
             if SAB in ["CHV","PSY","ICD9","ICD9CM","NCI_FDA","NCI_CTCAE","NCI_CDISC","ICPC2P","SNOMEDCT_VET"]:
                 return
 
+            if re.search(r"(nos|NOS)$", STR):
+                return
+
             # Skip records such as Pat.mo.dnt
             if STR.count(".") >= 3 or STR.count(":") >= 3:
                 return
 
             if TS == "P":
-                yield CUI, ["PREF", LAT, STR]
+                yield CUI, ["PREF", LAT, normalize(STR)]
             else:
-                yield CUI, ["TERM", LAT, STR]
+                yield CUI, ["TERM", LAT, normalize(STR)]
 
 
         # Additional Terms header
@@ -89,7 +77,11 @@ class AggregatorJob(MRJob):
         elif len(split) == 7:
             (CUI, TUI, STN, STY, ATUI, CVF, _) = split
 
-            yield CUI, ["STY", STY]
+            # Skipabble categories
+            if STY in skip_categories:
+                return
+
+            yield CUI, ["STY", get_group(TUI)]
         else:
             pass
 
@@ -97,7 +89,6 @@ class AggregatorJob(MRJob):
     def reducer(self, key, values):
         terms = defaultdict(set)
         preferred = defaultdict(list)
-
         types = set()
 
         for value in values:
@@ -116,15 +107,19 @@ class AggregatorJob(MRJob):
         if not terms or not types:
             return
 
-        if any((x for x in types if x in skip_categories)):
+        if not "PROC" in types:
             return
 
+        if any(x for x in types if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
+            return
 
         for LAT, v in terms.iteritems():
-            if LAT in preferred:
-                out = "%s\t%s\t%s\t%s\t%s" % (key, LAT, preferred[LAT][0], "|".join(types), "|".join(v))
-                print out.encode("utf-8")
+            # Get unique terms per language
+            unique = {t.lower(): t for t in v}.values()
 
+            if LAT in preferred:
+                out = "%s\t%s\t%s\t%s\t%s" % (key, LAT, preferred[LAT][0], "|".join(types), "|".join(unique))
+                print out.encode("utf-8")
 
 
 if __name__ == "__main__":

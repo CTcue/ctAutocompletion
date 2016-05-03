@@ -7,7 +7,6 @@ const through2 = require('through2');
 const split2 = require('split2');
 
 
-
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
