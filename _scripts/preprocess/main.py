@@ -5,6 +5,7 @@ from mrjob.job import MRJob
 from collections import defaultdict
 from normalize import normalize
 from semantic import get_group
+from body_parts import is_bodypart
 from skip_categories import skip_categories
 import re
 import os
@@ -17,6 +18,10 @@ tmp_dir  = os.path.abspath(os.path.join(basepath, "tmp"))
 tempfile.tempdir = tmp_dir
 
 
+# Patterns
+p_number = re.compile(r"^[0-9]+$")
+p_roman  = re.compile("^M{0,4***REMOVED***(CM|CD|D?C{0,3***REMOVED***)(XC|XL|L?X{0,3***REMOVED***)(IX|IV|V?I{0,3***REMOVED***)$", flags=re.I)
+
 
 class AggregatorJob(MRJob):
     """
@@ -27,12 +32,13 @@ class AggregatorJob(MRJob):
     def mapper(self, key, value):
         split = value.decode("utf-8").split("|")
 
-
         # MRCONSO Header
         if len(split) == 19:
             (CUI, LAT, TS, LUI, STT, SUI, ISPREF, AUI, SAUI, SCUI, SDUI, SAB, TTY, CODE, STR, SRL, SUPPRESS, CVF, _) = split
 
-            if len(STR) > 32:
+            STR = STR.strip()
+
+            if len(STR) < 2 or len(STR) > 30:
                 return
 
             if ISPREF != 'Y' or STT != "PF":
@@ -49,11 +55,22 @@ class AggregatorJob(MRJob):
             if SAB in ["CHV","PSY","ICD9","ICD9CM","NCI_FDA","NCI_CTCAE","NCI_CDISC","ICPC2P","SNOMEDCT_VET"]:
                 return
 
-            if re.search(r"(nos|NOS)$", STR):
+            # Skip NOS terms
+            if re.match(r"(nos|NOS)$", STR):
+                return
+
+            # Skip digit(s) only terms
+            if re.match(p_number, STR):
+                return
+
+            if re.match(p_roman, STR):
                 return
 
             # Skip records such as Pat.mo.dnt
             if STR.count(".") >= 3 or STR.count(":") >= 3:
+                return
+
+            if "." in STR and "^" in STR:
                 return
 
             if TS == "P":
@@ -107,13 +124,18 @@ class AggregatorJob(MRJob):
         if not terms or not types:
             return
 
-        if not "PROC" in types:
-            return
-
         if any(x for x in types if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
             return
 
         for LAT, v in terms.iteritems():
+            # If ANATOMY category -> skip checking for anatomoy terms
+            if not any(x for x in types if x == "ANAT"):
+                tmp_terms = set()
+                for t in v:
+                    if not is_bodypart(t):
+                        tmp_terms.add(t)
+                v = tmp_terms
+
             # Get unique terms per language
             unique = {t.lower(): t for t in v***REMOVED***.values()
 

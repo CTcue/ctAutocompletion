@@ -5,7 +5,7 @@ import os
 basepath = os.path.dirname(__file__)
 
 semantic_types = {***REMOVED***
-with open(os.path.join(basepath, 'semantic_types.txt')) as t:
+with open(os.path.join(basepath, "data", "semantic_types.txt")) as t:
     datareader = csv.reader(t, encoding="utf-8", delimiter=str("|"))
     for line in datareader:
         (abbr, group, code, description) = line
