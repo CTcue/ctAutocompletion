@@ -1,6 +1,16 @@
 
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
+var config  = require('../config/config.js');
+
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+***REMOVED***
+  ],
+***REMOVED***);
+
 
 var getCategory = require("./lib/category.js");
 
