@@ -28,7 +28,7 @@ const elasticClient = new elastic.Client({
 });
 
 
-const source = ["cui", "str", "exact", "pref", "source", "types"];
+const source = ["cui", "str", "pref", "types"];
 
 
 module.exports = function *() {
@@ -46,18 +46,18 @@ module.exports = function *() {
 
     var likes = [];
 
-
     if (config.neo4j["is_active"] && this.user) {
         // Find user added contributions
         likes = yield findUserLikes(query, this.user._id, this.user.env);
     }
 
-
     this.body = {
         "took"   : exactMatches.took + closeMatches.took,
         "special": specialMatches,
         "error"  : exactMatches.hasOwnProperty("error"),
-        "hits"   : _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), "exact")
+        "hits"   : _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), function(t) {
+            return t["str"].toString().toLowerCase();
+        })
     }
 };
 
@@ -98,7 +98,6 @@ function findUserLikes(query, userId, environment) {
                     // For display / uniqueness test
                     s["pref"]  = s["str"];
                     s["exact"] = s["str"];
-
                     s["contributed"] = true;
 
                     return s;
@@ -124,7 +123,6 @@ function findExact(query) {
             "_source": source,
 
             "size": 3,
-
             "query": {
                 "term" : {
                     "exact" : wantedTerm
@@ -153,7 +151,7 @@ function findExact(query) {
 
             callback(err, {
                 "took": res.took,
-                "hits": result
+                "hits": _.sortBy(result, (t => t.str.length))
             });
         });
     }
@@ -194,19 +192,19 @@ function findMatches(query) {
 
                         "functions" : [
                             // Prefer SnomedCT / MeSH
-                            {
-                                "filter": {
-                                    "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] }
-                                },
-                                "weight": 1.25
-                            },
+                            // {
+                            //     "filter": {
+                            //         "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] }
+                            //     },
+                            //     "weight": 1.25
+                            // },
 
-                            // Negative weight for some categories
+                            // weight for some categories
                             {
                                 "filter": {
-                                    "terms": { "types": ["Health Care Activity", "Biomedical Occupation or Discipline"] }
+                                    "terms": { "types": ["DISO"] }
                                 },
-                                "weight": 0.7
+                                "weight": 1.8
                             }
                         ]
                     }
@@ -235,7 +233,7 @@ function findMatches(query) {
 
             callback(err, {
                 "took": res.took,
-                "hits": result
+                "hits": _.sortBy(result, (t => t.str.length)),
             });
         });
     }

@@ -76,7 +76,7 @@ def normalize(term):
     term = re.sub(_cats, "", term)
 
     # Clean between brackets
-    term = re.sub("(\[[a-zA-Z\/]+\])", "", term)
+    term = re.sub("(\[.*\])", "", term)
 
     # Remove specific terms at term endings
     term = re.sub(_endings, "", term)
