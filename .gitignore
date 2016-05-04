@@ -3,6 +3,7 @@ lib-cov
 data/
 additional_terms/
 tmp/
+output/
 *.rrf
 *.RRF
 *.pyc

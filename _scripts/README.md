@@ -9,6 +9,6 @@
 
 Preprocess is used to create copies of MRCONSO (+ alternative sources if needed), MRSTY and MRREL. The copies contain only CUI's that are preferred and in useful groups and categories (ie not Food). In addition, obsolete CUI's are removed. It then outputes 2 files:
 
-    * `concepts.txt`  CUI, Types, Terms
+    * `concepts.txt`  CUI, Lat, Pref, Types, Terms
     * `relations.txt` CUI1, REL, CUI2
 

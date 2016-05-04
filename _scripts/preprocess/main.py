@@ -139,7 +139,7 @@ class AggregatorJob(MRJob):
             # Get unique terms per language
             unique = {t.lower(): t for t in v***REMOVED***.values()
 
-            if LAT in preferred:
+            if LAT in preferred and len(unique):
                 out = "%s\t%s\t%s\t%s\t%s" % (key, LAT, preferred[LAT][0], "|".join(types), "|".join(unique))
                 print out.encode("utf-8")
 
