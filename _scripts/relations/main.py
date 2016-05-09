@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import argparse
 import csv
-import re
 import os
 
 basepath = os.path.dirname(__file__)
@@ -62,7 +61,6 @@ if __name__ == "__main__":
             (CUI, LAT, SAB, CODE, PREF, TERMS) = line
             usedCUI.add(CUI)
 
-
     with open(os.path.join(basepath, "..", args.dir, "MRREL.RRF")) as t:
         datareader = csv.reader(t, delimiter=str("|"))
         for line in datareader:
@@ -99,3 +97,7 @@ if __name__ == "__main__":
 
             print "%s\t%s\t%s" % (CUI2, relation, CUI1)
 
+    # Idea
+    # Mapper: Do the thing above. Set key as "CUI1+CUI2"
+    # Reducer: Keep relations as set, to remove 'duplicates'
+    #
