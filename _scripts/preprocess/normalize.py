@@ -67,15 +67,14 @@ def contains_digits(d):
 
 
 def normalize(term):
-    # Multiple symbols -> become one '''
-
     term = term.replace(";", " ")
+    term = term.replace("'''", "'")
     term = term.replace("^+^", "+")
     term = re.sub(r"-+", "-", term)
     term = re.sub(r"(<su[bp])?>([a-zA-Z0-9]+)<(/su[bp]>)?", r"\2", term)
     term = re.sub(_cats, "", term)
 
-    # Clean between brackets
+    # Remove text in brackets
     term = re.sub("(\[.*\])", "", term)
 
     # Remove specific terms at term endings
