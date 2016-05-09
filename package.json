@@ -33,6 +33,7 @@
     "mongodb": "^1.4.40",
     "monk": "1.0.1",
     "neo4j": "^2.0.0-RC2",
+    "neo4j-batch-index-stream": "0.0.1",
     "request": "^2.69.0",
     "request-json": "^0.5.5"
   ***REMOVED***,

@@ -2,10 +2,11 @@
 import unicodecsv as csv
 import os
 
-basepath = os.path.dirname(__file__)
 
 semantic_types = {***REMOVED***
-with open(os.path.join(basepath, "data", "semantic_types.txt")) as t:
+basepath = os.path.dirname(__file__)
+
+with open(os.path.join(basepath, "lookup_data", "semantic_types.txt")) as t:
     datareader = csv.reader(t, encoding="utf-8", delimiter=str("|"))
     for line in datareader:
         (abbr, group, code, description) = line

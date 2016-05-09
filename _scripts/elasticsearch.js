@@ -19,7 +19,6 @@ const elasticClient = new elastic.Client({
 const ElasticsearchBulkIndexStream = require('elasticsearch-bulk-index-stream');
 
 
-
 const index = "autocomplete";
 const type  = "records";
 
@@ -44,17 +43,18 @@ elasticClient.indices.create(indexSettings, function(err, body) {
 var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, enc, callback) {
     var line = chunk.toString().trim();
 
-***REMOVED*** (CUI, LAT, PREF, CODE, TERMS)
+***REMOVED*** (CUI, LAT, SAB, TYPES, PREF, TERMS)
 
     if (line && line.length) {
         var parts = line.split("\t");
 
-        if (parts.length === 5) {
+        if (parts.length === 6) {
             var cui   = parts[0];
             var lat   = parts[1];
-            var pref  = parts[2];
+            var sab   = parts[2];
             var types = parts[3].split("|");
-            var terms = parts[4].split("|");
+            var pref  = parts[4]
+            var terms = parts[5].split("|");
 
             for (var i=0; i < terms.length; i++) {
                 this.push({
@@ -66,6 +66,7 @@ var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, en
                         "str"  : terms[i],
                         "exact": terms[i].replace("-", " ").toLowerCase(),
                         "lang" : lat,
+                        "source": sab,
                         "pref" : pref,
                         "types": types
                 ***REMOVED***
