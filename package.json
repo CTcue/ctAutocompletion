@@ -25,6 +25,7 @@
     "cheerio": "^0.20.0",
     "co-monk": "1.0.0",
     "elasticsearch": "8.1.0",
+    "elasticsearch-bulk-index-stream": "^0.2.1",
     "koa": "1.1.0",
     "koa-cors": "0.0.16",
     "koa-router": "5.2.3",
@@ -35,7 +36,9 @@
     "neo4j": "^2.0.0-RC2",
     "neo4j-batch-index-stream": "0.0.1",
     "request": "^2.69.0",
-    "request-json": "^0.5.5"
+    "request-json": "^0.5.5",
+    "split2": "^2.0.1",
+    "through2": "^2.0.1"
   ***REMOVED***,
   "devDependencies": {
     "supertest": "*",
