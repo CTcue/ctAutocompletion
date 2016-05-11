@@ -17,7 +17,7 @@ module.exports = function *() {
     var result = yield function(callback) {
         elasticClient.search({
           "index" : 'dbc_zorgproduct',
-          "size": 200,
+          "size": 1000,
           "_source": source,
 
           "body" : {
