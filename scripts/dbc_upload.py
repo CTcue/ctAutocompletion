@@ -6,6 +6,7 @@ import unicodecsv as csv
 import argparse
 import time
 import json
+import os
 
 _auth = ("", "")
 
@@ -19,6 +20,8 @@ try:
 
 except Exception as err:
     print err
+
+print _auth
 
 
 def read_rows(filename, delimiter=";"):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 from mrjob.job import MRJob
+import tempfile
 from collections import defaultdict
 from normalize import normalize
 from semantic import get_group
@@ -9,7 +9,7 @@ from body_parts import is_bodypart
 from skip_categories import skip_categories
 import re
 import os
-import tempfile
+
 
 
 # Set tmp dir to relative directory from script
@@ -86,12 +86,25 @@ class AggregatorJob(MRJob):
         elif len(split) == 4:
             (CUI, STR, LAT, SAB) = split
 
-            if LAT == "nl":
-                LAT = "DUT"
-            elif LAT == "en":
-                LAT = "ENG"
+            if not STR:
+                return
+
+            STR = STR.strip()
+
+            if STR.startswith(","):
+                return
 
             yield CUI, ["TERM", LAT, STR, SAB]
+
+        # Custom terms header
+        elif len(split) == 5:
+            (CUI, STR, LAT, SAB, PREF) = split
+            STR = STR.strip()
+
+            if PREF == "Y":
+                yield CUI, ["PREF", LAT, STR, SAB]
+            else:
+                yield CUI, ["TERM", LAT, STR, SAB]
 
         # MRSTY Header
         elif len(split) == 7:
@@ -161,8 +174,6 @@ class AggregatorJob(MRJob):
 
                 out = "\t".join([CUI, LAT, SAB, "|".join(types), pref_term, "|".join(unique)])
                 print out.encode("utf-8")
-
-
 
 
 if __name__ == "__main__":

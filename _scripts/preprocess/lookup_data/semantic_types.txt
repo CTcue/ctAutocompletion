@@ -1,9 +1,9 @@
+INDBH|Activities & Behaviors|T055|Individual Behavior
 ACTI|Activities & Behaviors|T052|Activity
 ACTI|Activities & Behaviors|T053|Behavior
 ACTI|Activities & Behaviors|T056|Daily or Recreational Activity
 ACTI|Activities & Behaviors|T051|Event
 ACTI|Activities & Behaviors|T064|Governmental or Regulatory Activity
-ACTI|Activities & Behaviors|T055|Individual Behavior
 ACTI|Activities & Behaviors|T066|Machine Activity
 ACTI|Activities & Behaviors|T057|Occupational Activity
 ACTI|Activities & Behaviors|T054|Social Behavior

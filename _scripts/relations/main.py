@@ -1,31 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import argparse
+from mrjob.job import MRJob
+import tempfile
+from collections import defaultdict
 import csv
 import re
 import os
+import hashlib
 
+
+# Set tmp dir to relative directory from script
 basepath = os.path.dirname(__file__)
+tmp_dir  = os.path.abspath(os.path.join(basepath, "mrjob_tmp"))
+tempfile.tempdir = tmp_dir
 
-# useless_relations = [
-#     "inverse_isa",
-#     "has_expanded_form",
-#     "was_a",
-#     "mapped_to",
-#     "mapped_from",
-#     "replaces",
-#     "replaced_by",
-#     "same_as",
 
-#     "uses_energy",
-#     "energy_used_by",
-#     "temporally_followed_by",
-#     "temporally_follows"
-# ]
+# First load used CUI's
+usedCUI = set()
 
-# usable_relations = [
-#     "isa"
-# ]
+with open(os.path.join(basepath, "..", "output", "concepts.txt")) as t:
+    datareader = csv.reader(t, delimiter=str("\t"))
+    for line in datareader:
+        (CUI, LAT, SAB, CODE, PREF, TERMS) = line
+        usedCUI.add(CUI)
 
 
 # Relations defined
@@ -47,55 +44,52 @@ basepath = os.path.dirname(__file__)
 # XR  Not related, no mapping
 #     Empty relationship
 
+class AggregatorJob(MRJob):
+    """
+    Obtains unique relations by CUI1 / CUI2 combinations
+    Output format: (CUI1, relation, CUI2)
+    """
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Pre-process build relations")
-    parser.add_argument('--dir', dest='dir', required=True, help='Directory containing the *.RRF files from UMLS')
-    args = parser.parse_args()
+    def mapper(self, _, line):
+        split = line.decode("utf-8").split("|")
 
-    # First load used CUI's
-    usedCUI = set()
-
-    with open(os.path.join(basepath, "..", "output", "concepts.txt")) as t:
-        datareader = csv.reader(t, delimiter=str("\t"))
-        for line in datareader:
-            (CUI, LAT, SAB, CODE, PREF, TERMS) = line
-            usedCUI.add(CUI)
-
-
-    with open(os.path.join(basepath, "..", args.dir, "MRREL.RRF")) as t:
-        datareader = csv.reader(t, delimiter=str("|"))
-        for line in datareader:
-            (CUI1, AUI1, STYPE1, REL, CUI2, AUI2, STYPE2, RELA, RUI, SRUI, SAB, SL, RG, DIR, SUPPRESS, CVF, _) = line
+        # MRREL header
+        if len(split) == 17:
+            (CUI1, AUI1, STYPE1, REL, CUI2, AUI2, STYPE2, RELA, RUI, SRUI, SAB, SL, RG, DIR, SUPPRESS, CVF, _) = split
 
             if not SAB or SAB not in ["SNOMEDCT_US", "ICD10CM"]:
-                continue
-
-            # ICD10 relations are defined different
-            # if SAB == "ICD10CM" and "REL" == "CHD":
-            #     RELA = "is_a_ICD10"
+                return
 
             if CUI1 == "" or CUI2 == "" or CUI1 == CUI2:
-                continue
+                return
 
-            # if not RELA or RELA in not in usable_relations:
-            #     continue
-
-            # if REL not in ["CHD", "SIB"]:
-            #     continue
+            if REL not in ["CHD", "SIB"]:
+                return
 
             if not CUI1 in usedCUI:
-                continue
+                return
 
             if not CUI2 in usedCUI:
-                continue
+                return
 
             if REL == "CHD":
                 relation = "is_child"
             elif REL == "SIB":
                 relation = "is_sibling"
-            else:
-                relation = REL + ":" + RELA
 
-            print "%s\t%s\t%s" % (CUI2, relation, CUI1)
+            yield "%s+%s" % (CUI1, CUI2), [CUI1, relation, CUI2]
 
+
+    def reducer(self, key, values):
+        relations = defaultdict(set)
+
+        for (CUI1, rel, CUI2) in values:
+            relations[rel] = (CUI1, CUI2)
+
+        for rel, (CUI1, CUI2) in relations.iteritems():
+            out = "\t".join([CUI1, rel, CUI2])
+            print out.encode("utf-8")
+
+
+if __name__ == "__main__":
+    AggregatorJob.run()
