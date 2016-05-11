@@ -4,7 +4,6 @@ from mrjob.job import MRJob
 import tempfile
 from collections import defaultdict
 import csv
-import re
 import os
 import hashlib
 
