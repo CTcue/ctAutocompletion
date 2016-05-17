@@ -15,13 +15,17 @@ tempfile.tempdir = tmp_dir
 
 
 # First load used CUI's
-usedCUI = set()
+usedCUI = defaultdict(set)
 
-with open(os.path.join(basepath, "..", "output", "concepts.txt")) as t:
-    datareader = csv.reader(t, delimiter=str("\t"))
-    for line in datareader:
-        (CUI, LAT, SAB, CODE, PREF, TERMS) = line
-        usedCUI.add(CUI)
+try:
+    with open(os.path.join(basepath, "..", "output", "concepts.txt")) as t:
+        datareader = csv.reader(t, delimiter=str("\t"))
+        for line in datareader:
+            (CUI, LAT, SAB, CODE, PREF, TERMS) = line
+            usedCUI[CUI].add(PREF)
+except:
+    print "Please run `python process_concepts.py` first to generate a list of used CUI's"
+
 
 
 # Relations defined
@@ -56,14 +60,22 @@ class AggregatorJob(MRJob):
         if len(split) == 17:
             (CUI1, AUI1, STYPE1, REL, CUI2, AUI2, STYPE2, RELA, RUI, SRUI, SAB, SL, RG, DIR, SUPPRESS, CVF, _) = split
 
-            if not SAB or SAB not in ["SNOMEDCT_US", "ICD10CM"]:
-                return
-
             if CUI1 == "" or CUI2 == "" or CUI1 == CUI2:
                 return
 
-            if REL not in ["CHD", "SIB"]:
+
+            # MSH for isa relations
+            # SNOMED / ICD10 for hierarchy
+            if not SAB or SAB not in ["MSH", "SNOMEDCT_US", "ICD10CM"]:
                 return
+
+            if REL not in ["RN", "CHD", "SIB"]:
+                return
+
+            # Allow 'narrower' relations, but only `isa`
+            if REL == "RN" and RELA != "isa":
+                return
+
 
             if not CUI1 in usedCUI:
                 return
@@ -71,10 +83,23 @@ class AggregatorJob(MRJob):
             if not CUI2 in usedCUI:
                 return
 
+
+            # Skip relations that map term => "extended" children
+            pref1 = usedCUI[CUI1] # set(["Simvastatin"])
+            pref2 = usedCUI[CUI2] # set(["Simvastatin 40 MG Oral Tablet"])
+
+            for child in pref2:
+                if any(p.lower() in child.lower() for p in pref1):
+                    return
+
+
             if REL == "CHD":
-                relation = "is_child"
+                relation = "child"
             elif REL == "SIB":
-                relation = "is_sibling"
+                relation = "sibling"
+            elif REL == "RN" and RELA == "isa":
+                relation = "isa"
+
 
             yield "%s+%s" % (CUI1, CUI2), [CUI1, relation, CUI2]
 

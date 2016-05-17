@@ -4,7 +4,7 @@
   "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --harmony app.js",
+    "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
     "test": "mocha --harmony -R spec --recursive ./test"
   ***REMOVED***,
   "repository": {

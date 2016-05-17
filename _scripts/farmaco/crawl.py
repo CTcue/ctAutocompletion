@@ -133,7 +133,7 @@ if __name__ == '__main__':
         w = csv.writer(outf, delimiter="|", encoding = "utf-8")
 
         for (CUI, term) in concepts:
-            w.writerow([CUI, term, "DUT", "farma_compas"])
+            w.writerow([CUI, term, "DUT", "farma_compas", "Y"])
 
 
     print "[%s]  Build relations." % stamp()
