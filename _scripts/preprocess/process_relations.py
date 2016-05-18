@@ -63,10 +63,9 @@ class AggregatorJob(MRJob):
             if CUI1 == "" or CUI2 == "" or CUI1 == CUI2:
                 return
 
-
             # MSH for isa relations
             # SNOMED / ICD10 for hierarchy
-            if not SAB or SAB not in ["MSH", "SNOMEDCT_US", "ICD10CM"]:
+            if not SAB or SAB not in ["SNOMEDCT_US", "ICD10CM"]:
                 return
 
             if REL not in ["RN", "CHD", "SIB"]:
@@ -76,13 +75,11 @@ class AggregatorJob(MRJob):
             if REL == "RN" and RELA != "isa":
                 return
 
-
             if not CUI1 in usedCUI:
                 return
 
             if not CUI2 in usedCUI:
                 return
-
 
             # Skip relations that map term => "extended" children
             pref1 = usedCUI[CUI1] # set(["Simvastatin"])
@@ -100,8 +97,13 @@ class AggregatorJob(MRJob):
             elif REL == "RN" and RELA == "isa":
                 relation = "isa"
 
+            # Create "unique-sorted" key, to remove duplicate relations
+            if CUI1 > CUI2:
+                key = CUI2 + CUI1
+            else:
+                key = CUI1 + CUI2
 
-            yield "%s+%s" % (CUI1, CUI2), [CUI1, relation, CUI2]
+            yield key, [CUI1, relation, CUI2]
 
 
     def reducer(self, key, values):
