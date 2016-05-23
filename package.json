@@ -30,6 +30,7 @@
     "koa-cors": "0.0.16",
     "koa-router": "5.2.3",
     "lodash": "^3.10.1",
+    "minimist": "^1.2.0",
     "moment": "^2.12.0",
     "mongodb": "^1.4.40",
     "monk": "1.0.1",

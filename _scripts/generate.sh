@@ -7,7 +7,7 @@ python clear_elasticsearch.py $*
 python preprocess/process_concepts.py ./2015AA/META/MRCONSO.RRF ./2015AA/META/MRSTY.RRF ./additional_terms/*.csv > ./output/concepts.txt
 
 # + Initial upload to elasticsearch
-less ./output/concepts.txt | node elasticsearch.js
+less ./output/concepts.txt | node elasticsearch.js $*
 
 # Crawl farmaceutisch kompas
 # - Needs initial UMLS for lookup

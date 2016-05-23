@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var argv = require('minimist')(process.argv.slice(2));
 var through2 = require('through2');
 var split2 = require('split2');
 var Neo4jStream = require('neo4j-batch-index-stream');
@@ -43,7 +44,14 @@ var buildRecords = through2({ objectMode: true }, function(chunk, enc, callback)
 
 
 var username = "neo4j";
-var password = "test123";
+var password = "neo4j";
+
+if (argv.neo4j) {
+    var _auth = argv.neo4j.split(":");
+
+    username = _auth[0];
+    password = _auth[1];
+}
 
 var stream = new Neo4jStream(username, password, {
     "index_key"     : "cui",
@@ -54,7 +62,7 @@ stream.index([
     ["Concept", "cui"]
 ]);
 
-console.log("START", stamp());
+console.log("NEO4J", stamp());
 
 process.stdin
 .pipe(split2())
