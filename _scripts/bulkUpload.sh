@@ -13,5 +13,6 @@ less ./output/concepts.txt | node elasticsearch.js
 # - Needs initial UMLS for lookup
 python farmaco/crawl.py
 
+
 # Get useful relations
 python preprocess/process_relations.py ./2015AA/META/MRREL.RRF > ./output/relations.txt
