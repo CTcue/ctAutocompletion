@@ -1,44 +1,33 @@
 #!/usr/bin/env node
 
 const _ = require("lodash");
-const config = require('../config/config.js');
-
+const argv = require('minimist')(process.argv.slice(2));
 const through2 = require('through2');
 const split2 = require('split2');
 
-const elastic_mapping = require("../_mappings/autocomplete")
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
     {
       "host": 'localhost',
-      "auth": config.elastic_shield
+      "auth": argv.elastic || ""
 ***REMOVED***
   ]
 ***REMOVED***);
 const ElasticsearchBulkIndexStream = require('elasticsearch-bulk-index-stream');
 
-
-const index = "autocomplete";
-const type  = "records";
-
-//////
-// Create index
-
-// var indexSettings = {
-//     "index": index,
-//     "body" : elastic_mapping
-// ***REMOVED***
-
-// elasticClient.indices.create(indexSettings, function(err, body) {
-//     if (err) {
-//         console.log(err);
-// ***REMOVED***
-// ***REMOVED***);
+const index = argv.index || "autocomplete";
+const type  = argv.type  || "records";
 
 
 /////
 // Pipe input and store it into Elasticsearch
+
+function stamp() {
+    return new Date().toISOString()
+      .replace(/T/, ' ')
+      .replace(/\..+/, '')
+***REMOVED***
 
 var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, enc, callback) {
     var line = chunk.toString().trim();
@@ -80,20 +69,19 @@ var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, en
 
 
 var elasticStream = new ElasticsearchBulkIndexStream(elasticClient, {
-    highWaterMark: 5000,
-    flushTimeout: 500
+    "highWaterMark": 5000,
+    "flushTimeout": 500
 ***REMOVED***);
 
+console.log("ELASTICSEARCH", stamp());
 
 process.stdin
   .pipe(split2())
   .pipe(buildRecords)
   .pipe(elasticStream)
   .on('error', function(error) {
-        console.log(error);
-    ***REMOVED*** Handle error
+      console.log(error);
   ***REMOVED***)
   .on('finish', function() {
-        console.log("Completed uploading concepts to Elasticsearch");
-    ***REMOVED*** Clean up Elasticsearch client?
+      console.log("DONE", stamp());
   ***REMOVED***)
