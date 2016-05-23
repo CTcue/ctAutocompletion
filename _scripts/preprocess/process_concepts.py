@@ -23,6 +23,24 @@ p_number = re.compile(r"^[0-9]+$")
 p_roman  = re.compile("^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$", flags=re.I)
 
 
+obsolete_types = ['N1', 'PM', 'OAS', 'OAF', 'OAM', 'OAP', 'OA', 'OCD', 'OET', 'OF', 'OLC', 'OM', 'ONP', 'OOSN', 'OPN', 'OP', 'LO', 'IS', 'MTH_LO', 'MTH_IS', 'MTH_OET']
+
+useful_sources =  [
+    "MSH",
+    "SNOMEDCT_US",
+    "LNC",
+    "RXNORM",
+    "MEDCIN",
+    "MTH",
+    "NCI",
+    "ICPC2ICD10DUT",
+    "MDRDUT",
+    "MSHDUT",
+    "MDR",
+    "ICD10DUT",
+    "ICD10"
+]
+
 
 class AggregatorJob(MRJob):
     """
@@ -50,10 +68,10 @@ class AggregatorJob(MRJob):
                 return
 
             # Obsolete sources
-            if TTY in ['N1', 'PM', 'OAS', 'OAF', 'OAM', 'OAP', 'OA', 'OCD', 'OET', 'OF', 'OLC', 'OM', 'ONP', 'OOSN', 'OPN', 'OP', 'LO', 'IS', 'MTH_LO', 'MTH_IS', 'MTH_OET']:
+            if TTY in obsolete_types:
                 return
 
-            if SAB in ["CHV", "PSY", "ICD9", "ICD9CM", "NCI_FDA", "NCI_CTCAE", "NCI_CDISC", "ICPC2P", "SNOMEDCT_VET"]:
+            if SAB not in useful_sources:
                 return
 
             normalized = normalize(STR)
