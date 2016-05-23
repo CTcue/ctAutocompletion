@@ -25,16 +25,16 @@ const type  = "records";
 //////
 // Create index
 
-var indexSettings = {
-    "index": index,
-    "body" : elastic_mapping
-***REMOVED***
+// var indexSettings = {
+//     "index": index,
+//     "body" : elastic_mapping
+// ***REMOVED***
 
-elasticClient.indices.create(indexSettings, function(err, body) {
-    if (err) {
-        console.log(err);
-***REMOVED***
-***REMOVED***);
+// elasticClient.indices.create(indexSettings, function(err, body) {
+//     if (err) {
+//         console.log(err);
+// ***REMOVED***
+// ***REMOVED***);
 
 
 /////
