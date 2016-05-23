@@ -106,6 +106,21 @@ class AggregatorJob(MRJob):
             else:
                 yield CUI, ["TERM", LAT, STR, SAB]
 
+        # Custom terms header
+        elif len(split) == 6:
+            (CUI, STR, LAT, SAB, PREF, STY) = split
+            STR = STR.strip()
+
+            if PREF == "Y":
+                yield CUI, ["PREF", LAT, STR, SAB]
+            else:
+                yield CUI, ["TERM", LAT, STR, SAB]
+
+
+            if STY and len(STY):
+                yield CUI, ["STY", STY]
+
+
         # MRSTY Header
         elif len(split) == 7:
             (CUI, TUI, STN, STY, ATUI, CVF, _) = split
@@ -139,9 +154,15 @@ class AggregatorJob(MRJob):
                 types.add(value[1])
 
 
-        # Check the types
-        if not terms or not types:
+        # Skip if no actual terms found
+        if not terms:
             return
+
+        # Check types
+        # + custom concepts have their own "yield STY"
+        if not types:
+            return
+
 
         if any(x for x in types if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
             return

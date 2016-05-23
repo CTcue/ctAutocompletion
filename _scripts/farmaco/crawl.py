@@ -52,6 +52,7 @@ def dictify(ul, parent=None):
 
     return result
 
+
 def sha1(term):
     h = hashlib.sha1()
     h.update(term.lower().encode("utf-8"))
@@ -133,10 +134,10 @@ if __name__ == '__main__':
         w = csv.writer(outf, delimiter="|", encoding = "utf-8")
 
         for (CUI, term) in concepts:
-            w.writerow([CUI, term, "DUT", "farma_compas", "Y"])
+            w.writerow([CUI, term, "DUT", "farma_compas", "Y", "CHEM"])
 
 
-    print "[%s]  Build relations." % stamp()
+    print "[%s]  Generating relations." % stamp()
 
     # Output for neo4j
     lookup     = concepts_to_lookup(concepts)
