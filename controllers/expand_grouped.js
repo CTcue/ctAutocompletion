@@ -20,7 +20,7 @@ const elasticClient = new elastic.Client({
 
 var getCategory = require("./lib/category.js");
 
-const source = ["str", "lang", "types"];
+const source = ["str", "pref", "lang", "types"];
 const language_map = {
     "DUT" : "dutch",
     "ENG" : "english"
@@ -51,9 +51,11 @@ module.exports = function *() {
                 var hits = resp.hits.hits;
 
             ***REMOVED*** Return ES source part only
-                if (hits.length) {
+                if (hits.length > 0) {
+                    var pref  = hits[0]._source.pref;
                     var types = hits[0]._source.types;
-                    return callback(false, [types, hits.map(s => s._source)]);
+
+                    return callback(false, [types, pref, hits.map(s => s._source)]);
             ***REMOVED***
         ***REMOVED***
 
@@ -61,13 +63,14 @@ module.exports = function *() {
     ***REMOVED***);
 ***REMOVED***;
 
-
+    var pref        = "";
     var types       = [];
     var found_terms = [];
 
     if (result) {
         types       = result[0];
-        found_terms = result[1];
+        pref        = result[1];
+        found_terms = result[2];
 ***REMOVED***
 
 
@@ -184,8 +187,9 @@ module.exports = function *() {
 
     this.body = {
       "category" : getCategory(types),
+      "pref"     : pref,
       "terms"    : terms,
-      "uncheck"  : uncheck || []
+      "uncheck"  : uncheck || [],
 ***REMOVED***;
 ***REMOVED***;
 
