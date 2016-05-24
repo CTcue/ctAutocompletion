@@ -91,9 +91,9 @@ class AggregatorJob(MRJob):
 
 
             if REL == "CHD":
-                relation = "child"
+                relation = "child_of"
             elif REL == "SIB":
-                relation = "sibling"
+                relation = "sibling_of"
             elif REL == "RN" and RELA == "isa":
                 relation = "isa"
 

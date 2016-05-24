@@ -1,11 +1,22 @@
+"use strict";
 
-var config  = require('../config/config.js');
-var neo4j = require('neo4j');
-var _ = require("lodash");
+/** Usage
 
-var db = new neo4j.GraphDatabase({
-    url: 'http://localhost:7474',
-    auth: config.neo4j
+    curl -X POST -d '{
+        "query": [
+            { "cui": "C0026187" },
+            { "str": "rituximab" }
+        ]
+    }' "https://ctcue.com/umls/suggest"
+
+*/
+
+const config  = require('../config/config.js');
+const _ = require("lodash");
+const neo4j = require('neo4j');
+const db = new neo4j.GraphDatabase({
+    "url": 'http://localhost:7474',
+    "auth": config.neo4j
 });
 
 
@@ -18,6 +29,9 @@ module.exports = function *() {
 
     var cypherObj = buildCypherObj(params);
 
+
+    // Find "siblings"
+
     var result = yield function(callback) {
         db.cypher(cypherObj, function(err, paths) {
             if (err) {
@@ -25,28 +39,28 @@ module.exports = function *() {
               return callback(false, [])
             }
 
-            var found = [];
+            // var found = [];
 
-            for (var i=0; i < paths.length; i++) {
-                var finding = paths[i];
+            // for (var i=0; i < paths.length; i++) {
+            //     var finding = paths[i];
 
-                // If no group found, skip
-                if (! finding.hasOwnProperty("g")) {
-                    continue;
-                }
+            //     // If no group found, skip
+            //     if (! finding.hasOwnProperty("g")) {
+            //         continue;
+            //     }
 
-                var rel = {
-                    "groupId": finding["ID"],
-                    "groupName": finding["g"]["name"],
-                    "abbreviation": finding["g"]["abbr"] || "",
-                    "description" : finding["g"]["description"] || "",
-                    "groupTerms"  : finding["terms"]
-                }
+            //     var rel = {
+            //         "groupId"      : finding["ID"],
+            //         "groupName"    : finding["g"]["name"],
+            //         "abbreviation" : finding["g"]["abbr"] || "",
+            //         "description"  : finding["g"]["description"] || "",
+            //         "groupTerms"   : finding["terms"]
+            //     }
 
-                found.push(rel);
-            }
+            //     found.push(rel);
+            // }
 
-            callback(null, found)
+            callback(null, paths)
         });
     }
 
@@ -93,8 +107,6 @@ function checkParam(param) {
 
 function buildQuery(keyA, keyB) {
     return `MATCH (t1:Concept { ${keyA}: {A} }), (t2:Concept { ${keyB}: {B} }),
-            (g:Group),
-            (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2),
-            g<-[:is_part_of]-(r)
-            return t1, t2, g, ID(g) as ID, COLLECT(r) as terms`
+            p = shortestPath((t1)<-[*..4]->(t2))
+            return p`
 }
