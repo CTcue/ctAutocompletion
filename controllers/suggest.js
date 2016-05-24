@@ -1,11 +1,22 @@
+"use strict";
 
-var config  = require('../config/config.js');
-var neo4j = require('neo4j');
-var _ = require("lodash");
+/** Usage
 
-var db = new neo4j.GraphDatabase({
-    url: 'http://localhost:7474',
-    auth: config.neo4j
+    curl -X POST -d '{
+        "query": [
+            { "cui": "C0026187" ***REMOVED***,
+            { "str": "rituximab" ***REMOVED***
+        ]
+***REMOVED***' "https://ctcue.com/umls/suggest"
+
+*/
+
+const config  = require('../config/config.js');
+const _ = require("lodash");
+const neo4j = require('neo4j');
+const db = new neo4j.GraphDatabase({
+    "url": 'http://localhost:7474',
+    "auth": config.neo4j
 ***REMOVED***);
 
 
@@ -18,6 +29,9 @@ module.exports = function *() {
 
     var cypherObj = buildCypherObj(params);
 
+
+***REMOVED*** Find "siblings"
+
     var result = yield function(callback) {
         db.cypher(cypherObj, function(err, paths) {
             if (err) {
@@ -25,28 +39,28 @@ module.exports = function *() {
               return callback(false, [])
         ***REMOVED***
 
-            var found = [];
+        ***REMOVED*** var found = [];
 
-            for (var i=0; i < paths.length; i++) {
-                var finding = paths[i];
+        ***REMOVED*** for (var i=0; i < paths.length; i++) {
+        ***REMOVED***     var finding = paths[i];
 
-            ***REMOVED*** If no group found, skip
-                if (! finding.hasOwnProperty("g")) {
-                    continue;
-            ***REMOVED***
+        ***REMOVED*** ***REMOVED*** If no group found, skip
+        ***REMOVED***     if (! finding.hasOwnProperty("g")) {
+        ***REMOVED***         continue;
+        ***REMOVED*** ***REMOVED***
 
-                var rel = {
-                    "groupId": finding["ID"],
-                    "groupName": finding["g"]["name"],
-                    "abbreviation": finding["g"]["abbr"] || "",
-                    "description" : finding["g"]["description"] || "",
-                    "groupTerms"  : finding["terms"]
-            ***REMOVED***
+        ***REMOVED***     var rel = {
+        ***REMOVED***         "groupId"      : finding["ID"],
+        ***REMOVED***         "groupName"    : finding["g"]["name"],
+        ***REMOVED***         "abbreviation" : finding["g"]["abbr"] || "",
+        ***REMOVED***         "description"  : finding["g"]["description"] || "",
+        ***REMOVED***         "groupTerms"   : finding["terms"]
+        ***REMOVED*** ***REMOVED***
 
-                found.push(rel);
-        ***REMOVED***
+        ***REMOVED***     found.push(rel);
+        ***REMOVED*** ***REMOVED***
 
-            callback(null, found)
+            callback(null, paths)
     ***REMOVED***);
 ***REMOVED***
 
@@ -93,8 +107,6 @@ function checkParam(param) {
 
 function buildQuery(keyA, keyB) {
     return `MATCH (t1:Concept { ${keyA***REMOVED***: {A***REMOVED*** ***REMOVED***), (t2:Concept { ${keyB***REMOVED***: {B***REMOVED*** ***REMOVED***),
-            (g:Group),
-            (t1)-[:is_part_of]->(g)<-[:is_part_of]-(t2),
-            g<-[:is_part_of]-(r)
-            return t1, t2, g, ID(g) as ID, COLLECT(r) as terms`
+            p = shortestPath((t1)<-[*..4]->(t2))
+            return p`
 ***REMOVED***

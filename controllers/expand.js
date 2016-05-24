@@ -1,5 +1,16 @@
+"use strict";
+
+/** Usage
+
+  curl -X POST -H "Content-Type: application/json" -d '{
+      "query": "C1306459"
+  ***REMOVED***' "http://localhost:4080/expand"
+
+*/
 
 const config  = require('../config/config.js');
+const getCategory = require("./lib/category.js");
+
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -9,8 +20,6 @@ const elasticClient = new elastic.Client({
 ***REMOVED***
   ]
 ***REMOVED***);
-
-var getCategory = require("./lib/category.js");
 
 
 const source = ["str", "types"];
@@ -35,10 +44,10 @@ module.exports = function *() {
   ***REMOVED***,
       function(err, resp) {
           if (resp && !!resp.hits && resp.hits.total > 0) {
-            callback(false, resp.hits.hits);
+              callback(false, resp.hits.hits);
       ***REMOVED***
           ***REMOVED***
-            callback(err, []);
+              callback(err, []);
       ***REMOVED***
   ***REMOVED***);
   ***REMOVED***;
@@ -55,4 +64,3 @@ module.exports = function *() {
 
   this.body = { "type": "", "category": "", "terms": [] ***REMOVED***
 ***REMOVED***;
-

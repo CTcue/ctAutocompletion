@@ -57,10 +57,13 @@ class AggregatorJob(MRJob):
 
             STR = STR.strip()
 
-            if len(STR) < 2 or len(STR) > 30:
+            if len(STR) < 2:
                 return
 
-            if ISPREF != 'Y' or STT != "PF":
+            if ISPREF != 'Y' or STT != "PF" or TS not in ["P", "S"]:
+                return
+
+            if SUPPRESS != "N": #in ["E", "O", "Y"]:
                 return
 
             # Language

@@ -1,3 +1,13 @@
+"use strict";
+
+/** Usage
+
+  curl -X POST -H "Content-Type: application/json" -d '{
+      "query": "C1306459"
+  ***REMOVED***' "http://localhost:4080/expand-grouped"
+
+*/
+
 
 const config  = require('../config/config.js');
 const neo4j = require('neo4j');
@@ -182,7 +192,11 @@ module.exports = function *() {
             delete terms[k];
     ***REMOVED***
         ***REMOVED***
-            terms[k] = _.sortBy(terms[k], "length");
+            var unique = _.uniq(terms[k], s => normalizeTextForComparison(s));
+
+        ***REMOVED*** console.log(unique.map(s => normalizeTextForComparison(s)))
+
+            terms[k] = _.sortBy(unique, "length");
     ***REMOVED***
 ***REMOVED***
 
@@ -195,3 +209,16 @@ module.exports = function *() {
 ***REMOVED***;
 ***REMOVED***;
 
+
+
+function normalizeTextForComparison(text) {
+    if (!text) {
+        return "";
+***REMOVED***
+
+    return text
+        .toLowerCase()
+        .replace(/[^\w]/g, ' ') // symbols etc
+        .replace(/\s\s+/g, ' ') // multi whitespace
+        .trim()
+***REMOVED***

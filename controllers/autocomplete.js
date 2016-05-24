@@ -1,5 +1,12 @@
+"use strict";
 
-/** Module dependencies. */
+/** Usage
+
+    curl -X POST -H "Content-Type: application/json" -d '{
+        "query": "cabg"
+***REMOVED***' "http://localhost:4080/autocomplete"
+
+*/
 
 var config  = require('../config/config.js');
 

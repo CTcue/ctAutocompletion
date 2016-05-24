@@ -105,7 +105,7 @@ def generate_relations(tree, lookup, parent=None):
             relations += generate_relations(v, lookup, parentCui)
 
         if parent:
-            relations.append((lookup[k], "child", parent))
+            relations.append((parent, "child_of", lookup[k]))
 
     return relations
 
