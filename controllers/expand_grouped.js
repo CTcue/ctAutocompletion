@@ -193,10 +193,7 @@ module.exports = function *() {
         }
         else {
             var unique = _.uniq(terms[k], s => normalizeTextForComparison(s));
-
-            // console.log(unique.map(s => normalizeTextForComparison(s)))
-
-            terms[k] = _.sortBy(unique, "length");
+            terms[k]   = _.sortBy(unique, "length");
         }
     }
 
