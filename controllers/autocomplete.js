@@ -43,25 +43,33 @@ module.exports = function *() {
 
 ***REMOVED*** Remove diacritics from query
     var query = _.deburr(this.request.body.query);
-
-***REMOVED*** Check special matches, such as demographic options
-    var specialMatches = yield findSpecial(query);
+    var query_type = guess_origin(query);
 
 ***REMOVED*** Lookup matches in Elasticsearch
-    var exactMatches = yield findExact(query);
-    var closeMatches = yield findMatches(query);
+    var exactMatches = yield findExact(query, query_type);
 
     var likes = [];
+    var specialMatches = [];
+    var closeMatches   = {"hits": []***REMOVED***;
 
-    if (config.neo4j["is_active"] && this.user) {
-    ***REMOVED*** Find user added contributions
-        likes = yield findUserLikes(query, this.user._id, this.user.env);
+***REMOVED*** Default query_type
+***REMOVED*** Check special matches, such as demographic options
+    if (query_type === "default") {
+        closeMatches = yield findMatches(query);
+        specialMatches = yield findSpecial(query);
+
+    ***REMOVED*** Find user added contributions (if needed)
+        if (config.neo4j["is_active"] && this.user) {
+            likes = yield findUserLikes(query, this.user._id, this.user.env);
+    ***REMOVED***
+***REMOVED***
+    ***REMOVED***
+
 ***REMOVED***
 
     this.body = {
-        "took"   : exactMatches.took + closeMatches.took,
+        "took"   : (exactMatches.took || 10) + (closeMatches.took || 20),
         "special": specialMatches,
-        "error"  : exactMatches.hasOwnProperty("error"),
         "hits"   : _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), function(t) {
             return t["str"].toString().toLowerCase();
     ***REMOVED***)
@@ -116,19 +124,37 @@ function findUserLikes(query, userId, environment) {
 ***REMOVED***
 ***REMOVED***
 
-function findExact(query) {
-***REMOVED*** Exact term is indexed without dashes
-    var wantedTerm = query
-        .replace(/-/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
+function findExact(query, query_type) {
+    var queryObj = {***REMOVED***;
+
+***REMOVED***
+***REMOVED*** TODO: DBC lookup?
+***REMOVED***
 
 
-    return function(callback) {
-        var elastic_query =  {
+    if (query_type === "cui") {
+        queryObj["body"] = {
             "_source": source,
+            "size": 4,
+            "query": {
+                "term" : {
+                    "cui" : query
+            ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***;
 
+        queryObj["index"] = "autocomplete";
+***REMOVED***
+    ***REMOVED***
+    ***REMOVED*** Exact term is indexed without dashes
+        var wantedTerm = query
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+
+        queryObj["body"] = {
+            "_source": source,
             "size": 3,
             "query": {
                 "term" : {
@@ -137,93 +163,46 @@ function findExact(query) {
         ***REMOVED***
     ***REMOVED***;
 
-        var queryObj = {
-            "index" : 'autocomplete',
-            "body"  : elastic_query
-    ***REMOVED***;
-
-        elasticClient.search(queryObj, function(err, res) {
-            if (err) {
-                return callback(false, { "error": true, "took": 10, "hits": []***REMOVED***)
-        ***REMOVED***
-
-            var hits = res.hits;
-            var result = [];
-
-            if (hits && hits.total > 0) {
-                for (var i=0; i < hits.hits.length; i++) {
-                    result.push(hits.hits[i]._source);
-            ***REMOVED***
-        ***REMOVED***
-
-            callback(err, {
-                "took": res.took,
-                "hits": _.sortBy(result, (t => t.str.length))
-        ***REMOVED***);
-    ***REMOVED***);
+        queryObj["index"] = "autocomplete";
 ***REMOVED***
+
+    return getResults(queryObj);
 ***REMOVED***
 
 
 function findMatches(query) {
-    var origin = guess_origin(query);
+    var queryObj = {***REMOVED***;
 
-***REMOVED*** Filter out CUI codes that the user already selected
-    return function(callback) {
-
-    ***REMOVED*** DBC code check needs prefix matching
-        if (origin === "code") {
-            var elastic_query =  {
-                "_source": source,
-                "size": 6,
-
-                "query": {
-                    "match_phrase_prefix" : {
+    queryObj["index"] = "autocomplete";
+    queryObj["body"] =  {
+        "_source": source,
+        "size": 6,
+        "query": {
+            "function_score" : {
+                "query" : {
+                    "match_phrase" : {
                         "str" : query.trim()
                 ***REMOVED***
-            ***REMOVED***
-        ***REMOVED***;
-    ***REMOVED***
-        ***REMOVED***
-            var elastic_query =  {
-                "_source": source,
-                "size": 6,
-
-                "query": {
-                    "function_score" : {
-                        "query" : {
-                            "match_phrase" : {
-                                "str" : query.trim()
-                        ***REMOVED***
+            ***REMOVED***,
+            ***REMOVED*** Boost disease/disorders category
+                "functions" : [
+                    {
+                        "filter": {
+                            "terms": { "types": ["DISO"] ***REMOVED***
                     ***REMOVED***,
-
-                        "functions" : [
-                        ***REMOVED*** Prefer SnomedCT / MeSH
-                        ***REMOVED*** {
-                        ***REMOVED***     "filter": {
-                        ***REMOVED***         "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] ***REMOVED***
-                        ***REMOVED*** ***REMOVED***,
-                        ***REMOVED***     "weight": 1.25
-                        ***REMOVED*** ***REMOVED***,
-
-                        ***REMOVED*** weight for some categories
-                            {
-                                "filter": {
-                                    "terms": { "types": ["DISO"] ***REMOVED***
-                            ***REMOVED***,
-                                "weight": 1.8
-                        ***REMOVED***
-                        ]
+                        "weight": 1.8
                 ***REMOVED***
-            ***REMOVED***
-        ***REMOVED***;
+                ]
+        ***REMOVED***
     ***REMOVED***
+***REMOVED***;
 
-        var queryObj = {
-            "index" : 'autocomplete',
-            "body"  : elastic_query
-    ***REMOVED***;
+    return getResults(queryObj);
+***REMOVED***
 
+
+function getResults (queryObj) {
+    return function(callback) {
         elasticClient.search(queryObj, function(err, res) {
             if (err) {
                 return callback(false, { "error": true, "took": 10, "hits": []***REMOVED***)
