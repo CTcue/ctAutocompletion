@@ -11,6 +11,7 @@
 const config  = require('../config/config.js');
 const getCategory = require("./lib/category.js");
 
+const _ = require("lodash");
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -54,13 +55,27 @@ module.exports = function *() {
 
   if (result && result.length > 0) {
       var types = result[0]._source.types;
+      var terms = result.map(s => s._source.str);
 
       return this.body = {
-          "type"     : "-",
-          "category" : getCategory(types),
-          "terms"    : result.map(function(item) { return item._source.str; ***REMOVED***)
+          "DEPRECATED": true,
+          "category" : types,
+          "terms"    : _.uniq(terms, s => normalizeTextForComparison(s)),
   ***REMOVED***;
   ***REMOVED***
 
-  this.body = { "type": "", "category": "", "terms": [] ***REMOVED***
+  this.body = { "DEPRECATED": true, "category": null, "terms": [] ***REMOVED***
 ***REMOVED***;
+
+
+function normalizeTextForComparison(text) {
+    if (!text) {
+        return "";
+***REMOVED***
+
+    return text
+        .toLowerCase()
+        .replace(/[^\w]/g, ' ') // symbols etc
+        .replace(/\s\s+/g, ' ') // multi whitespace
+        .trim()
+***REMOVED***
