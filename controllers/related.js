@@ -19,7 +19,7 @@ module.exports = function *() {
     var result = {
         "children": [],
         "parents" : [],
-        "siblings": []
+    ***REMOVED*** "siblings": []
 ***REMOVED***;
 
 ***REMOVED*** Obtain given "cui" parameter
@@ -49,13 +49,13 @@ module.exports = function *() {
     ***REMOVED***
 ***REMOVED***
 
-    for (let cui of yield _cypher(params, queries.__siblings())) {
-        var item = yield _elastic(cui);
+***REMOVED*** for (let cui of yield _cypher(params, queries.__siblings())) {
+***REMOVED***     var item = yield _elastic(cui);
 
-        if (item) {
-            result["siblings"].push(item)
-    ***REMOVED***
-***REMOVED***
+***REMOVED***     if (item) {
+***REMOVED***         result["siblings"].push(item)
+***REMOVED*** ***REMOVED***
+***REMOVED*** ***REMOVED***
 
     this.body = result;
 ***REMOVED***;

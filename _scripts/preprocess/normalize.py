@@ -39,7 +39,6 @@ bracket_cat = [
     "treatment",
     "volume",
 ]
-_cats = re.compile( "\((%s)\)" % "|".join(bracket_cat) )
 
 block_cat = [
     "ambiguous",
@@ -47,12 +46,12 @@ block_cat = [
     "Disease/Finding"
 ]
 
+_cats = re.compile( "\((%s)\)" % "|".join(bracket_cat) )
 _combined = re.compile("(\[(%s)\]|\((%s)\))" % ("|".join(block_cat), "|".join(bracket_cat)))
 
 endsWith = [
     "NAO",
     "\(NAO\)",
-    "\(NOS\)",
     "nao",
     "[Dd]is",
     "[Zz]iekte van",
@@ -73,9 +72,6 @@ def normalize(term):
     term = re.sub(r"-+", "-", term)
     term = re.sub(r"(<su[bp])?>([a-zA-Z0-9]+)<(/su[bp]>)?", r"\2", term)
     term = re.sub(_cats, "", term)
-
-    # Remove text in brackets
-    term = re.sub("(\[.*\])", "", term)
 
     # Remove specific terms at term endings
     term = re.sub(_endings, "", term)

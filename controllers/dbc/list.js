@@ -39,7 +39,6 @@ module.exports = function *() {
     ***REMOVED***,
         function(err, resp) {
             if (resp && !!resp.hits && resp.hits.total > 0) {
-
                 var hits = resp.hits.hits;
                 var sources = hits.map(function(s) {
                     return {
