@@ -15,6 +15,12 @@ const queries = require("./_cypher/queries");
 const _cypher = require("./_cypher/cypher");
 const _elastic = require("./_cypher/expand_by_cui");
 
+const neoQuery = {
+    "children" : queries.__children(),
+    "parents"  : queries.__parents(),
+};
+
+
 module.exports = function *() {
     var result = {
         "children": [],
@@ -32,30 +38,15 @@ module.exports = function *() {
         return this.body = result;
     }
 
+    for (var k in result) {
+        for (let cui of yield _cypher(params, neoQuery[k])) {
+            var item = yield _elastic(cui);
 
-    for (let cui of yield _cypher(params, queries.__children())) {
-        var item = yield _elastic(cui);
-
-        if (item) {
-            result["children"].push(item)
+            if (item) {
+                result[k].push(item)
+            }
         }
     }
-
-    for (let cui of yield _cypher(params, queries.__parents())) {
-        var item = yield _elastic(cui);
-
-        if (item) {
-            result["parents"].push(item)
-        }
-    }
-
-    // for (let cui of yield _cypher(params, queries.__siblings())) {
-    //     var item = yield _elastic(cui);
-
-    //     if (item) {
-    //         result["siblings"].push(item)
-    //     }
-    // }
 
     this.body = result;
 };

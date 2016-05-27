@@ -5,7 +5,7 @@ exports.__parents = function() {
 }
 
 exports.__shared_parents = function() {
-    return `MATCH (t1:Concept { cui: {A} }), (t2:Concept { cui: {B} }) (t1)-[:child_of]->(p)<-[:child_of]-(t2) return COLLECT(p) as list`
+    return `MATCH (t1:Concept { cui: {A} }), (t2:Concept { cui: {B} }), (t1)-[:child_of]->(p)<-[:child_of]-(t2) return COLLECT(p) as list`
 }
 
 exports.__children = function() {
@@ -19,7 +19,7 @@ exports.__siblings = function() {
 
 // Currently not used
 exports.__shortestPath = function() {
-    return `MATCH (t1:Concept { ${keyA}: {A} }), (t2:Concept { ${keyB}: {B} }),
+    return `MATCH (t1:Concept { cui: {A} }), (t2:Concept { cui: {B} }),
             p = shortestPath((t1)<-[*..3]->(t2))
             return p`
 }

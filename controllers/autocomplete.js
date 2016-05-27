@@ -63,17 +63,15 @@ module.exports = function *() {
             likes = yield findUserLikes(query, this.user._id, this.user.env);
         }
     }
-    else {
 
-    }
+    var allMatches = [].concat(exactMatches.hits, likes, closeMatches.hits);
+    var unique     = _.uniq(allMatches, s => s["cui"]);
 
     this.body = {
         "took"   : (exactMatches.took || 10) + (closeMatches.took || 20),
         "special": specialMatches,
-        "hits"   : _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), function(t) {
-            return t["pref"].toString().toLowerCase();
-        })
-    }
+        "hits"   : unique
+    };
 };
 
 
@@ -190,9 +188,9 @@ function findMatches(query) {
                 "functions" : [
                     {
                         "filter": {
-                            "terms": { "types": ["DISO"] }
+                            "terms": { "types": ["DISO", "PROC", "T200"] }
                         },
-                        "weight": 1.8
+                        "weight": 1.5
                     }
                 ]
             }
