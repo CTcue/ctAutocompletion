@@ -1,6 +1,6 @@
 'use strict';
 
-var version = "19 okt. 2015";
+var version = require("./package").version;
 
 var config = require('./config/config');
 var koa = require('koa');

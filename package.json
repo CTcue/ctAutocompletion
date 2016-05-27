@@ -1,6 +1,6 @@
 {
   "name": "ct-autocompletion",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
@@ -19,7 +19,6 @@
     "complete"
   ],
   "author": "CTcue",
-  "license": "ISC",
   "homepage": "https://github.com/CTcue/ctAutocompletion",
   "dependencies": {
     "cheerio": "^0.20.0",
@@ -44,5 +43,7 @@
   "devDependencies": {
     "supertest": "*",
     "mocha": "*"
-  }
+  },
+  "license": "Proprietary",
+  "private": true
 }

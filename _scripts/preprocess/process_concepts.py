@@ -56,18 +56,17 @@ class AggregatorJob(MRJob):
             (CUI, LAT, TS, LUI, STT, SUI, ISPREF, AUI, SAUI, SCUI, SDUI, SAB, TTY, CODE, STR, SRL, SUPPRESS, CVF, _) = split
 
             STR = STR.strip()
-
             if len(STR) < 2:
+                return
+
+            # Language
+            if LAT not in ['ENG', 'DUT']:
                 return
 
             if ISPREF != 'Y' or STT != "PF" or TS not in ["P", "S"]:
                 return
 
-            if SUPPRESS != "N": #in ["E", "O", "Y"]:
-                return
-
-            # Language
-            if LAT not in ['ENG', 'DUT']:
+            if SUPPRESS != "N":
                 return
 
             # Obsolete sources
@@ -80,7 +79,7 @@ class AggregatorJob(MRJob):
             normalized = normalize(STR)
 
             # Skip NOS terms
-            if re.match(r"(nos|NOS)$", normalized):
+            if re.match(r" (nos|NOS|\(NOS\))$", normalized):
                 return
 
             # Skip digit(s) only terms

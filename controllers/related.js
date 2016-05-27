@@ -19,7 +19,7 @@ module.exports = function *() {
     var result = {
         "children": [],
         "parents" : [],
-        "siblings": []
+        // "siblings": []
     };
 
     // Obtain given "cui" parameter
@@ -49,13 +49,13 @@ module.exports = function *() {
         }
     }
 
-    for (let cui of yield _cypher(params, queries.__siblings())) {
-        var item = yield _elastic(cui);
+    // for (let cui of yield _cypher(params, queries.__siblings())) {
+    //     var item = yield _elastic(cui);
 
-        if (item) {
-            result["siblings"].push(item)
-        }
-    }
+    //     if (item) {
+    //         result["siblings"].push(item)
+    //     }
+    // }
 
     this.body = result;
 };

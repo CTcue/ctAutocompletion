@@ -71,7 +71,7 @@ module.exports = function *() {
         "took"   : (exactMatches.took || 10) + (closeMatches.took || 20),
         "special": specialMatches,
         "hits"   : _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), function(t) {
-            return t["str"].toString().toLowerCase();
+            return t["pref"].toString().toLowerCase();
         })
     }
 };
@@ -165,6 +165,8 @@ function findExact(query, query_type) {
 
         queryObj["index"] = "autocomplete";
     }
+
+    // console.log(JSON.stringify(queryObj, null, 2))
 
     return getResults(queryObj);
 }
