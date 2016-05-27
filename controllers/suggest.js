@@ -19,6 +19,9 @@ const _cypher = require("./_cypher/cypher");
 const _elastic = require("./_cypher/expand_by_cui");
 
 
+const neoQuery = queries.__shortestPath();
+
+
 module.exports = function *() {
     var body = this.request.body.query;
 
@@ -35,7 +38,7 @@ module.exports = function *() {
 
     var result = [];
 
-    for (let cui of yield _cypher(params, queries.__parents())) {
+    for (let cui of yield _cypher(params, neoQuery)) {
         var item = yield _elastic(cui);
 
         if (item) {

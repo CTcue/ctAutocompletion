@@ -56,7 +56,7 @@ class AggregatorJob(MRJob):
             (CUI, LAT, TS, LUI, STT, SUI, ISPREF, AUI, SAUI, SCUI, SDUI, SAB, TTY, CODE, STR, SRL, SUPPRESS, CVF, _) = split
 
             STR = STR.strip()
-            if len(STR) < 2:
+            if len(STR) < 2 or len(STR) > 80:
                 return
 
             # Language
@@ -89,12 +89,19 @@ class AggregatorJob(MRJob):
             if re.match(p_roman, normalized):
                 return
 
-            # Skip records such as Pat.mo.dnt
+            # Skip records such as Pat.mo.dnt and chemical notations
+            if "." in normalized and "^" in normalized:
+                return
+
             if normalized.count(".") >= 3 or normalized.count(":") >= 3:
                 return
 
-            if "." in normalized and "^" in normalized:
+            if normalized.count("(") >= 2 or normalized.count("[") >= 2:
                 return
+
+            if normalized.count(",") > 2 and normalized.count("-") > 2:
+                return
+
 
             if TS == "P":
                 yield CUI, ["PREF", LAT, normalize(STR), SAB]
@@ -128,7 +135,7 @@ class AggregatorJob(MRJob):
 
         # Custom terms header
         elif len(split) == 6:
-            (CUI, STR, LAT, SAB, PREF, STY) = split
+            (CUI, STR, LAT, SAB, PREF, TUI) = split
             STR = STR.strip()
 
             if PREF == "Y":
@@ -137,8 +144,8 @@ class AggregatorJob(MRJob):
                 yield CUI, ["TERM", LAT, STR, SAB]
 
 
-            if STY and len(STY):
-                yield CUI, ["STY", STY]
+            if TUI and len(TUI):
+                yield CUI, ["STY", get_group(TUI), TUI]
 
 
         # MRSTY Header
@@ -149,8 +156,7 @@ class AggregatorJob(MRJob):
             if STY in skip_categories:
                 return
 
-            group = get_group(TUI)
-            yield CUI, ["STY", group]
+            yield CUI, ["STY", get_group(TUI), TUI]
 
         else:
             # Unknown file, so skip it
@@ -160,6 +166,8 @@ class AggregatorJob(MRJob):
     def reducer(self, CUI, values):
         terms = defaultdict(lambda: defaultdict(set))
         preferred = defaultdict(list)
+
+        category = set()
         types = set()
 
         for value in values:
@@ -171,20 +179,21 @@ class AggregatorJob(MRJob):
                     preferred[LAT].append(STR)
 
             elif value[0] == "STY":
-                types.add(value[1])
+                category.add(value[1])
+                types.add(value[2])
 
 
         # Skip if no actual terms found
         if not terms:
             return
 
-        # Check types
+        # Check category
         # + custom concepts have their own "yield STY"
-        if not types:
+        if not category:
             return
 
 
-        if any(x for x in types if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
+        if any(x for x in category if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
             return
 
 
@@ -192,7 +201,7 @@ class AggregatorJob(MRJob):
             for SAB, v in SAB_terms.iteritems():
 
                 # If ANATOMY category -> skip checking for anatomoy terms
-                if not any(x for x in types if x == "ANAT"):
+                if not any(x for x in category if x == "ANAT"):
                     tmp_terms = set()
                     for t in v:
                         if not is_bodypart(t):
@@ -213,7 +222,7 @@ class AggregatorJob(MRJob):
                 else:
                     pref_term = list(unique)[0]
 
-                out = "\t".join([CUI, LAT, SAB, "|".join(types), pref_term, "|".join(unique)])
+                out = "\t".join([CUI, LAT, SAB, "|".join(category|types), pref_term, "|".join(unique)])
                 print out.encode("utf-8")
 
 
