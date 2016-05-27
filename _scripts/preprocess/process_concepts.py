@@ -6,8 +6,8 @@ from collections import defaultdict
 from normalize import normalize
 from semantic import get_group
 from body_parts import is_bodypart
+from skip_term import skip_term
 from skip_categories import skip_categories
-import re
 import os
 
 
@@ -18,17 +18,13 @@ tmp_dir  = os.path.abspath(os.path.join(basepath, "mrjob_tmp"))
 tempfile.tempdir = tmp_dir
 
 
-# Patterns
-p_number = re.compile(r"^[0-9]+$")
-p_roman  = re.compile("^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$", flags=re.I)
-
 
 obsolete_types = ['N1', 'PM', 'OAS', 'OAF', 'OAM', 'OAP', 'OA', 'OCD', 'OET', 'OF', 'OLC', 'OM', 'ONP', 'OOSN', 'OPN', 'OP', 'LO', 'IS', 'MTH_LO', 'MTH_IS', 'MTH_OET']
 
 useful_sources =  [
     "MSH",
     "SNOMEDCT_US",
-    "LNC",
+    # "LNC",
     "RXNORM",
     "MEDCIN",
     "MTH",
@@ -55,10 +51,6 @@ class AggregatorJob(MRJob):
         if len(split) == 19:
             (CUI, LAT, TS, LUI, STT, SUI, ISPREF, AUI, SAUI, SCUI, SDUI, SAB, TTY, CODE, STR, SRL, SUPPRESS, CVF, _) = split
 
-            STR = STR.strip()
-            if len(STR) < 2 or len(STR) > 80:
-                return
-
             # Language
             if LAT not in ['ENG', 'DUT']:
                 return
@@ -76,37 +68,16 @@ class AggregatorJob(MRJob):
             if SAB not in useful_sources:
                 return
 
+            STR = STR.strip()
             normalized = normalize(STR)
 
-            # Skip NOS terms
-            if re.match(r" (nos|NOS|\(NOS\))$", normalized):
+            if skip_term(normalized):
                 return
-
-            # Skip digit(s) only terms
-            if re.match(p_number, normalized):
-                return
-
-            if re.match(p_roman, normalized):
-                return
-
-            # Skip records such as Pat.mo.dnt and chemical notations
-            if "." in normalized and "^" in normalized:
-                return
-
-            if normalized.count(".") >= 3 or normalized.count(":") >= 3:
-                return
-
-            if normalized.count("(") >= 2 or normalized.count("[") >= 2:
-                return
-
-            if normalized.count(",") > 2 and normalized.count("-") > 2:
-                return
-
 
             if TS == "P":
-                yield CUI, ["PREF", LAT, normalize(STR), SAB]
+                yield CUI, ["PREF", LAT, normalized, SAB]
             else:
-                yield CUI, ["TERM", LAT, normalize(STR), SAB]
+                yield CUI, ["TERM", LAT, normalized, SAB]
 
 
         # Additional Terms header
@@ -117,7 +88,6 @@ class AggregatorJob(MRJob):
                 return
 
             STR = STR.strip()
-
             if STR.startswith(","):
                 return
 
@@ -185,11 +155,6 @@ class AggregatorJob(MRJob):
 
         # Skip if no actual terms found
         if not terms:
-            return
-
-        # Check category
-        # + custom concepts have their own "yield STY"
-        if not category:
             return
 
 
