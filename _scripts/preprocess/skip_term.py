@@ -1,58 +1,106 @@
+from collections import Counter
 import re
 
-# Patterns
-p_number = re.compile(r"^[0-9\.]+$")
+p_nos = re.compile(r"\b(nos|NOS|induced platelet Ab)\b")
+p_dosage = re.compile(r"\b([0-9\.]+ (mg|MG|\w+/ML))\b")
+p_meds = re.compile(r".\boral (\w+)? (capsule|product|pill)\b", flags=re.I)
+p_construct1 = re.compile(r"\b(skin|tissue) structure of\b", flags=re.I)
+p_construct2 = re.compile(r"\b(fracture|structure) of\b.*of\b", flags=re.I)
+p_multi = re.compile(r"\b([\w\s]+){2,} / ([\w\s]+){2,}\b", flags=re.I)
 
 
 def skip_term(STR):
     if len(STR) < 2 or len(STR) > 80:
         return True
 
-    # Skip NOS terms
-    if re.search(r"\b(nos|NOS)\b", STR):
-        return True
-
-    # # Skip digit(s) only terms
-    if re.match(p_number, STR):
-        return True
-
     # Skip records with a lot of words
-    if len(re.findall(r'\w+', STR)) > 6:
+    if len(re.findall(r'\w+', STR)) > 7:
         return True
 
-    # Skip records such as Pat.mo.dnt and chemical notations
-    if "." in STR and "^" in STR:
+    # To skip chemical notation and records such as Pat.mo.dnt
+    # - Count specific characters
+    chars = Counter()
+
+    for c in STR:
+        if c.isdigit():
+            chars["digits"] += 1
+        elif c.isalpha():
+            chars["letters"] += 1
+        else:
+            chars[c] += 1
+
+    if chars["letters"] < 2:
         return True
 
-    if STR.count(".") >= 3 or STR.count(":") >= 3:
+    if chars["digits"] >= 2:
+        if chars["-"] >= 2:
+            return True
+        if chars["("] >= 1:
+            return True
+
+    if chars["digits"] > 3 and (chars[","] or chars["'"]):
         return True
 
-    if STR.count("(") >= 2 or STR.count("[") >= 2:
+    if chars["."] >= 3:
+        return True
+    if chars[":"] >= 3:
+        return True
+    if chars["@"] >= 2:
+        return True
+    if chars["("] >= 2:
+        return True
+    if chars["["] >= 2:
+        return True
+    if chars[","] > 2 and chars["-"] > 2:
+        return True
+    if chars["-"] > 4:
         return True
 
-    if STR.count(",") > 2 and STR.count("-") > 2:
-        return True
+    if "." in STR:
+        if "^" in STR:
+            return True
+        if "'" in STR and "," in STR:
+            return True
 
-    if STR.count("-") > 4:
+    # Skip NOS terms
+    if re.search(p_nos, STR):
         return True
 
     # Skip medication with dosage info (Phenindione 10mg tablet)
+    if re.search(p_dosage, STR):
+        return True
+    if re.search(p_meds, STR):
+        return True
+
+    # Skip terms with weird constructs (X structure of Y)
+    if re.search(p_construct1, STR) or re.search(p_construct2, STR):
+        return True
+
+    # Skip multi terms
+    if "/" in STR and re.search(p_multi, STR):
+        return True
 
     return False
-
 
 
 if __name__ == '__main__':
     import unittest
 
     class TestTerms(unittest.TestCase):
+        def test_normal(self):
+            self.assertEqual(skip_term("LDL"), False)
+            self.assertEqual(skip_term("Carcinoma"), False)
+            self.assertEqual(skip_term("Ankylosing spondylitis"), False)
+            self.assertEqual(skip_term("Recurrent Major depressive disorder"), False)
+            self.assertEqual(skip_term("Simvastatine"), False)
+            self.assertEqual(skip_term("Malignant neoplasm, Brain"), False)
+            self.assertEqual(skip_term("Structure of occipital angle"), False)
 
         def test_nubmer(self):
-            self.assertEqual(skip_term("carcinoma 11"), False)
             self.assertEqual(skip_term("11"), True)
             self.assertEqual(skip_term("0.11"), True)
             self.assertEqual(skip_term("20.11"), True)
-            self.assertEqual(skip_term("20-11"), False)
+            self.assertEqual(skip_term("20-11"), True)
 
         def test_NOS(self):
             self.assertEqual(skip_term("pernoster"), False)
@@ -71,41 +119,26 @@ if __name__ == '__main__':
             self.assertEqual(skip_term("1,1-dimethyl-2-phenylethyl isobutyrate"), True)
 
         def test_medication_dosage(self):
-            # Afatinib 40 MG
-            # Sodium Fluoride 0.0024 MG/MG
-            # golimumab 12.5 MG/ML
-            # Bacitracin 0.5 UNT/ML
-            # Tacrolimus 1 MG Extended Release Oral Capsule
-            pass
+            self.assertEqual(skip_term("Afatinib 40"), False)
+            self.assertEqual(skip_term("Afatinib 40 MG"), True)
+            self.assertEqual(skip_term("Sodium Fluoride 0.0024 MG/MG"), True)
+            self.assertEqual(skip_term("golimumab 12.5 MG/ML"), True)
+            self.assertEqual(skip_term("Bacitracin 0.5 UNT/ML"), True)
+            self.assertEqual(skip_term("Tacrolimus 1 MG Extended Release Oral Capsule"), True)
 
         def test_medication_form(self):
-            # Biotene Dry Mouth Fluoride Oral Paste Product
-            # Pediacare Children's 24-Hr Allergy Oral Liquid Product
-            # levomilnacipran 120 MG Extended Release Oral Capsule
-            pass
+            self.assertEqual(skip_term("Oral Paste Product"), False)
+            self.assertEqual(skip_term("Biotene Dry Mouth Fluoride Oral Paste Product"), True)
+            self.assertEqual(skip_term("Pediacare Children's 24-Hr Allergy Oral Liquid Product"), True)
+            self.assertEqual(skip_term("levomilnacipran 120 MG Extended Release Oral Capsule"), True)
 
         def test_multi_term(self):
-            # Piperonyl Butoxide / Pyrethrins Medicated Shampoo
-
-            pass
-
-        def test_computer_abbr(self):
-            # Hydralazine (plat) IgM SerPl Ql FC
-            # Hydralazine (plat) IgG SerPl Ql FC
-            pass
+            # Ezetimibe+Simvastatin
+            self.assertEqual(skip_term("Piperonyl Butoxide / Pyrethrins Medicated Shampoo"), True)
 
         def test_constructs(self):
-            # C3656166    Mirtazapine induced platelet Ab
-            # C3656169    Minoxidil induced platelet Ab
-            # C3656172    Minocycline induced platelet Ab
-            # C3656174    Milrinone induced platelet Ab
-            # C3656177    Midazolam induced platelet Ab
-            # C3656180    Metronidazole induced platelet Ab
-            # C3656183    Metoprolol induced platelet Ab
-            # C3656186    Metoprolol induced neutrophil Ab
-            # C3656189    Metoclopramide induced platelet Ab
-            # C3656191    Metoclopramide induced neutrophil Ab
-
-            pass
+            self.assertEqual(skip_term("Skin structure of labium"), True)
+            self.assertEqual(skip_term("Subcutaneous tissue structure of head"), True)
+            self.assertEqual(skip_term("Mirtazapine induced platelet Ab"), True)
 
     unittest.main()
