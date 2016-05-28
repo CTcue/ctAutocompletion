@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from py2neo import authenticate, Graph
 import argparse
@@ -21,11 +20,9 @@ if __name__ == '__main__':
             username = "neo4j"
             password = "neo4j"
 
-
         authenticate("localhost:7474", username, password)
         db = Graph()
         db.delete_all()
-
     except Exception as err:
-        print 'Provide a valid Neo4j username and password'
+        print "Please provide Neo4j authentication\n\t--neo4j 'username:secret-password'"
         sys.exit(1)

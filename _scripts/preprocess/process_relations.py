@@ -5,12 +5,11 @@ import tempfile
 from collections import defaultdict
 import csv
 import os
-import hashlib
 
 
 # Set tmp dir to relative directory from script
 basepath = os.path.dirname(__file__)
-tmp_dir  = os.path.abspath(os.path.join(basepath, "mrjob_tmp"))
+tmp_dir = os.path.abspath(os.path.join(basepath, "mrjob_tmp"))
 tempfile.tempdir = tmp_dir
 
 
@@ -26,26 +25,6 @@ try:
 except:
     print "Please run `python process_concepts.py` first to generate a list of used CUI's"
 
-
-
-# Relations defined
-# https://www.nlm.nih.gov/research/umls/knowledge_sources/metathesaurus/release/abbreviations.html#REL
-
-# AQ  Allowed qualifier
-# CHD has child relationship in a Metathesaurus source vocabulary
-# DEL Deleted concept
-# PAR has parent relationship in a Metathesaurus source vocabulary
-# QB  can be qualified by.
-# RB  has a broader relationship
-# RL  the relationship is similar or "alike". the two concepts are similar or "alike". In the current edition of the Metathesaurus, most relationships with this attribute are mappings provided by a source, named in SAB and SL; hence concepts linked by this relationship may be synonymous, i.e. self-referential: CUI1 = CUI2. In previous releases, some MeSH Supplementary Concept relationships were represented in this way.
-# RN  has a narrower relationship
-# RO  has relationship other than synonymous, narrower, or broader
-# RQ  related and possibly synonymous.
-# RU  Related, unspecified
-# SIB has sibling relationship in a Metathesaurus source vocabulary.
-# SY  source asserted synonymy.
-# XR  Not related, no mapping
-#     Empty relationship
 
 class AggregatorJob(MRJob):
     """
@@ -82,13 +61,12 @@ class AggregatorJob(MRJob):
                 return
 
             # Skip relations that map term => "extended" children
-            pref1 = usedCUI[CUI1] # set(["Simvastatin"])
-            pref2 = usedCUI[CUI2] # set(["Simvastatin 40 MG Oral Tablet"])
+            pref1 = usedCUI[CUI1]  # set(["Simvastatin"])
+            pref2 = usedCUI[CUI2]  # set(["Simvastatin 40 MG Oral Tablet"])
 
             for child in pref2:
                 if any(p.lower() in child.lower() for p in pref1):
                     return
-
 
             if REL == "CHD":
                 relation = "child_of"
@@ -104,7 +82,6 @@ class AggregatorJob(MRJob):
                 key = CUI1 + CUI2
 
             yield key, [CUI1, relation, CUI2]
-
 
     def reducer(self, key, values):
         relations = defaultdict(set)

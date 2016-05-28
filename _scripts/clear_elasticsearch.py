@@ -1,10 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from elasticsearch import Elasticsearch, helpers
-from py2neo import authenticate, Graph
+from elasticsearch import Elasticsearch
 import argparse
-import os
 import sys
 import json
 
@@ -15,7 +13,6 @@ if __name__ == '__main__':
     parser.add_argument('--elastic', dest='elastic', default=None, help='Elasticsearch authentication (optional)')
     parser.add_argument('--neo4j', dest='neo4j', help='Neo4j authentication (required)')
     args = parser.parse_args()
-
 
     try:
         # Check if Elasticsearch auth is provided

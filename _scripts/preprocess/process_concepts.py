@@ -11,17 +11,14 @@ from skip_categories import skip_categories
 import os
 
 
-
 # Set tmp dir to relative directory from script
 basepath = os.path.dirname(__file__)
-tmp_dir  = os.path.abspath(os.path.join(basepath, "mrjob_tmp"))
+tmp_dir = os.path.abspath(os.path.join(basepath, "mrjob_tmp"))
 tempfile.tempdir = tmp_dir
 
 
-
 obsolete_types = ['N1', 'PM', 'OAS', 'OAF', 'OAM', 'OAP', 'OA', 'OCD', 'OET', 'OF', 'OLC', 'OM', 'ONP', 'OOSN', 'OPN', 'OP', 'LO', 'IS', 'MTH_LO', 'MTH_IS', 'MTH_OET']
-
-useful_sources =  [
+useful_sources = [
     "MSH",
     "SNOMEDCT_US",
     # "LNC",
@@ -79,7 +76,6 @@ class AggregatorJob(MRJob):
             else:
                 yield CUI, ["TERM", LAT, normalized, SAB]
 
-
         # Additional Terms header
         elif len(split) == 4:
             (CUI, STR, LAT, SAB) = split
@@ -113,10 +109,8 @@ class AggregatorJob(MRJob):
             else:
                 yield CUI, ["TERM", LAT, STR, SAB]
 
-
             if TUI and len(TUI):
                 yield CUI, ["STY", get_group(TUI), TUI]
-
 
         # MRSTY Header
         elif len(split) == 7:
@@ -131,7 +125,6 @@ class AggregatorJob(MRJob):
         else:
             # Unknown file, so skip it
             pass
-
 
     def reducer(self, CUI, values):
         terms = defaultdict(lambda: defaultdict(set))
@@ -152,19 +145,15 @@ class AggregatorJob(MRJob):
                 category.add(value[1])
                 types.add(value[2])
 
-
         # Skip if no actual terms found
         if not terms:
             return
 
-
         if any(x for x in category if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
             return
 
-
         for LAT, SAB_terms in terms.iteritems():
             for SAB, v in SAB_terms.iteritems():
-
                 # If ANATOMY category -> skip checking for anatomoy terms
                 if not any(x for x in category if x == "ANAT"):
                     tmp_terms = set()
@@ -189,7 +178,6 @@ class AggregatorJob(MRJob):
 
                 out = "\t".join([CUI, LAT, SAB, "|".join(category|types), pref_term, "|".join(unique)])
                 print out.encode("utf-8")
-
 
 if __name__ == "__main__":
     AggregatorJob.run()

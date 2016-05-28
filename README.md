@@ -1,17 +1,11 @@
 ctAutocompletion
 =======
 
-You will need an [UMLS license](https://www.nlm.nih.gov/research/umls/) to obtain the required `MRCONSO.rrf`.
-
-
-### Autocompletion
-
-Find relevant UMLS terms based on user input. It will prioritize exact matches, secondly it will look for prefix matches. Given multiple words it will suggest terms using
-prefixes of multiple terms. Wildcard options are not supported.
+Find relevant UMLS terms based on user input. The autocompletion algorithm prioritizes exact matches, and if non are found it prefers prefix matches. You can also send multiple words and for each seperate term it does a prefix lookup, so you can send queries like `anky spondy` or `maj dep dis`.
 
 
 ```
-curl -XPOST 'http://localhost/autocomplete' -d '{
+curl -XPOST 'http://localhost:4080/autocomplete' -d '{
     "query" : "Major dep"
 }'
 
@@ -23,17 +17,14 @@ curl -XPOST 'http://localhost/autocomplete' -d '{
     {
       "str": "Major depression",
       "cui": "C1269683",
-      "score": 9.811963
     },
     {
       "str": "major depressive disorder",
       "cui": "C1269683",
-      "score": 7.8495703
     },
     {
       "str": "major depressive illness",
       "cui": "C1269683",
-      "score": 7.8495703
     },
 
     ...
@@ -41,29 +32,25 @@ curl -XPOST 'http://localhost/autocomplete' -d '{
 ```
 
 
+## Installation
 
-### Synonym browsing
+* Make sure you have NodeJS (>5.x) and Elasticsearch (>2.x) installed
+  * Check if elasticsearch running
+  * Optionally you can install Neo4j
+* Run `npm install`
+* Run `pip install -r requirements.txt`
+* Obtain an UMLS directory with MRCONSO.RRF and MRSTY.RRF (etc)
+  * You will need an [UMLS license](https://www.nlm.nih.gov/research/umls/) to obtain these sources
+* Adjust the paths inside `_scripts/generate.sh` to locate your UMLS directory
+  * If you don't need the relations, you can comment the neo4j parts
+* Run `bash ./_scripts/generate.sh` (this may take a while)
+* Run `bash ./_scripts/bulkUpload.sh`
 
-Obtain all UMLS synonyms for a given CUI code.
+You can now run `npm start` or `node app.js` to start your local ctAutocompletion server on http://localhost:4080 by default.
 
 
-```
-curl -XPOST 'http://localhost/expand' -d '{
-    "query" : "C1269683"
-}'
+## Contributing
 
-// Results in
+You can run unit tests with `npm test`.
 
-[
-  "Depressieve stoornis, ernstige",
-  "Ernstige depressieve stoornis",
-  "Involutiepsychose",
-  "involutionele Melancholie",
-  "involutionele Parafrenie",
-  "involutionele Psychose",
-  "Involutiedepressie",
-  "Involutionele depressie",
-  "major depressive disorder",
-  "Depressive Disorder, Major"
-]
-```
+If you feel something is missing, you can open an issue stating the problem sentence and desired result. If code is unclear give me a @mention. Pull requests are welcome.

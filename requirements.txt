@@ -1,0 +1,3 @@
+elasticsearch
+py2neo
+mrjob
