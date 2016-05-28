@@ -46,7 +46,7 @@ block_cat = [
     "Disease/Finding"
 ]
 
-_cats = re.compile( "\((%s)\)" % "|".join(bracket_cat) )
+_cats = re.compile("\((%s)\)" % "|".join(bracket_cat))
 _combined = re.compile("(\[(%s)\]|\((%s)\))" % ("|".join(block_cat), "|".join(bracket_cat)))
 
 endsWith = [
@@ -105,11 +105,9 @@ def normalize(term):
     return term.strip(" ,-")
 
 
-
-
-
 if __name__ == '__main__':
     import unittest
+
     class TestStringMethods(unittest.TestCase):
 
         def test_semicolon(self):
@@ -137,7 +135,6 @@ if __name__ == '__main__':
             self.assertEqual(normalize("Droxidopa [Chemical/Ingredient]"), "Droxidopa")
             self.assertEqual(normalize("Abdomen, Acute [Disease/Finding]"), "Abdomen, Acute")
 
-
         def test_machine_variants(self):
             self.assertEqual(normalize("Tumor, Buik-"), "buiktumor")
             self.assertEqual(normalize("Syndroom, afferente-lis-"), "afferente-lissyndroom")
@@ -156,6 +153,5 @@ if __name__ == '__main__':
         def test_remove_common(self):
             self.assertEqual(normalize("Bechterew, ziekte van"), "Bechterew")
             self.assertEqual(normalize("Bechterew, Syndroom van"), "Bechterew")
-
 
     unittest.main()
