@@ -1,8 +1,8 @@
 "use strict";
 
-var _ = require("lodash");
-
+const _ = require("lodash");
 const config  = require('../../config/config.js');
+
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -26,7 +26,7 @@ module.exports = function *() {
     var result = yield function(callback) {
         elasticClient.search({
           "index" : 'dbc_zorgproduct',
-          "size": 200,
+          "size": 1000,
           "_source": source,
 
           "body" : {
@@ -54,7 +54,6 @@ module.exports = function *() {
             }
         });
     };
-
 
     this.body = result;
 }

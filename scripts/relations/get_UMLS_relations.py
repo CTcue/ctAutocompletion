@@ -60,7 +60,8 @@ def extract_rels(umls_dir):
             if ru.canSkip(row, used_CUIs):
                 continue
 
-            w.writerow([row["CUI1"],row["CUI2"],row["RELA"],row["SAB"]])
+            counts[(row["SAB"],row["RELA"])]+=1
+            w.writerow([row["CUI2"], row["CUI1"],row["RELA"],row["SAB"]])
 
             rel_count+=1
 
@@ -68,7 +69,16 @@ def extract_rels(umls_dir):
 
     print "%i relations extracted"%rel_count
     print "of which %i non snomed relations"%non_snomed_count
-    print counts
+
+    rel_types = list(counts.keys())
+    rel_types.sort()
+
+    with open("relations/data/overview_relation_types.csv","wb") as outf:
+            w =  csv.writer(outf, encoding="utf-8",delimiter = ",")
+            w.writerow(["rel_type","rel_source"])
+            for r in rel_types:
+                print r, counts[r]
+                w.writerow([r[0],r[1], counts[r]])
 
 
 

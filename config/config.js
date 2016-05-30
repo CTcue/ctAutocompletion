@@ -26,7 +26,6 @@ else {
 // Assume neo4j is active
 config.neo4j["is_active"] = true;
 config.path = 'http://'+ config.host + ':' + config.port;
-
 config.elastic = "http://localhost:9200";
 
 try {
