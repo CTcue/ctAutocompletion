@@ -65,7 +65,7 @@ module.exports = function *() {
     }
 
     var allMatches = [].concat(exactMatches.hits, likes, closeMatches.hits);
-    var unique     = _.uniq(allMatches, s => s["cui"]);
+    var unique     = _.uniq(allMatches, s => s["pref"]);
 
     this.body = {
         "took"   : (exactMatches.took || 10) + (closeMatches.took || 20),

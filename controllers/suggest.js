@@ -19,7 +19,7 @@ const _cypher = require("./_cypher/cypher");
 const _elastic = require("./_cypher/expand_by_cui");
 
 
-const neoQuery = queries.__shortestPath();
+const neoQuery = queries.__shared_parents();
 
 
 module.exports = function *() {

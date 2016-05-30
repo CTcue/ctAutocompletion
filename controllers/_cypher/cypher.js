@@ -25,7 +25,7 @@ module.exports = function _cypher(params, query) {
     return function(callback) {
         db.cypher(cypherObj, function(err, paths) {
             if (err) {
-                // console.log(err);
+                console.log("NEO4J: ", err);
                 return callback(false, [])
             }
 
