@@ -2,8 +2,8 @@ from collections import Counter
 import re
 
 p_nos = re.compile(r"\b(nos|NOS|induced platelet Ab)\b")
-p_dosage = re.compile(r"\b([0-9\.]+ (mg|MG|\w+/ML))\b")
-p_meds = re.compile(r".\boral (\w+)? (capsule|product|pill)\b", flags=re.I)
+p_dosage = re.compile(r"\b([0-9\.]+\s?(mg|MG|\w+/ML))\b")
+p_meds = re.compile(r".\boral (\w+ )?(tablet|capsule|product|pill)\b", flags=re.I)
 p_construct1 = re.compile(r"\b(skin|tissue) structure of\b", flags=re.I)
 p_construct2 = re.compile(r"\b(fracture|structure) of\b.*of\b", flags=re.I)
 
@@ -115,6 +115,8 @@ if __name__ == '__main__':
         def test_medication_dosage(self):
             self.assertEqual(skip_term("Afatinib 40"), False)
             self.assertEqual(skip_term("Afatinib 40 MG"), True)
+            self.assertEqual(skip_term("Atorvastatin 40mg tablet"), True)
+
             self.assertEqual(skip_term("Sodium Fluoride 0.0024 MG/MG"), True)
             self.assertEqual(skip_term("golimumab 12.5 MG/ML"), True)
             self.assertEqual(skip_term("Bacitracin 0.5 UNT/ML"), True)
@@ -125,6 +127,8 @@ if __name__ == '__main__':
             self.assertEqual(skip_term("Biotene Dry Mouth Fluoride Oral Paste Product"), True)
             self.assertEqual(skip_term("Pediacare Children's 24-Hr Allergy Oral Liquid Product"), True)
             self.assertEqual(skip_term("levomilnacipran 120 MG Extended Release Oral Capsule"), True)
+            self.assertEqual(skip_term("Amlodipine / atorvastatin Oral Tablet"), True)
+
 
         def test_multi_term(self):
             # Ezetimibe+Simvastatin
