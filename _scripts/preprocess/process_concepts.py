@@ -48,29 +48,6 @@ class AggregatorJob(MRJob):
         if len(split) == 19:
             (CUI, LAT, TS, LUI, STT, SUI, ISPREF, AUI, SAUI, SCUI, SDUI, SAB, TTY, CODE, STR, SRL, SUPPRESS, CVF, _) = split
 
-            # Language
-            if LAT not in ['ENG', 'DUT']:
-                return
-
-            if ISPREF != 'Y' or STT != "PF" or TS not in ["P", "S"]:
-                return
-
-            if SUPPRESS != "N":
-                return
-
-            # Obsolete sources
-            if TTY in obsolete_types:
-                return
-
-            if SAB not in useful_sources:
-                return
-
-            STR = STR.strip()
-            normalized = normalize(STR)
-
-            if skip_term(normalized):
-                return
-
             if TS == "P":
                 yield CUI, ["PREF", LAT, normalized, SAB]
             else:

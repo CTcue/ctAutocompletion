@@ -6,21 +6,15 @@ p_dosage = re.compile(r"\b([0-9\.]+ (mg|MG|\w+/ML))\b")
 p_meds = re.compile(r".\boral (\w+)? (capsule|product|pill)\b", flags=re.I)
 p_construct1 = re.compile(r"\b(skin|tissue) structure of\b", flags=re.I)
 p_construct2 = re.compile(r"\b(fracture|structure) of\b.*of\b", flags=re.I)
-p_multi = re.compile(r"\b([\w\s]+){2,***REMOVED*** / ([\w\s]+){2,***REMOVED***\b", flags=re.I)
 
 
 def skip_term(STR):
     if len(STR) < 2 or len(STR) > 80:
         return True
 
-    # Skip records with a lot of words
-    if len(re.findall(r'\w+', STR)) > 7:
-        return True
-
     # To skip chemical notation and records such as Pat.mo.dnt
     # - Count specific characters
     chars = Counter()
-
     for c in STR:
         if c.isdigit():
             chars["digits"] += 1
@@ -30,6 +24,10 @@ def skip_term(STR):
             chars[c] += 1
 
     if chars["letters"] < 2:
+        return True
+
+    # Skip records with a lot of words
+    if chars[" "] > 7:
         return True
 
     if chars["digits"] >= 2:
@@ -74,10 +72,6 @@ def skip_term(STR):
 
     # Skip terms with weird constructs (X structure of Y)
     if re.search(p_construct1, STR) or re.search(p_construct2, STR):
-        return True
-
-    # Skip multi terms
-    if "/" in STR and re.search(p_multi, STR):
         return True
 
     return False
@@ -134,7 +128,8 @@ if __name__ == '__main__':
 
         def test_multi_term(self):
             # Ezetimibe+Simvastatin
-            self.assertEqual(skip_term("Piperonyl Butoxide / Pyrethrins Medicated Shampoo"), True)
+            # self.assertEqual(skip_term("Piperonyl Butoxide / Pyrethrins Medicated Shampoo"), True)
+            pass
 
         def test_constructs(self):
             self.assertEqual(skip_term("Skin structure of labium"), True)
