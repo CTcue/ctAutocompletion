@@ -1,8 +1,8 @@
 "use strict";
 
 const _ = require("lodash");
+const config  = require('../../config/config.js');
 
-const config = require('../../config/config.js');
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -12,7 +12,6 @@ const elasticClient = new elastic.Client({
 ***REMOVED***
   ]
 ***REMOVED***);
-
 
 const source = ["code", "diagnose"];
 
@@ -40,7 +39,6 @@ module.exports = function *() {
     ***REMOVED***,
         function(err, resp) {
             if (resp && !!resp.hits && resp.hits.total > 0) {
-
                 var hits = resp.hits.hits;
                 var sources = hits.map(function(s) {
                     return {
@@ -56,7 +54,6 @@ module.exports = function *() {
         ***REMOVED***
     ***REMOVED***);
 ***REMOVED***;
-
 
     this.body = result;
 ***REMOVED***

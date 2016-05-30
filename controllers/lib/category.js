@@ -19,8 +19,8 @@ module.exports = function getCategoryByTypes(types) {
 ***REMOVED***
 
     var dbc        = ["DBC", "dbc", "zorgproduct"];
-    var medication = ["medication", "Pharmacologic Substance", "product"];
-    var labresult  = ["Finding", "Laboratory Procedure", "Laboratory or Test Result", "Chemical/Ingredient"];
+    var medication = ["T200", "T121", "medication", "Pharmacologic Substance", "product"];
+    var labresult  = ["PROC", "T059", "Finding", "Laboratory Procedure", "Laboratory or Test Result", "Chemical/Ingredient"];
 
     return inList(types, dbc, "dbc")               ||
            inList(types, medication, "medication") ||

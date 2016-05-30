@@ -9,6 +9,7 @@ from py2neo.packages.httpstream import http
 # To avoid socket timeout when clearing the old graph
 http.socket_timeout = 9999
 
+
 def stamp():
     return time.strftime("%Y-%m-%d %H:%M")
 
@@ -42,47 +43,47 @@ def upload(umls_dir):
 
     print "[%s] start upload UMLS relations"%stamp()
 
-    row_counter = 0
-    for row in tqdm(utils.read_rows(umls_dir + "/MRREL.RRF", header=ru.rel_header, delimiter="|")):
+    # row_counter = 0
+    # for row in tqdm(utils.read_rows(umls_dir + "/MRREL.RRF", header=ru.rel_header, delimiter="|")):
 
-        # # REMOVE THIS
-        # if row_counter > 10:
-        #     break
-        # row_counter+=1
+    #     # # REMOVE THIS
+    #     # if row_counter > 10:
+    #     #     break
+    #     # row_counter+=1
 
-        if ru.canSkip(row, used_CUIs):
-            continue
+    #     if ru.canSkip(row, used_CUIs):
+    #         continue
 
-        counter += 1
+    #     counter += 1
 
-        cypher =  """
-            MERGE (a:Concept { cui: '%s' ***REMOVED***)
-            MERGE (b:Concept { cui: '%s' ***REMOVED***)
-            WITH a, b
-                CREATE (b)-[:%s]->(a)
-            RETURN a,b
-        """ % (row["CUI1"], row["CUI2"], row["RELA"])
-        tx.append(cypher)
+    #     cypher =  """
+    #         MERGE (a:Concept { cui: '%s' ***REMOVED***)
+    #         MERGE (b:Concept { cui: '%s' ***REMOVED***)
+    #         WITH a, b
+    #             CREATE (b)-[:%s]->(a)
+    #         RETURN a, b
+    #     """ % (row["CUI1"], row["CUI2"], row["RELA"])
+    #     tx.append(cypher)
 
-        for cui in [row["CUI1"],row["CUI2"]]:
-            if not used_CUIs[cui]["added"]:
-                for t in used_CUIs[cui]["types"]:
-                    cypher = """
-                        MERGE (a:Concept { cui: '%s' ***REMOVED***)
-                        MERGE (b:Type { type: '%s' ***REMOVED***)
-                        WITH a, b
-                            CREATE (a)-[:%s]->(b)
-                        RETURN a,b
-                        """%(cui, t, "has_type")
-                    tx.append(cypher)
+    #     for cui in [row["CUI1"],row["CUI2"]]:
+    #         if not used_CUIs[cui]["added"]:
+    #             for t in used_CUIs[cui]["types"]:
+    #                 cypher = """
+    #                     MERGE (a:Concept { cui: '%s' ***REMOVED***)
+    #                     MERGE (b:Type { type: '%s' ***REMOVED***)
+    #                     WITH a, b
+    #                         CREATE (a)-[:%s]->(b)
+    #                     RETURN a,b
+    #                     """%(cui, t, "has_type")
+    #                 tx.append(cypher)
 
-        if counter % 1000:
-            tx.commit()
-            tx = db.cypher.begin()
+    #     if counter % 1000:
+    #         tx.commit()
+    #         tx = db.cypher.begin()
 
 
-    tx.commit()
-    tx = db.cypher.begin()
+    # tx.commit()
+    # tx = db.cypher.begin()
 
     print "\n[%s] upload UMLS done start upload pharma kompas relations"%stamp()
 

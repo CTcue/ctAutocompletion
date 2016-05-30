@@ -1,12 +1,18 @@
 
 // Very simple check for now
 module.exports = function(query) {
-    var isnum = /^\d+$/.test(query.trim());
+    query = query.trim();
 
-***REMOVED*** If only numbers && query length is > 3, assume it's DBC / Some type of code
-    if (isnum && query.length >= 3) {
-        return "code";
+    if (query.length >= 3) {
+    ***REMOVED*** Is all numeric
+        if (/^\d+$/.test(query)) {
+            return "code";
+    ***REMOVED***
+    ***REMOVED*** Check for CUI code
+        else if (/^C\d+$/.test(query)) {
+            return "cui";
+    ***REMOVED***
 ***REMOVED***
 
-    return "record";
+    return "default";
 ***REMOVED***

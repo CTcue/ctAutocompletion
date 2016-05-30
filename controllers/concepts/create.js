@@ -3,8 +3,16 @@
 var db    = require('../../lib/database');
 var table = db.table('umls');
 
-var elastic = require('elasticsearch');
-var elasticClient = new elastic.Client();
+const config  = require('../../config/config.js');
+const elastic = require('elasticsearch');
+const elasticClient = new elastic.Client({
+  "host": [
+    {
+      "host": 'localhost',
+      "auth": config.elastic_shield
+***REMOVED***
+  ]
+***REMOVED***);
 
 
 module.exports = function *(next) {

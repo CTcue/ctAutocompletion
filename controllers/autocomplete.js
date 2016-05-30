@@ -1,5 +1,12 @@
+"use strict";
 
-/** Module dependencies. */
+/** Usage
+
+    curl -X POST -H "Content-Type: application/json" -d '{
+        "query": "cabg"
+***REMOVED***' "http://localhost:4080/autocomplete"
+
+*/
 
 var config  = require('../config/config.js');
 
@@ -27,8 +34,7 @@ const elasticClient = new elastic.Client({
   ],
 ***REMOVED***);
 
-
-const source = ["cui", "str", "exact", "pref", "source", "types"];
+const source = ["cui", "str", "pref", "types"];
 
 
 module.exports = function *() {
@@ -36,29 +42,35 @@ module.exports = function *() {
 
 ***REMOVED*** Remove diacritics from query
     var query = _.deburr(this.request.body.query);
-
-***REMOVED*** Check special matches, such as demographic options
-    var specialMatches = yield findSpecial(query);
+    var query_type = guess_origin(query);
 
 ***REMOVED*** Lookup matches in Elasticsearch
-    var exactMatches = yield findExact(query);
-    var closeMatches = yield findMatches(query);
+    var exactMatches = yield findExact(query, query_type);
 
     var likes = [];
+    var specialMatches = [];
+    var closeMatches   = {"hits": []***REMOVED***;
 
+***REMOVED*** Default query_type
+***REMOVED*** Check special matches, such as demographic options
+    if (query_type === "default") {
+        closeMatches = yield findMatches(query);
+        specialMatches = yield findSpecial(query);
 
-    if (config.neo4j["is_active"] && this.user) {
-    ***REMOVED*** Find user added contributions
-        likes = yield findUserLikes(query, this.user._id, this.user.env);
+    ***REMOVED*** Find user added contributions (if needed)
+        if (config.neo4j["is_active"] && this.user) {
+            likes = yield findUserLikes(query, this.user._id, this.user.env);
+    ***REMOVED***
 ***REMOVED***
 
+    var allMatches = [].concat(exactMatches.hits, likes, closeMatches.hits);
+    var unique     = _.uniq(allMatches, s => s["pref"]);
 
     this.body = {
-        "took"   : exactMatches.took + closeMatches.took,
+        "took"   : (exactMatches.took || 10) + (closeMatches.took || 20),
         "special": specialMatches,
-        "error"  : exactMatches.hasOwnProperty("error"),
-        "hits"   : _.uniq([].concat(exactMatches.hits, likes, closeMatches.hits), "exact")
-***REMOVED***
+        "hits"   : unique
+***REMOVED***;
 ***REMOVED***;
 
 
@@ -98,7 +110,6 @@ function findUserLikes(query, userId, environment) {
                 ***REMOVED*** For display / uniqueness test
                     s["pref"]  = s["str"];
                     s["exact"] = s["str"];
-
                     s["contributed"] = true;
 
                     return s;
@@ -110,21 +121,38 @@ function findUserLikes(query, userId, environment) {
 ***REMOVED***
 ***REMOVED***
 
-function findExact(query) {
-***REMOVED*** Exact term is indexed without dashes
-    var wantedTerm = query
-        .replace(/-/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
+function findExact(query, query_type) {
+    var queryObj = {***REMOVED***;
+
+***REMOVED***
+***REMOVED*** TODO: DBC lookup?
+***REMOVED***
 
 
-    return function(callback) {
-        var elastic_query =  {
+    if (query_type === "cui") {
+        queryObj["body"] = {
             "_source": source,
+            "size": 4,
+            "query": {
+                "term" : {
+                    "cui" : query
+            ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***;
 
+        queryObj["index"] = "autocomplete";
+***REMOVED***
+    ***REMOVED***
+    ***REMOVED*** Exact term is indexed without dashes
+        var wantedTerm = query
+            .replace(/-/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+
+        queryObj["body"] = {
+            "_source": source,
             "size": 3,
-
             "query": {
                 "term" : {
                     "exact" : wantedTerm
@@ -132,93 +160,48 @@ function findExact(query) {
         ***REMOVED***
     ***REMOVED***;
 
-        var queryObj = {
-            "index" : 'autocomplete',
-            "body"  : elastic_query
-    ***REMOVED***;
-
-        elasticClient.search(queryObj, function(err, res) {
-            if (err) {
-                return callback(false, { "error": true, "took": 10, "hits": []***REMOVED***)
-        ***REMOVED***
-
-            var hits = res.hits;
-            var result = [];
-
-            if (hits && hits.total > 0) {
-                for (var i=0; i < hits.hits.length; i++) {
-                    result.push(hits.hits[i]._source);
-            ***REMOVED***
-        ***REMOVED***
-
-            callback(err, {
-                "took": res.took,
-                "hits": result
-        ***REMOVED***);
-    ***REMOVED***);
+        queryObj["index"] = "autocomplete";
 ***REMOVED***
+
+***REMOVED*** console.log(JSON.stringify(queryObj, null, 2))
+
+    return getResults(queryObj);
 ***REMOVED***
 
 
 function findMatches(query) {
-    var origin = guess_origin(query);
+    var queryObj = {***REMOVED***;
 
-***REMOVED*** Filter out CUI codes that the user already selected
-    return function(callback) {
-
-    ***REMOVED*** DBC code check needs prefix matching
-        if (origin === "code") {
-            var elastic_query =  {
-                "_source": source,
-                "size": 6,
-
-                "query": {
-                    "match_phrase_prefix" : {
+    queryObj["index"] = "autocomplete";
+    queryObj["body"] =  {
+        "_source": source,
+        "size": 6,
+        "query": {
+            "function_score" : {
+                "query" : {
+                    "match_phrase" : {
                         "str" : query.trim()
                 ***REMOVED***
-            ***REMOVED***
-        ***REMOVED***;
-    ***REMOVED***
-        ***REMOVED***
-            var elastic_query =  {
-                "_source": source,
-                "size": 6,
-
-                "query": {
-                    "function_score" : {
-                        "query" : {
-                            "match_phrase" : {
-                                "str" : query.trim()
-                        ***REMOVED***
+            ***REMOVED***,
+            ***REMOVED*** Boost disease/disorders category
+                "functions" : [
+                    {
+                        "filter": {
+                            "terms": { "types": ["DISO", "PROC", "T200"] ***REMOVED***
                     ***REMOVED***,
-
-                        "functions" : [
-                        ***REMOVED*** Prefer SnomedCT / MeSH
-                            {
-                                "filter": {
-                                    "terms": { "source": ["SNOMEDCT_US", "MSH", "MSHDUT"] ***REMOVED***
-                            ***REMOVED***,
-                                "weight": 1.25
-                        ***REMOVED***,
-
-                        ***REMOVED*** Negative weight for some categories
-                            {
-                                "filter": {
-                                    "terms": { "types": ["Health Care Activity", "Biomedical Occupation or Discipline"] ***REMOVED***
-                            ***REMOVED***,
-                                "weight": 0.7
-                        ***REMOVED***
-                        ]
+                        "weight": 1.5
                 ***REMOVED***
-            ***REMOVED***
-        ***REMOVED***;
+                ]
+        ***REMOVED***
     ***REMOVED***
+***REMOVED***;
 
-        var queryObj = {
-            "index" : 'autocomplete',
-            "body"  : elastic_query
-    ***REMOVED***;
+    return getResults(queryObj);
+***REMOVED***
 
+
+function getResults (queryObj) {
+    return function(callback) {
         elasticClient.search(queryObj, function(err, res) {
             if (err) {
                 return callback(false, { "error": true, "took": 10, "hits": []***REMOVED***)
@@ -235,7 +218,7 @@ function findMatches(query) {
 
             callback(err, {
                 "took": res.took,
-                "hits": result
+                "hits": _.sortBy(result, (t => t.str.length)),
         ***REMOVED***);
     ***REMOVED***);
 ***REMOVED***

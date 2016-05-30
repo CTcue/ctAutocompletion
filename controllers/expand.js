@@ -1,6 +1,17 @@
+"use strict";
 
-var config  = require('../config/config.js');
+/** Usage
 
+  curl -X POST -H "Content-Type: application/json" -d '{
+      "query": "C1306459"
+  ***REMOVED***' "http://localhost:4080/expand"
+
+*/
+
+const config  = require('../config/config.js');
+const getCategory = require("./lib/category.js");
+
+const _ = require("lodash");
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -8,11 +19,9 @@ const elasticClient = new elastic.Client({
       "host": 'localhost',
       "auth": config.elastic_shield
 ***REMOVED***
-  ],
+  ]
 ***REMOVED***);
 
-
-var getCategory = require("./lib/category.js");
 
 const source = ["str", "types"];
 
@@ -36,24 +45,37 @@ module.exports = function *() {
   ***REMOVED***,
       function(err, resp) {
           if (resp && !!resp.hits && resp.hits.total > 0) {
-            callback(false, resp.hits.hits);
+              callback(false, resp.hits.hits);
       ***REMOVED***
           ***REMOVED***
-            callback(err, []);
+              callback(err, []);
       ***REMOVED***
   ***REMOVED***);
   ***REMOVED***;
 
   if (result && result.length > 0) {
       var types = result[0]._source.types;
+      var terms = result.map(s => s._source.str);
 
       return this.body = {
-        "type"      : "-",
-        "category"  : getCategory(types),
-        "terms"     : result.map(function(item) { return item._source.str; ***REMOVED***)
+          "DEPRECATED": true,
+          "category" : types,
+          "terms"    : _.uniq(terms, s => normalizeTextForComparison(s)),
   ***REMOVED***;
   ***REMOVED***
 
-  this.body = { "type": "", "category": "", "terms": [] ***REMOVED***
+  this.body = { "DEPRECATED": true, "category": null, "terms": [] ***REMOVED***
 ***REMOVED***;
 
+
+function normalizeTextForComparison(text) {
+    if (!text) {
+        return "";
+***REMOVED***
+
+    return text
+        .toLowerCase()
+        .replace(/[^\w]/g, ' ') // symbols etc
+        .replace(/\s\s+/g, ' ') // multi whitespace
+        .trim()
+***REMOVED***

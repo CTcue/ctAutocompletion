@@ -1,10 +1,10 @@
 
 /** Module dependencies. */
 
-var config  = require('../config/config.js');
+const config  = require('../config/config.js');
 
-var guess_origin = require("./lib/guess_origin");
-var _ = require("lodash");
+const guess_origin = require("./lib/guess_origin");
+const _ = require("lodash");
 
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
@@ -15,7 +15,6 @@ const elasticClient = new elastic.Client({
 ***REMOVED***
   ],
 ***REMOVED***);
-
 
 const source = ["cui", "str", "exact", "pref","types"];
 

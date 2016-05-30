@@ -178,4 +178,3 @@ if __name__ == '__main__':
         upload(umls_dir, index, add_termfiles)
     else:
         record_CUIs(umls_dir, add_termfiles)
-

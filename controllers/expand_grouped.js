@@ -1,12 +1,23 @@
+"use strict";
 
-var config  = require('../config/config.js');
-var neo4j = require('neo4j');
-var _ = require("lodash");
+/** Usage
 
-var db = new neo4j.GraphDatabase({
+  curl -X POST -H "Content-Type: application/json" -d '{
+      "query": "C1306459"
+  ***REMOVED***' "http://localhost:4080/expand-grouped"
+
+*/
+
+
+const config  = require('../config/config.js');
+const neo4j = require('neo4j');
+const _ = require("lodash");
+
+const db = new neo4j.GraphDatabase({
     url: 'http://localhost:7474',
     auth: config.neo4j
 ***REMOVED***);
+
 
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
@@ -15,12 +26,12 @@ const elasticClient = new elastic.Client({
       "host": 'localhost',
       "auth": config.elastic_shield
 ***REMOVED***
-  ],
+  ]
 ***REMOVED***);
 
-var getCategory = require("./lib/category.js");
+const getCategory = require("./lib/category.js");
 
-const source = ["str", "pref", "lang", "types"];
+const source = ["str", "lang", "types", "pref"];
 const language_map = {
     "DUT" : "dutch",
     "ENG" : "english"
@@ -62,6 +73,7 @@ module.exports = function *() {
             callback(false, false);
     ***REMOVED***);
 ***REMOVED***;
+
 
     var pref        = "";
     var types       = [];
@@ -180,7 +192,8 @@ module.exports = function *() {
             delete terms[k];
     ***REMOVED***
         ***REMOVED***
-            terms[k] = _.sortBy(terms[k], "length");
+            var unique = _.uniq(terms[k], s => normalizeTextForComparison(s));
+            terms[k]   = _.sortBy(unique, "length");
     ***REMOVED***
 ***REMOVED***
 
@@ -189,7 +202,20 @@ module.exports = function *() {
       "category" : getCategory(types),
       "pref"     : pref,
       "terms"    : terms,
-      "uncheck"  : uncheck || [],
+      "uncheck"  : uncheck || []
 ***REMOVED***;
 ***REMOVED***;
 
+
+
+function normalizeTextForComparison(text) {
+    if (!text) {
+        return "";
+***REMOVED***
+
+    return text
+        .toLowerCase()
+        .replace(/[^\w]/g, ' ') // symbols etc
+        .replace(/\s\s+/g, ' ') // multi whitespace
+        .trim()
+***REMOVED***
