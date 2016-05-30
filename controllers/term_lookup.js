@@ -13,7 +13,7 @@ const elasticClient = new elastic.Client({
       "host": 'localhost',
       "auth": config.elastic_shield
 ***REMOVED***
-  ]
+  ],
 ***REMOVED***);
 
 const source = ["cui", "str", "exact", "pref","types"];
@@ -27,7 +27,8 @@ module.exports = function *() {
 
   this.body = {
     "took": exactMatches.took,
-    "hits": exactMatches.hits
+    "hits": exactMatches.hits,
+    "error": exactMatches.error || false
   ***REMOVED***
 ***REMOVED***;
 
@@ -68,6 +69,14 @@ function findExact(query) {
     ***REMOVED***;
 
         elasticClient.search(queryObj, function(err, res) {
+            if (err) {
+                return callback(false, {
+                    "took": 0,
+                    "hits": [],
+                    "error": err
+            ***REMOVED***)
+        ***REMOVED***
+
             var hits = res.hits;
             var result = [];
 
@@ -77,7 +86,7 @@ function findExact(query) {
             ***REMOVED***
         ***REMOVED***
 
-            callback(err, {
+            callback(false, {
                 "took": res.took,
                 "hits": result
         ***REMOVED***);

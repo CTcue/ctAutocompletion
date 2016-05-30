@@ -31,9 +31,8 @@ const elasticClient = new elastic.Client({
       "host": 'localhost',
       "auth": config.elastic_shield
 ***REMOVED***
-  ]
+  ],
 ***REMOVED***);
-
 
 const source = ["cui", "str", "pref", "types"];
 
