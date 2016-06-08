@@ -38,9 +38,7 @@ const language_map = {
 ***REMOVED***;
 
 module.exports = function *() {
-
     var body = this.request.body.query;
-
 
     var result = yield function(callback) {
         elasticClient.search({

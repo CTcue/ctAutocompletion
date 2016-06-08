@@ -70,4 +70,3 @@ if __name__ == '__main__':
 
 
     print "[%s]  Done." % stamp()
-    # OUTPUT (CUI, STR, LAT, SAB, PREF)

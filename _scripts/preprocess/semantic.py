@@ -16,4 +16,4 @@ with open(os.path.join(basepath, "lookup_data", "semantic_types.txt")) as t:
 def get_group(code):
     if code in semantic_types:
         return semantic_types[code]
-    return ""
+    return False

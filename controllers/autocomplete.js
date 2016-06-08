@@ -23,6 +23,7 @@ var guess_origin = require("./lib/guess_origin");
 var Trie = require('./lib/trie');
 var _ = require("lodash");
 
+const getCategory = require("./lib/category.js");
 
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
@@ -63,8 +64,18 @@ module.exports = function *() {
     ***REMOVED***
 ***REMOVED***
 
-    var allMatches = [].concat(exactMatches.hits, likes, closeMatches.hits);
-    var unique     = _.uniq(allMatches, s => s["pref"]);
+    var allMatches = [].concat(exactMatches.hits, likes, closeMatches.hits).map(function(item) {
+        item["category"] = getCategory(item["types"]);
+
+        delete item["types"];
+        return item;
+***REMOVED***);
+
+
+***REMOVED*** Parse matches, for duplicates include it's category/pref_type
+
+
+    var unique     = allMatches; //_.uniq(allMatches, s => s["pref"]);
 
     this.body = {
         "took"   : (exactMatches.took || 10) + (closeMatches.took || 20),
@@ -183,6 +194,7 @@ function findMatches(query) {
                         "str" : query.trim()
                 ***REMOVED***
             ***REMOVED***,
+
             ***REMOVED*** Boost disease/disorders category
                 "functions" : [
                     {

@@ -87,7 +87,10 @@ class AggregatorJob(MRJob):
                 yield CUI, ["TERM", LAT, STR, SAB]
 
             if TUI and len(TUI):
-                yield CUI, ["STY", get_group(TUI), TUI]
+                group = get_group(TUI)
+
+                if group:
+                    yield CUI, ["STY", group, TUI]
 
         # MRSTY Header
         elif len(split) == 7:
@@ -97,7 +100,10 @@ class AggregatorJob(MRJob):
             if STY in skip_categories:
                 return
 
-            yield CUI, ["STY", get_group(TUI), TUI]
+            group = get_group(TUI)
+
+            if group:
+                yield CUI, ["STY", group, TUI]
 
         else:
             # Unknown file, so skip it
@@ -122,9 +128,13 @@ class AggregatorJob(MRJob):
                 category.add(value[1])
                 types.add(value[2])
 
+
+        combined_types = [t for t in category|types if t]
+
         # Skip if no actual terms found
-        if not terms:
+        if not terms or not combined_types:
             return
+
 
         if any(x for x in category if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
             return
@@ -153,7 +163,7 @@ class AggregatorJob(MRJob):
                 else:
                     pref_term = list(unique)[0]
 
-                out = "\t".join([CUI, LAT, SAB, "|".join(category|types), pref_term, "|".join(unique)])
+                out = "\t".join([CUI, LAT, SAB, "|".join(combined_types), pref_term, "|".join(unique)])
                 print out.encode("utf-8")
 
 if __name__ == "__main__":
