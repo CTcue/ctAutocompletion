@@ -20,7 +20,7 @@ module.exports = function getCategoryByTypes(types) {
     else if (_.includes(types, "DISO")) {
         return "keyword";
 ***REMOVED***
-    else if (_.includes(types, "T200")) {
+    else if (_.includes(types, "T200") && !(_.includes(types, "ANAT") || _.includes(types, "CHEM"))) {
         return "medication";
 ***REMOVED***
 
