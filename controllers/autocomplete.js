@@ -73,9 +73,24 @@ module.exports = function *() {
 
 
 ***REMOVED*** Parse matches, for duplicates include it's category/pref_type
+    var unique = _.uniq(allMatches, s => s["pref"]);
+
+    var just_str = unique.map(s => s["str"].toLowerCase());
+    var dupes = _.filter(just_str, function(value, index, iteratee) {
+       return _.includes(iteratee, value, index+1);
+***REMOVED***);
 
 
-    var unique     = allMatches; //_.uniq(allMatches, s => s["pref"]);
+    for (var i=0; i < unique.length; i++) {
+    ***REMOVED*** if (unique[i]["category"] === "keyword") {
+    ***REMOVED***     continue;
+    ***REMOVED*** ***REMOVED***
+
+        if (_.includes(dupes, unique[i]["str"].toLowerCase())) {
+            unique[i]["pref"] = unique[i]["pref"] + " (" + unique[i]["category"] + ")";
+    ***REMOVED***
+***REMOVED***
+
 
     this.body = {
         "took"   : (exactMatches.took || 10) + (closeMatches.took || 20),
@@ -134,11 +149,6 @@ function findUserLikes(query, userId, environment) {
 
 function findExact(query, query_type) {
     var queryObj = {***REMOVED***;
-
-***REMOVED***
-***REMOVED*** TODO: DBC lookup?
-***REMOVED***
-
 
     if (query_type === "cui") {
         queryObj["body"] = {
