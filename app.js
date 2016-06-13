@@ -39,27 +39,33 @@ router['get']('/', function *() {
 
 
 // API
-var autocomplete = require('./controllers/autocomplete.js');
+
 var term_lookup = require('./controllers/term_lookup.js');
 var expander = require('./controllers/expand.js');
 var expandGrouped = require('./controllers/expand_grouped.js'); // Groups result by language
 var suggester = require('./controllers/suggest.js');
 var concept_children = require('./controllers/children.js');
 var concept_related = require('./controllers/related.js');
+var dbc = require("./controllers/dbc.js");
 
-router['post']('/autocomplete', extractUserId, autocomplete);
+
+// Temp workaround to allow multiple instances
+var autocomplete_v0 = require('./controllers/v0/autocomplete.js');
+var autocomplete_v1 = require('./controllers/v1/autocomplete.js');
+
+router['post']('/autocomplete', extractUserId, autocomplete_v0);
+router['post']('/v1/autocomplete', extractUserId, autocomplete_v1);
+
+
 router['post']('/term_lookup', term_lookup);
 router['post']('/expand', expander);
 router['post']('/expand-grouped', extractUserId, expandGrouped);
 router['post']('/suggest', suggester);
 router['post']('/children', concept_children);
 router['post']('/related', concept_related);
+router['get']('/dbc/:specialty_code', dbc);
 
 
-// Management for custom terms from users
-var concept_management = require("./controllers/concepts/router")(router);
-var related_management = require("./controllers/related/router")(router);
-var dbc = require("./controllers/dbc/router")(router);
 
 
 // Listen

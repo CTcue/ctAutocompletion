@@ -1,7 +1,7 @@
 "use strict";
 
 const _ = require("lodash");
-const config  = require('../../config/config.js');
+const config  = require('../config/config.js');
 
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
@@ -47,7 +47,13 @@ module.exports = function *() {
                 ***REMOVED***
             ***REMOVED***);
 
-                callback(false, _.sortBy(sources, "number"));
+            ***REMOVED*** Sort the DBC codes
+                sources = _.sortBy(sources, "number");
+                sources = _.uniq(sources, function(s) {
+                    return s["number"].replace(/^0+/, "");
+            ***REMOVED***);
+
+                callback(false, sources);
         ***REMOVED***
             ***REMOVED***
                 callback(err, []);

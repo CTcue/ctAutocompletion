@@ -8,22 +8,19 @@
 
 */
 
-var config  = require('../config/config.js');
+const config  = require('../../config/config.js');
+const _ = require("lodash");
 
-var neo4j = require('neo4j');
-var _ = require("lodash");
-
-var db = new neo4j.GraphDatabase({
-    url: 'http://localhost:7474',
-    auth: config.neo4j
+const neo4j = require('neo4j');
+const db = new neo4j.GraphDatabase({
+    "url": 'http://localhost:7474',
+    "auth": config.neo4j,
 ***REMOVED***);
 
+const Trie = require('../lib/trie');
+const guess_origin = require("../lib/guess_origin");
+const getCategory = require("../lib/category.js");
 
-var guess_origin = require("./lib/guess_origin");
-var Trie = require('./lib/trie');
-var _ = require("lodash");
-
-const getCategory = require("./lib/category.js");
 
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
