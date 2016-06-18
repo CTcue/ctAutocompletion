@@ -166,6 +166,10 @@ module.exports = function *() {
         var t = found_terms[i];
         var key = "custom";
 
+    ***REMOVED*** Skip two letter abbreviations
+        if (!t["str"] || t["str"].length < 3) {
+            continue;
+    ***REMOVED***
 
         if (t.hasOwnProperty("label")) {
             key = t["label"].toLowerCase();
@@ -185,6 +189,7 @@ module.exports = function *() {
 
 ***REMOVED*** - Remove empty key/values
 ***REMOVED*** - Sort terms by their length
+
     for (var k in terms) {
         if (! terms[k].length) {
             delete terms[k];
