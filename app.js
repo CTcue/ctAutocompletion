@@ -56,7 +56,6 @@ var autocomplete_v1 = require('./controllers/v1/autocomplete.js');
 router['post']('/autocomplete', extractUserId, autocomplete_v0);
 router['post']('/v1/autocomplete', extractUserId, autocomplete_v1);
 
-
 router['post']('/term_lookup', term_lookup);
 router['post']('/expand', expander);
 router['post']('/expand-grouped', extractUserId, expandGrouped);
@@ -65,6 +64,11 @@ router['post']('/children', concept_children);
 router['post']('/related', concept_related);
 router['get']('/dbc/:specialty_code', dbc);
 
+
+// Allow users to add/recommend custom terms
+var recommend = require('./controllers/recommend.js');
+
+router['post']('/recommend', recommend);
 
 
 
