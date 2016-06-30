@@ -87,10 +87,8 @@ module.exports = function *() {
 ***REMOVED*** Check for user contributions
 ***REMOVED*** - If the current user added custom concepts/synonyms
     if (config.neo4j["is_active"]) {
-
         if (this.user) {
             var user_contributed = yield function(callback) {
-
                 var cypherObj = {
                     "query": `MATCH
                                 (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:LIKES]-(u:User { id: { _USER_ ***REMOVED***, env: { _ENV_ ***REMOVED*** ***REMOVED***)
@@ -98,9 +96,9 @@ module.exports = function *() {
                                 s.str as str, s.label as label`,
 
                     "params": {
-                        "_CUI_": body,
-                        "_USER_": this.user._id,
-                        "_ENV_" : this.user.env
+                        "_CUI_"  : body,
+                        "_USER_" : this.user._id,
+                        "_ENV_"  : this.user.env
                 ***REMOVED***,
 
                     "lean": true
@@ -166,6 +164,10 @@ module.exports = function *() {
         var t = found_terms[i];
         var key = "custom";
 
+    ***REMOVED*** Skip two letter abbreviations
+        if (!t["str"] || t["str"].length < 3) {
+            continue;
+    ***REMOVED***
 
         if (t.hasOwnProperty("label")) {
             key = t["label"].toLowerCase();
@@ -185,6 +187,7 @@ module.exports = function *() {
 
 ***REMOVED*** - Remove empty key/values
 ***REMOVED*** - Sort terms by their length
+
     for (var k in terms) {
         if (! terms[k].length) {
             delete terms[k];
