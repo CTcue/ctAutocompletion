@@ -31,6 +31,12 @@
                     "search_analyzer": "keyword"
             ***REMOVED***,
 
+                "product_code": {
+                    "type": "string",
+                    "analyzer": "folding",
+                    "search_analyzer": "keyword"
+            ***REMOVED***,
+
                 "specialism": {
                     "type": "string",
                     "analyzer": "folding",

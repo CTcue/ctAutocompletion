@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Clear elasticsearch
-python clear_elasticsearch.py $*
+python clear_elasticsearch.py --src AUTOCOMPLETE $*
 
 # Extract normalized concept list from MRCONSO.RRF
 python preprocess/clean_mrconso.py

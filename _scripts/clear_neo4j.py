@@ -7,7 +7,7 @@ import sys
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="ctAutocompletion database clearing script")
-    parser.add_argument('--index', dest='index', default="autocomplete", help='Elasticsearch index for autocompletion')
+    parser.add_argument('--src', dest='src', default=None, help='')
     parser.add_argument('--elastic', dest='elastic', default=None, help='Elasticsearch authentication (optional)')
     parser.add_argument('--neo4j', dest='neo4j', default=None, help='Neo4j authentication (required)')
     args = parser.parse_args()
@@ -23,6 +23,7 @@ if __name__ == '__main__':
         authenticate("localhost:7474", username, password)
         db = Graph()
         db.delete_all()
+
     except Exception as err:
         print "Please provide Neo4j authentication\n\t--neo4j 'username:secret-password'"
         sys.exit(1)

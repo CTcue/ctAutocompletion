@@ -46,7 +46,9 @@ var expandGrouped = require('./controllers/expand_grouped.js'); // Groups result
 var suggester = require('./controllers/suggest.js');
 var concept_children = require('./controllers/children.js');
 var concept_related = require('./controllers/related.js');
+
 var dbc = require("./controllers/dbc.js");
+var dbc_diagnosis = require("./controllers/dbc_diagnosis.js");
 
 
 // Temp workaround to allow multiple instances
@@ -63,7 +65,9 @@ router['post']('/expand-grouped', extractUserId, expandGrouped);
 router['post']('/suggest', suggester);
 router['post']('/children', concept_children);
 router['post']('/related', concept_related);
-router['get']('/dbc/:specialty_code', dbc);
+
+router['get']('/dbc/:code', dbc_diagnosis);
+router['post']('/dbc', dbc);
 
 
 
