@@ -13,8 +13,6 @@ const elasticClient = new elastic.Client({
   ]
 ***REMOVED***);
 
-const source = ["code", "diagnose"];
-
 
 // Autocomplete specialism diagnosis (given specific code)
 
@@ -28,8 +26,8 @@ module.exports = function *() {
     var result = yield function(callback) {
         elasticClient.search({
           "index" : 'dbc_zorgproduct',
-          "size": 1000,
-          "_source": source,
+          "type": "diagnosis",
+          "size": 500,
 
           "body" : {
               "query" : {
@@ -44,7 +42,7 @@ module.exports = function *() {
                 var hits = resp.hits.hits;
                 var sources = hits.map(function(s) {
                     return {
-                        "label"  : s["_source"]["diagnose"],
+                        "label"  : s["_source"]["label"],
                         "number" : s["_source"]["code"]
                 ***REMOVED***
             ***REMOVED***);
