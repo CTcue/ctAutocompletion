@@ -67,8 +67,9 @@ module.exports = function *() {
                     return callback(false, [types, pref, hits.map(s => s._source)]);
             ***REMOVED***
         ***REMOVED***
-
-            callback(false, false);
+            ***REMOVED***
+                callback(false, false);
+        ***REMOVED***
     ***REMOVED***);
 ***REMOVED***;
 

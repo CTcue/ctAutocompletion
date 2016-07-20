@@ -50,6 +50,10 @@ module.exports = function *() {
             ***REMOVED*** Sort the DBC codes
                 sources = _.sortBy(sources, "number");
                 sources = _.uniq(sources, function(s) {
+                    if (!s || !s.hasOwnProperty("number")) {
+                        return false;
+                ***REMOVED***
+
                     return s["number"].replace(/^0+/, "");
             ***REMOVED***);
 
