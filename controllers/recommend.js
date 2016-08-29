@@ -14,27 +14,32 @@ var table   = mongoDb.table('umls');
 
 module.exports = function * recommend() {
     var params = this.request.body.query;
-    var cypherObj = buildCypherObj(params.user, params.relation, params.synonym);
 
 
-    if (! cypherObj) {
-        return this.body = false;
+***REMOVED*** Create Cypher query if neo4j is active
+    if (_.get(config, "neo4j.is_active")) {
+        var cypherObj = buildCypherObj(params.user, params.relation, params.synonym);
+
+        if (cypherObj) {
+            var addedRelation = yield function(callback) {
+                db.cypher(cypherObj, function(err, res) {
+                    if (err) {
+                    ***REMOVED*** console.log(err);
+                        callback(false, false);
+                ***REMOVED***
+                    ***REMOVED***
+                        callback(false, true);
+                ***REMOVED***
+            ***REMOVED***);
+        ***REMOVED***
+    ***REMOVED***
 ***REMOVED***
 
-    var result = yield function(callback) {
-        db.cypher(cypherObj, function(err, res) {
-            if (err) {
-            ***REMOVED*** console.log(err);
-                callback(false, false);
-        ***REMOVED***
-            ***REMOVED***
-                callback(false, res);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***
 
-***REMOVED*** If relation added -> store it in mongoDb for concept_manager
-    if (result && params.relation === "LIKES") {
+***REMOVED*** Store it in mongoDb for concept_manager
+    var addedTerm = false;
+
+    if (_.has(params, "relation") && params.relation === "LIKES") {
         var data = {
             "user"     : params.user,
             "synonym"  : params.synonym,
@@ -42,10 +47,11 @@ module.exports = function * recommend() {
             "created"  : new Date()
     ***REMOVED***;
 
-        var added = yield table.insert(data);
+        addedTerm = yield table.insert(data);
 ***REMOVED***
 
-    this.body = result;
+
+    this.body = !_.isEmpty(addedTerm);
 ***REMOVED***;
 
 
@@ -86,6 +92,7 @@ function buildCypherObj(user, relation, synonym) {
         "lean" : true
 ***REMOVED***;
 ***REMOVED***
+
 
 // Return YYYY.MM.DD date format
 function getDateToday() {

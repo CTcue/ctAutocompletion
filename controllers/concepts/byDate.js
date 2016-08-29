@@ -3,8 +3,13 @@
 var db    = require('../../lib/database');
 var table = db.table('umls');
 
+var _ = require("lodash");
+
 
 module.exports = function *() {
+    if (! _.has(this.params, "year") || !_.has(this.params, "month")) {
+        return this.body = [];
+***REMOVED***
 
 ***REMOVED*** Damn date with zero indexes
     var start = new Date(this.params.year, this.params.month-1,  1);

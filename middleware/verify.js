@@ -1,16 +1,12 @@
 
 var config = require("../config/config.js");
+var _ = require("lodash");
 
 
 module.exports = function *(next) {
     var headers = this.req.headers;
-    var conf    = config.neo4j;
 
-
-    if (conf.hasOwnProperty("need_tokens") && !conf.need_tokens) {
-        yield next;
-***REMOVED***
-    else if (conf.hasOwnProperty("verification_token") && headers["umls-u-token"] === conf.verification_token) {
+    if (_.get(headers, "x-token") === config.api_token) {
         yield next;
 ***REMOVED***
     ***REMOVED***
