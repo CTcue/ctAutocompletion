@@ -1,5 +1,5 @@
 ctAutocompletion
-=======
+================
 
 Find relevant UMLS terms based on user input. The autocompletion algorithm prioritizes exact matches, and if non are found it prefers prefix matches. You can also send multiple words and for each seperate term it does a prefix lookup, so you can send queries like `anky spondy` or `maj dep dis`.
 
@@ -14,6 +14,7 @@ Find relevant UMLS terms based on user input. The autocompletion algorithm prior
 * Download the `output` directory from our [https://zoomholding.stackstorage.com/](https://zoomholding.stackstorage.com/)
 * Place the `output` directory in `ctAutocompletion/_scripts/`
 * Run `bash ./_scripts/bulkUpload.sh`
+
 
 ## Running ctAutocompletion locally
 
@@ -31,6 +32,26 @@ Make sure elastic search is also running:
 ###### Notes
 
 * This will probably say Neo4j is off, but that is ok. You don't need it for `term_lookup`
+
+
+## Check if upload worked
+
+Turn on the API and then run the following python script (for exampl) to check if everything is working
+
+```
+import requests
+
+url = "http://localhost:4080/expand-grouped"
+
+response = requests.request("POST", url, json={ "query": "C0202117" ***REMOVED***)
+
+print(response.text)
+```
+
+
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Basic ZmFiaWVuOjIhdGVzdDEyMw==" -H "Cache-Control: no-cache" -H "Postman-Token: b212ebed-e8ad-0fd8-ebac-156f4ac3eb12" -d '{
+    "query": "C0202117"
+***REMOVED***' "http://localhost:4080/expand-grouped"
 
 
 ## Contributing

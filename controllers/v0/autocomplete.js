@@ -53,7 +53,6 @@ module.exports = function *() {
 ***REMOVED*** Check special matches, such as demographic options
     if (query_type === "default") {
         closeMatches = yield findMatches(query);
-        specialMatches = yield findSpecial(query);
 
     ***REMOVED*** Find user added contributions (if needed)
         if (config.neo4j["is_active"] && this.user) {
@@ -240,37 +239,5 @@ function getResults (queryObj) {
                 "hits": _.sortBy(result, (t => t.str.length)),
         ***REMOVED***);
     ***REMOVED***);
-***REMOVED***
-***REMOVED***
-
-
-
-
-// Build regex objects for custom category checks
-var TRIE = new Trie(config.demographic_types.mapping);
-var LOOKUP = config.demographic_types.lookup;
-
-function findSpecial(query) {
-    var _query = query.trim().toLowerCase();
-
-    return function(callback) {
-        var result = false;
-        var match = TRIE.search(_query);
-
-    ***REMOVED*** Return first/best match if available
-        if (match.length > 0) {
-            var best = match[0];
-
-        ***REMOVED*** Get category info from LOOKUP
-            if (LOOKUP.hasOwnProperty(best.value)) {
-                result = LOOKUP[best.value];
-
-                result["use_template"] = true;
-                result["cui"] = "custom";
-                result["str"] = best.key;
-        ***REMOVED***
-    ***REMOVED***
-
-        callback(false, result);
 ***REMOVED***
 ***REMOVED***
