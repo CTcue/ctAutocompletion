@@ -1,15 +1,5 @@
-ctAutocompletion
+ctAutocompletion Building from scratch
 =================
-
-
-The easiest way to use ctAutocompletion is to:
-
-1. Download the `preprocessed` files. (link)
-2. Extract these files into the `./output` directory
-3. Run `bulkUpload.sh --user=neo4-user --password=neo4j-password`
-
-
-## Building from scratch
 
 You can generate the `preprocessed` files yourself too!
 
