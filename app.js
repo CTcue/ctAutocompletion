@@ -42,6 +42,7 @@ app.use(bodyParser);
 var term_lookup = require('./controllers/term_lookup.js');
 var expander = require('./controllers/expand.js');
 var expandGrouped = require('./controllers/expand_grouped.js'); // Groups result by language
+var expandByString = require('./controllers/expand_by_string.js');
 var suggester = require('./controllers/suggest.js');
 var concept_children = require('./controllers/children.js');
 var concept_related = require('./controllers/related.js');
@@ -75,6 +76,7 @@ router['post']('/v1/autocomplete', extractUserId, autocomplete_v1);
 router['post']('/term_lookup', term_lookup);
 router['post']('/expand', expander);
 router['post']('/expand-grouped', extractUserId, expandGrouped);
+router['post']('/expand-by-string', extractUserId, expandByString);
 router['post']('/suggest', suggester);
 router['post']('/children', concept_children);
 router['post']('/related', concept_related);

@@ -3,7 +3,6 @@
 
 const config  = require('../config/config.js');
 
-const guess_origin = require("./lib/guess_origin");
 const _ = require("lodash");
 
 const elastic = require('elasticsearch');
@@ -20,16 +19,16 @@ const source = ["cui", "str", "exact", "pref","types"];
 
 
 module.exports = function *() {
-  var query = this.request.body.query;
+    var query = this.request.body.query;
 
-  // Lookup matches in Elasticsearch
-  var exactMatches = yield findExact(query);
+***REMOVED*** Lookup matches in Elasticsearch
+    var exactMatches = yield findExact(query);
 
-  this.body = {
-    "took": exactMatches.took,
-    "hits": exactMatches.hits,
-    "error": exactMatches.error || false
-  ***REMOVED***
+    this.body = {
+        "took": exactMatches.took,
+        "hits": exactMatches.hits,
+        "error": exactMatches.error || false
+***REMOVED***
 ***REMOVED***;
 
 

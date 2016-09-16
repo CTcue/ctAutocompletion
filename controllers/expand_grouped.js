@@ -29,9 +29,12 @@ const elasticClient = new elastic.Client({
   ]
 ***REMOVED***);
 
-const getCategory = require("./lib/category.js");
+
+const util = require("../lib/util");
+const getCategory = require("./lib/category");
 
 const source = ["str", "lang", "types", "pref"];
+
 const language_map = {
     "DUT" : "dutch",
     "ENG" : "english"
@@ -87,7 +90,7 @@ module.exports = function *() {
         pref        = result[1];
         found_terms = result[2];
 
-        found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => compareFn(s.str) );
+        found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => util.compareFn(s.str) );
 ***REMOVED***
 
 
@@ -200,7 +203,7 @@ module.exports = function *() {
             delete terms[k];
     ***REMOVED***
         ***REMOVED***
-            var unique = _.uniq(terms[k], s => normalizeTextForComparison(s));
+            var unique = _.uniq(terms[k], s => util.forComparison(s));
             terms[k]   = _.sortBy(unique, "length");
     ***REMOVED***
 ***REMOVED***
@@ -213,17 +216,3 @@ module.exports = function *() {
       "uncheck"  : []
 ***REMOVED***;
 ***REMOVED***;
-
-
-
-function normalizeTextForComparison(text) {
-    if (!text) {
-        return "";
-***REMOVED***
-
-    return text
-        .toLowerCase()
-        .replace(/[^\w]/g, ' ') // symbols etc
-        .replace(/\s\s+/g, ' ') // multi whitespace
-        .trim()
-***REMOVED***

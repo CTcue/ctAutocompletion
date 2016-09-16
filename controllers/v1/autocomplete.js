@@ -68,9 +68,10 @@ module.exports = function *() {
 
 
 ***REMOVED*** Parse matches, for duplicates include it's category/pref_type
-    var unique = _.uniq(allMatches, s => s["pref"].trim().replace("-", " ").toLowerCase());
+    var unique = _.uniqBy(allMatches, s => s["pref"].trim().replace("-", " ").toLowerCase());
 
     var just_str = unique.map(s => s["str"].toLowerCase());
+
     var dupes = _.filter(just_str, function(value, index, iteratee) {
        return _.includes(iteratee, value, index+1);
 ***REMOVED***);
@@ -235,4 +236,3 @@ function getResults (queryObj) {
     ***REMOVED***);
 ***REMOVED***
 ***REMOVED***
-

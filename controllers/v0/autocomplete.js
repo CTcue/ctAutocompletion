@@ -69,7 +69,7 @@ module.exports = function *() {
 
 
 ***REMOVED*** Parse matches, for duplicates include it's category/pref_type
-    var unique = _.uniq(allMatches, s => s["pref"].trim().replace("-", " ").toLowerCase());
+    var unique = _.uniqBy(allMatches, s => s["pref"].trim().replace("-", " ").toLowerCase());
 
     var just_str = unique.map(s => s["str"].toLowerCase());
     var dupes = _.filter(just_str, function(value, index, iteratee) {
@@ -78,10 +78,6 @@ module.exports = function *() {
 
 
     for (var i=0; i < unique.length; i++) {
-    ***REMOVED*** if (unique[i]["category"] === "keyword") {
-    ***REMOVED***     continue;
-    ***REMOVED*** ***REMOVED***
-
         if (_.includes(dupes, unique[i]["str"].toLowerCase())) {
             unique[i]["pref"] = unique[i]["pref"] + " (" + unique[i]["category"] + ")";
     ***REMOVED***

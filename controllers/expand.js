@@ -9,7 +9,8 @@
 */
 
 const config  = require('../config/config.js');
-const getCategory = require("./lib/category.js");
+
+const util = require("../lib/util");
 
 const _ = require("lodash");
 const elastic = require('elasticsearch');
@@ -60,22 +61,9 @@ module.exports = function *() {
       return this.body = {
           "DEPRECATED": true,
           "category" : types,
-          "terms"    : _.uniq(terms, s => normalizeTextForComparison(s)),
+          "terms"    : _.uniq(terms, s => util.forComparison(s)),
   ***REMOVED***;
   ***REMOVED***
 
   this.body = { "DEPRECATED": true, "category": null, "terms": [] ***REMOVED***
 ***REMOVED***;
-
-
-function normalizeTextForComparison(text) {
-    if (!text) {
-        return "";
-***REMOVED***
-
-    return text
-        .toLowerCase()
-        .replace(/[^\w]/g, ' ') // symbols etc
-        .replace(/\s\s+/g, ' ') // multi whitespace
-        .trim()
-***REMOVED***
