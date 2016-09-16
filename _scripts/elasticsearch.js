@@ -14,7 +14,7 @@ const elasticClient = new elastic.Client({
 ***REMOVED***
   ]
 ***REMOVED***);
-const ElasticsearchBulkIndexStream = require('elasticsearch-bulk-index-stream');
+const ElasticsearchBulkIndexStream = require('elasticsearch-writable-stream');
 
 const index = argv.index || "autocomplete";
 const type  = argv.type  || "records";

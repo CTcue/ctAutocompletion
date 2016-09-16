@@ -24,7 +24,7 @@
     "cheerio": "^0.22.0",
     "co-monk": "1.0.0",
     "elasticsearch": "11.0.1",
-    "elasticsearch-bulk-index-stream": "^2.0.0",
+    "elasticsearch-writable-stream": "^2.0.0",
     "koa": "1.2.4",
     "koa-cors": "0.0.16",
     "koa-router": "5.4.0",
