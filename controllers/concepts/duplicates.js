@@ -8,7 +8,7 @@ module.exports = function *() {
 
 ***REMOVED*** Find all terms/synonyms added more than once
     this.body =  yield function(callback) {
-        table.col.aggregate([
+        table.aggregate([
             {
                 "$group" : {
                     "_id": {

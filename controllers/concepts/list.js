@@ -16,7 +16,7 @@ module.exports = function *() {
 ***REMOVED*** Aggregate user added terms by month
 
     var aggregated = yield function(callback) {
-        table.col.aggregate([
+        table.aggregate([
             {
                 "$group" : {
                     "_id": {
