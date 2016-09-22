@@ -89,9 +89,10 @@ module.exports = function *() {
 
     var result = yield function(callback) {
         elasticClient.search({
-            "index" : 'autocomplete',
+            "index": 'autocomplete',
             "size": 100,
 
+            "sort": ["_doc"],
             "_source": source,
 
             "body" : {

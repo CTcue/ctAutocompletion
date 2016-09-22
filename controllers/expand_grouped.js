@@ -40,9 +40,6 @@ const language_map = {
     "ENG" : "english"
 ***REMOVED***;
 
-const compareFn = function(s) {
-    return _.deburr(s).trim().toLowerCase();
-***REMOVED***
 
 module.exports = function *() {
     var body = this.request.body.query;
@@ -52,6 +49,7 @@ module.exports = function *() {
             "index" : 'autocomplete',
             "size": 100,
 
+            "sort": ["_doc"],
             "_source": source,
 
             "body" : {
@@ -203,7 +201,7 @@ module.exports = function *() {
             delete terms[k];
     ***REMOVED***
         ***REMOVED***
-            var unique = _.uniq(terms[k], s => util.forComparison(s));
+            var unique = _.uniqBy(terms[k], s => util.forComparison(s));
             terms[k]   = _.sortBy(unique, "length");
     ***REMOVED***
 ***REMOVED***
