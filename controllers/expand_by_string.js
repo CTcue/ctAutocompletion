@@ -87,7 +87,6 @@ module.exports = function *() {
         return;
 ***REMOVED***
 
-
     var result = yield function(callback) {
         elasticClient.search({
             "index" : 'autocomplete',
@@ -173,6 +172,7 @@ module.exports = function *() {
 
 
     this.body = {
+      "cui"      : _.get(cuiResult, "cui") || null,
       "pref"     : pref,
       "terms"    : terms,
       "uncheck"  : []
