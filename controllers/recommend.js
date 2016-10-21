@@ -24,7 +24,6 @@ module.exports = function * recommend() {
             var addedRelation = yield function(callback) {
                 db.cypher(cypherObj, function(err, res) {
                     if (err) {
-                    ***REMOVED*** console.log(err);
                         callback(false, false);
                 ***REMOVED***
                     ***REMOVED***

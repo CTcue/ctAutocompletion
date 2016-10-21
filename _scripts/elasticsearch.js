@@ -73,15 +73,15 @@ var elasticStream = new ElasticsearchBulkIndexStream(elasticClient, {
     "flushTimeout": 500
 ***REMOVED***);
 
-console.log("ELASTICSEARCH", stamp());
+console.info("ELASTICSEARCH", stamp());
 
 process.stdin
   .pipe(split2())
   .pipe(buildRecords)
   .pipe(elasticStream)
   .on('error', function(error) {
-      console.log(error);
+      console.error(error);
   ***REMOVED***)
   .on('finish', function() {
-      console.log("DONE", stamp());
+      console.info("DONE", stamp());
   ***REMOVED***)

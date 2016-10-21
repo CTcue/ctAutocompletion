@@ -12,6 +12,8 @@
 const config  = require('../config/config.js');
 const neo4j = require('neo4j');
 const _ = require("lodash");
+const string = require("../lib/string");
+const getCategory = require("../lib/category");
 
 const db = new neo4j.GraphDatabase({
     url: 'http://localhost:7474',
@@ -29,9 +31,6 @@ const elasticClient = new elastic.Client({
   ]
 ***REMOVED***);
 
-
-const util = require("../lib/util");
-const getCategory = require("./lib/category");
 
 const source = ["str", "lang", "types", "pref"];
 
@@ -88,7 +87,7 @@ module.exports = function *() {
         pref        = result[1];
         found_terms = result[2];
 
-        found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => util.compareFn(s.str) );
+        found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => string.compareFn(s.str) );
 ***REMOVED***
 
 
@@ -115,7 +114,7 @@ module.exports = function *() {
 
                 db.cypher(cypherObj, function(err, res) {
                     if (err) {
-                        console.log(err);
+                        console.error(err);
                         callback(false, []);
                 ***REMOVED***
                     ***REMOVED***
@@ -201,7 +200,7 @@ module.exports = function *() {
             delete terms[k];
     ***REMOVED***
         ***REMOVED***
-            var unique = _.uniqBy(terms[k], s => util.forComparison(s));
+            var unique = _.uniqBy(terms[k], s => string.forComparison(s));
             terms[k]   = _.sortBy(unique, "length");
     ***REMOVED***
 ***REMOVED***

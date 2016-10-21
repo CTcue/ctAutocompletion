@@ -17,8 +17,9 @@ const db = new neo4j.GraphDatabase({
     "auth": config.neo4j,
 ***REMOVED***);
 
-const guess_origin = require("../lib/guess_origin");
-const getCategory = require("../lib/category.js");
+const string = require("../../lib/string");
+const guess_origin = require("../../lib/guess_origin");
+const getCategory  = require("../../lib/category.js");
 
 
 const elastic = require('elasticsearch');
@@ -42,11 +43,12 @@ module.exports = function *() {
     var query = _.deburr(this.request.body.query);
     var query_type = guess_origin(query);
 
+
 ***REMOVED*** Lookup matches in Elasticsearch
     var exactMatches = yield findExact(query, query_type);
 
     var likes = [];
-    var closeMatches = {"hits": []***REMOVED***;
+    var closeMatches = { "hits": [] ***REMOVED***;
 
 ***REMOVED*** Default query_type
 ***REMOVED*** Check special matches, such as demographic options
@@ -68,12 +70,13 @@ module.exports = function *() {
 
 
 ***REMOVED*** Parse matches, for duplicates include it's category/pref_type
-    var unique = _.uniqBy(allMatches, s => s["pref"].trim().replace("-", " ").toLowerCase());
-
+    var unique   = _.uniqBy(allMatches, s => s["pref"].trim().replace("-", " ").toLowerCase());
     var just_str = unique.map(s => s["str"].toLowerCase());
 
+    unique = generateTerms(unique, just_str);
+
     var dupes = _.filter(just_str, function(value, index, iteratee) {
-       return _.includes(iteratee, value, index+1);
+        return _.includes(iteratee, value, index+1);
 ***REMOVED***);
 
 
@@ -91,8 +94,31 @@ module.exports = function *() {
 ***REMOVED***;
 
 
-function escapeRegExp(str) {
-    return str.replace(/[\-\[\]\/\{\***REMOVED***\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+// Add custom terms if there is a certain pattern:
+// - Gleason score 5
+// - Diabetes mellitus type 2
+// - Diabetes mellitus type II
+// - etc.
+
+function generateTerms(unique, strings) {
+
+    var generated = _.map(strings, string.replaceAppendix);
+    var to_add = _.uniq(_.filter(generated, function(s) {
+        return !_.includes(strings, s);
+***REMOVED***));
+
+
+    var added = [];
+    for (var i=0; i < to_add.length; i++) {
+        added.push({
+            "str"      : to_add[i],
+            "pref"     : to_add[i],
+            "cui"      : 'generated',
+            "category" : 'keyword'
+    ***REMOVED***);
+***REMOVED***
+
+    return [].concat(added, unique);
 ***REMOVED***
 
 
@@ -111,7 +137,7 @@ function findUserLikes(query, userId, environment) {
             "params": {
               "_USER_": userId,
               "_ENV_" : environment,
-              "_QUERY_": "(?i)" + escapeRegExp(query) + ".*"
+              "_QUERY_": "(?i)" + string.escapeRegExp(query) + ".*"
         ***REMOVED***,
 
             "lean": true
@@ -119,7 +145,7 @@ function findUserLikes(query, userId, environment) {
 
         db.cypher(cypherObj, function(err, res) {
             if (err) {
-                console.log(err);
+                console.error(err);
                 callback(false, []);
         ***REMOVED***
             ***REMOVED***
@@ -156,11 +182,7 @@ function findExact(query, query_type) {
 ***REMOVED***
     ***REMOVED***
     ***REMOVED*** Exact term is indexed without dashes
-        var wantedTerm = query
-            .replace(/-/g, " ")
-            .replace(/\s+/g, " ")
-            .trim()
-            .toLowerCase();
+        var wantedTerm = string.removeDashes(query);
 
         queryObj["body"] = {
             "_source": source,
@@ -175,7 +197,6 @@ function findExact(query, query_type) {
         queryObj["index"] = "autocomplete";
 ***REMOVED***
 
-***REMOVED*** console.log(JSON.stringify(queryObj, null, 2))
 
     return getResults(queryObj);
 ***REMOVED***
@@ -187,7 +208,7 @@ function findMatches(query) {
     queryObj["index"] = "autocomplete";
     queryObj["body"] =  {
         "_source": source,
-        "size": 6,
+        "size": 8,
         "query": {
             "function_score" : {
                 "query" : {

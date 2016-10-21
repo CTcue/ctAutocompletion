@@ -20,7 +20,6 @@ module.exports = function *() {
 
         db.cypher(cypherObj, function(err, res) {
             if (err) {
-                console.log(err);
                 callback(false, []);
         ***REMOVED***
             ***REMOVED***

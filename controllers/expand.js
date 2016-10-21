@@ -10,7 +10,7 @@
 
 const config  = require('../config/config.js');
 
-const util = require("../lib/util");
+const string = require("../lib/string");
 
 const _ = require("lodash");
 const elastic = require('elasticsearch');
@@ -81,7 +81,7 @@ module.exports = function *() {
 
 
           for (var k in terms) {
-              terms[k] = _.uniqBy(terms[k], util.compareFn);
+              terms[k] = _.uniqBy(terms[k], string.compareFn);
       ***REMOVED***
 
           return this.body = terms;
@@ -119,7 +119,7 @@ module.exports = function *() {
           var terms = result.map(s => s._source.str);
 
           return this.body = {
-              "terms" : _.uniqBy(terms, util.compareFn),
+              "terms" : _.uniqBy(terms, string.compareFn),
       ***REMOVED***;
   ***REMOVED***
   ***REMOVED***

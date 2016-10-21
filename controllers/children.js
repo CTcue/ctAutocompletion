@@ -40,7 +40,7 @@ module.exports = function *() {
     var children = yield function(callback) {
         db.cypher(cypherObj, function(err, paths) {
             if (err) {
-              console.log(err);
+              console.error(err);
               return callback(false, [])
         ***REMOVED***
 

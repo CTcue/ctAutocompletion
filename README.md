@@ -49,7 +49,7 @@ print(response.text)
 ```
 
 
-curl -X POST -H "Content-Type: application/json" -H "Authorization: Basic ZmFiaWVuOjIhdGVzdDEyMw==" -H "Cache-Control: no-cache" -H "Postman-Token: b212ebed-e8ad-0fd8-ebac-156f4ac3eb12" -d '{
+curl -X POST -H "Content-Type: application/json" -d '{
     "query": "C0202117"
 ***REMOVED***' "http://localhost:4080/expand-grouped"
 

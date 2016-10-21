@@ -12,8 +12,7 @@
 const config  = require('../config/config');
 
 const _ = require("lodash");
-
-
+const string = require("../lib/string");
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -23,9 +22,6 @@ const elasticClient = new elastic.Client({
 ***REMOVED***
   ]
 ***REMOVED***);
-
-const util = require("../lib/util");
-const getCategory = require("./lib/category");
 
 
 const source = ["str", "lang", "pref"];
@@ -82,6 +78,7 @@ module.exports = function *() {
     ***REMOVED***);
 ***REMOVED***;
 
+
     if (!cuiResult) {
         this.body = null;
         return;
@@ -126,7 +123,7 @@ module.exports = function *() {
 
     if (result) {
         pref        = result[0];
-        found_terms = _.uniq( _.sortBy(result[1], "lang"), s => util.compareFn(s.str) );
+        found_terms = _.uniq( _.sortBy(result[1], "lang"), s => string.compareFn(s.str) );
 ***REMOVED***
 
 ***REMOVED*** Group terms by label / language
@@ -166,7 +163,7 @@ module.exports = function *() {
             delete terms[k];
     ***REMOVED***
         ***REMOVED***
-            var unique = _.uniq(terms[k], s => util.forComparison(s));
+            var unique = _.uniq(terms[k], s => string.forComparison(s));
             terms[k]   = _.sortBy(unique, "length");
     ***REMOVED***
 ***REMOVED***

@@ -48,7 +48,6 @@ module.exports = function *(next) {
 
             db.cypher(cypherObj, function(err, res) {
                 if (err) {
-                    console.log(err);
                     callback(false, false);
             ***REMOVED***
                 ***REMOVED***

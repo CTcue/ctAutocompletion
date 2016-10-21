@@ -62,15 +62,15 @@ stream.index([
     ["Concept", "cui"]
 ]);
 
-console.log("NEO4J", stamp());
+console.info("NEO4J", stamp());
 
 process.stdin
 .pipe(split2())
 .pipe(buildRecords)
 .pipe(stream)
 .on('error', function(error) {
-    console.log(error);
+    console.error(error);
 ***REMOVED***)
 .on('finish', function() {
-    console.log("DONE", stamp());
+    console.info("DONE", stamp());
 ***REMOVED***)

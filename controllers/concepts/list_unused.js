@@ -20,8 +20,5 @@ var findUnused = {
 
 // find -- remove
 var list = table.find(findUnused, function(err, list) {
-
-    console.log(list)
     process.exit(0);
-
 ***REMOVED***);

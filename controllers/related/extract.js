@@ -12,7 +12,6 @@ module.exports = function *() {
     var tables = yield function(callback) {
         return request(domain, function (err, resp, html) {
             if (err) {
-                console.log(err);
                 callback(false, []);
         ***REMOVED***
             ***REMOVED***

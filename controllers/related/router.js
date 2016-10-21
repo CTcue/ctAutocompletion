@@ -12,7 +12,7 @@ var verify = require("../verify");
 module.exports = function(app) {
   app['get'] (
     '/related/list',
-    verify,
+***REMOVED*** verify,
     list
   );
 

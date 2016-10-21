@@ -18,7 +18,6 @@ var extractUserId = require("./middleware/extractUser");
 var verify = require("./middleware/verify");
 
 
-
 app.use(cors({
     "headers" : [
         "Content-Type",
@@ -39,20 +38,17 @@ app.use(bodyParser);
 /////
 // API
 
-var term_lookup = require('./controllers/term_lookup.js');
-var expander = require('./controllers/expand.js');
-var expandGrouped = require('./controllers/expand_grouped.js'); // Groups result by language
-var expandByString = require('./controllers/expand_by_string.js');
-var suggester = require('./controllers/suggest.js');
+
+var autocomplete_v1  = require('./controllers/v1/autocomplete.js');
+var term_lookup      = require('./controllers/term_lookup.js');
+var expander         = require('./controllers/expand.js');
+var expandGrouped    = require('./controllers/expand_grouped.js'); // Groups result by language
+var expandByString   = require('./controllers/expand_by_string.js');
+var suggester        = require('./controllers/suggest.js');
 var concept_children = require('./controllers/children.js');
-var concept_related = require('./controllers/related.js');
-var dbc = require("./controllers/dbc.js");
-var dbc_diagnosis = require("./controllers/dbc_diagnosis.js");
-
-
-// Temp workaround to allow multiple instances
-var autocomplete_v0 = require('./controllers/v0/autocomplete.js');
-var autocomplete_v1 = require('./controllers/v1/autocomplete.js');
+var concept_related  = require('./controllers/related.js');
+var dbc              = require("./controllers/dbc.js");
+var dbc_diagnosis    = require("./controllers/dbc_diagnosis.js");
 
 
 // Allow users to add/recommend custom terms
@@ -71,7 +67,6 @@ router['get']('/', function *() {
 ***REMOVED***);
 
 
-router['post']('/autocomplete', extractUserId, autocomplete_v0);
 router['post']('/v1/autocomplete', extractUserId, autocomplete_v1);
 router['post']('/term_lookup', term_lookup);
 router['post']('/expand', expander);
@@ -87,11 +82,11 @@ router['get'] ('/umls/list', verify, customConcepts);
 router['get'] ('/umls/:year/:month', verify, customConceptsbyDate);
 
 
-
 // Listen
+var port = process.env.PORT || config.port;
 app.use(router.routes());
-app.listen(config.port);
-console.log('listening on port %d', config.port);
+app.listen(port);
+console.info('listening on port %d', port);
 
 
 
@@ -102,23 +97,23 @@ console.log('listening on port %d', config.port);
 var elasticCheck = request.createClient("http://localhost:9200");
 var elasticVersion = elasticCheck.get("", function(err, res, body) {
     if (err) {
-        console.log("Elasticsearch is OFF");
-        console.log(err);
+        console.info("Elasticsearch is OFF");
+        console.info(err);
 ***REMOVED***
     ***REMOVED***
-        console.log("Elasticsearch is ON");
+        console.info("Elasticsearch is ON");
 ***REMOVED***
 ***REMOVED***);
 
 var neoCheck = request.createClient("http://localhost:7474");
 var neoVersion = neoCheck.get("", function(err, res, body) {
     if (err) {
-        console.log("Neo4j is OFF");
-        console.log(err);
+        console.info("Neo4j is OFF");
+        console.info(err);
         config.neo4j["is_active"] = false;
 ***REMOVED***
     ***REMOVED***
-        console.log("Neo4j is ON");
+        console.info("Neo4j is ON");
         ***REMOVED***
 ***REMOVED***
 ***REMOVED***);
