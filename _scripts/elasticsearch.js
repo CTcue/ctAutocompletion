@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const _ = require("lodash");
-const argv = require('minimist')(process.argv.slice(2));
+const _        = require("lodash");
+const argv     = require('minimist')(process.argv.slice(2));
+const split2   = require('split2');
 const through2 = require('through2');
-const split2 = require('split2');
 
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
@@ -29,7 +29,7 @@ function stamp() {
       .replace(/\..+/, '')
 ***REMOVED***
 
-var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, enc, callback) {
+var buildRecords = through2({ "objectMode": true ***REMOVED***, function(chunk, enc, callback) {
     var line = chunk.toString().trim();
 
 ***REMOVED*** (CUI, LAT, SAB, TYPES, PREF, TERMS)
@@ -51,18 +51,19 @@ var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, en
                     "type" : type,
 
                     "body": {
-                        "cui"  : cui,
-                        "str"  : terms[i],
-                        "exact": terms[i].replace("-", " ").toLowerCase(),
-                        "lang" : lat,
-                        "source": sab,
-                        "pref" : pref,
-                        "types": types
+                        "cui"    : cui,
+                        "str"    : terms[i],
+                        "exact"  : terms[i].replace("-", " ").toLowerCase(),
+                        "lang"   : lat,
+                        "source" : sab,
+                        "pref"   : pref,
+                        "types"  : types
                 ***REMOVED***
             ***REMOVED***);
         ***REMOVED***
     ***REMOVED***
 ***REMOVED***
+
 
     callback();
 ***REMOVED***);
