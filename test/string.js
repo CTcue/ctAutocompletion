@@ -42,4 +42,10 @@ describe("Replace appendix strings", function () {
         var clean = string.replaceAppendix("Carcinoma stadium 0");
         assert.equal("Carcinoma", clean);
 ***REMOVED***);
+
+
+    it("Should replace 'phase + num'", function () {
+        var clean = string.replaceAppendix("Carcinoma phase 0");
+        assert.equal("Carcinoma", clean);
+***REMOVED***);
 ***REMOVED***);
