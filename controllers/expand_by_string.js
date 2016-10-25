@@ -13,6 +13,15 @@ const config  = require('../config/config');
 
 const _ = require("lodash");
 const string = require("../lib/string");
+
+
+const neo4j = require('neo4j');
+const db = new neo4j.GraphDatabase({
+    "url": 'http://localhost:7474',
+    "auth": config.neo4j
+***REMOVED***);
+
+
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -59,7 +68,7 @@ module.exports = function *() {
         "size" : 1,
 
         "body": {
-            "_source": ["cui", "pref"],
+            "_source": ["cui", "pref", "source"],
             "query": {
                 "term" : {
                     "exact" : wantedTerm
@@ -84,40 +93,8 @@ module.exports = function *() {
         return;
 ***REMOVED***
 
-    var result = yield function(callback) {
-        elasticClient.search({
-            "index": 'autocomplete',
-            "size": 100,
 
-            "sort": ["_doc"],
-            "_source": source,
-
-            "body" : {
-                "query" : {
-                    "term" : {
-                        "cui" : _.get(cuiResult, "cui")
-                 ***REMOVED***
-             ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***,
-        function(err, resp) {
-            if (resp && !!resp.hits && resp.hits.total > 0) {
-                var hits = resp.hits.hits;
-
-            ***REMOVED*** Return ES source part only
-                if (hits.length > 0) {
-                    var pref  = hits[0]._source.pref;
-
-                    return callback(false, [pref, hits.map(s => s._source)]);
-            ***REMOVED***
-        ***REMOVED***
-            ***REMOVED***
-                callback(false, false);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
-
-
+    var result = yield getTermsByCui(_.get(cuiResult, "cui"));
     var pref        = "";
     var found_terms = [];
 
@@ -155,6 +132,53 @@ module.exports = function *() {
 ***REMOVED***
 
 
+***REMOVED***
+***REMOVED*** for farma-compas terms => check for children to add as synonyms
+
+    if (config.neo4j["is_active"] && _.get(cuiResult, "source") === "farma_compas") {
+        var cui = _.get(cuiResult, "cui");
+
+        var cypherObj = {
+            "query"  : buildQuery(cui),
+            "params" : {
+                "A": cui,
+        ***REMOVED***,
+
+            "lean": true
+    ***REMOVED***;
+
+        var children = yield function(callback) {
+            db.cypher(cypherObj, function(err, paths) {
+                if (err) {
+                  console.error(err);
+                  return callback(false, [])
+            ***REMOVED***
+
+                if (!paths || paths.length < 1 || !_.get(paths[0], "children")) {
+                    return callback(false, []);
+            ***REMOVED***
+
+                callback(null, paths[0]["children"].map(s => s["cui"]));
+        ***REMOVED***);
+    ***REMOVED***;
+
+
+        for (var i=0; i < children.length; i++) {
+            var child_synonyms = yield getTermsByCui(children[i], 2);
+
+            if (!child_synonyms) {
+                continue;
+        ***REMOVED***
+
+            var _pref = child_synonyms[0];
+            var _terms = child_synonyms[1];
+
+            terms[_pref] = [_pref].concat(_terms.map(s => s["str"]));
+    ***REMOVED***
+***REMOVED***
+
+
+
 ***REMOVED*** - Remove empty key/values
 ***REMOVED*** - Sort terms by their length
 
@@ -163,7 +187,7 @@ module.exports = function *() {
             delete terms[k];
     ***REMOVED***
         ***REMOVED***
-            var unique = _.uniq(terms[k], s => string.forComparison(s));
+            var unique = _.uniqBy(terms[k], s => string.forComparison(s));
             terms[k]   = _.sortBy(unique, "length");
     ***REMOVED***
 ***REMOVED***
@@ -176,3 +200,51 @@ module.exports = function *() {
       "uncheck"  : []
 ***REMOVED***;
 ***REMOVED***;
+
+
+
+function getTermsByCui(cui, size) {
+    if (typeof size === "undefined") {
+        size = 60;
+***REMOVED***
+
+
+    return function(callback) {
+        if (!cui) {
+            return callback(false, false);
+    ***REMOVED***
+
+        elasticClient.search({
+            "index": 'autocomplete',
+            "size": size,
+            "sort": ["_doc"],
+            "body" : {
+                "query" : {
+                    "term" : {
+                        "cui" : cui
+                 ***REMOVED***
+             ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***,
+        function(err, resp) {
+            if (resp && !!resp.hits && resp.hits.total > 0) {
+                var hits = resp.hits.hits;
+
+            ***REMOVED*** Return ES source part only
+                if (hits.length > 0) {
+                    var pref  = hits[0]._source.pref;
+
+                    return callback(false, [pref, hits.map(s => s._source)]);
+            ***REMOVED***
+        ***REMOVED***
+            ***REMOVED***
+                callback(false, false);
+        ***REMOVED***
+    ***REMOVED***);
+***REMOVED***;
+***REMOVED***
+
+
+function buildQuery(cui) {
+    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***), (t1)<-[:child_of]-(c) return COLLECT(c) as children`
+***REMOVED***
