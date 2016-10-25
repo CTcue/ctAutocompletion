@@ -61,6 +61,12 @@ module.exports = function *() {
     ***REMOVED***
 ***REMOVED***
 
+***REMOVED*** If no matches -> attempt spelling fixes
+    if (!closeMatches.hits.length) {
+        closeMatches = yield spellingMatches(query);
+***REMOVED***
+
+
     var allMatches = [].concat(exactMatches.hits, likes, closeMatches.hits).map(function(item) {
         item["category"] = getCategory(item["types"]);
 
@@ -226,6 +232,31 @@ function findMatches(query) {
                         "weight": 1.5
                 ***REMOVED***
                 ]
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***;
+
+    return getResults(queryObj);
+***REMOVED***
+
+
+
+function spellingMatches(query) {
+    var queryObj = {***REMOVED***;
+
+    queryObj["index"] = "autocomplete";
+    queryObj["body"] =  {
+        "_source": source,
+        "size": 5,
+        "query": {
+            "match" : {
+                "str" : {
+                    "query" : query.trim(),
+                    "fuzziness": "AUTO",
+                    "operator": "and",
+                    "prefix_length"   : 4,
+                    "max_expansions"  : 10
+            ***REMOVED***
         ***REMOVED***
     ***REMOVED***
 ***REMOVED***;
