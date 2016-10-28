@@ -18,7 +18,6 @@ const db = new neo4j.GraphDatabase({
 ***REMOVED***);
 
 const string = require("../../lib/string");
-const guess_origin = require("../../lib/guess_origin");
 const getCategory  = require("../../lib/category.js");
 
 
@@ -33,46 +32,54 @@ const elasticClient = new elastic.Client({
 ***REMOVED***);
 
 
-const source = ["cui", "str", "pref", "types"];
+const source = ["cui", "str", "pref", "types", "source"];
 
 
 module.exports = function *() {
     var headers = this.req.headers;
+    var body    = this.request.body;
+    var query   = _.deburr(body.query);
 
-***REMOVED*** Remove diacritics from query
-    var query = _.deburr(this.request.body.query);
-    var query_type = guess_origin(query);
+***REMOVED*** Search for suggestions in Elasticsearch
+    var exactMatches = yield findExact(query);
 
-
-***REMOVED*** Lookup matches in Elasticsearch
-    var exactMatches = yield findExact(query, query_type);
-
-    var likes = [];
-    var closeMatches = { "hits": [] ***REMOVED***;
-
-***REMOVED*** Default query_type
-***REMOVED*** Check special matches, such as demographic options
-    if (query_type === "default") {
-        closeMatches = yield findMatches(query);
-
-    ***REMOVED*** Find user added contributions (if needed)
-        if (config.neo4j["is_active"] && this.user) {
-            likes = yield findUserLikes(query, this.user._id, this.user.env);
-    ***REMOVED***
-***REMOVED***
 
 ***REMOVED*** If no matches -> attempt spelling fixes
+    var closeMatches = yield findMatches(query);
+
     if (!closeMatches.hits.length) {
         closeMatches = yield spellingMatches(query);
 ***REMOVED***
 
 
-    var allMatches = [].concat(exactMatches.hits, likes, closeMatches.hits).map(function(item) {
-        item["category"] = getCategory(item["types"]);
+***REMOVED*** Find user added contributions (if needed)
+    var likes = [];
+
+    if (config.neo4j["is_active"] && this.user) {
+        likes = yield findUserLikes(query, this.user._id, this.user.env);
+***REMOVED***
+
+
+***REMOVED*** Combine suggestions
+    var combined = [].concat(exactMatches.hits, likes, closeMatches.hits);
+    var allMatches = combined.map(function(item) {
+        item["category"] = getCategory(item["types"], item["source"]);
 
         delete item["types"];
+        delete item["source"];
+
         return item;
 ***REMOVED***);
+
+
+***REMOVED*** If specific category is given, filter results
+    if (_.has(body, "category")) {
+        var wanted_category = _.get(body, "category") || "keyword";
+
+        allMatches = _.filter(allMatches, function(m) {
+            return m.category === wanted_category;
+    ***REMOVED***);
+***REMOVED***
 
 
 ***REMOVED*** Parse matches, for duplicates include it's category/pref_type
@@ -100,31 +107,24 @@ module.exports = function *() {
 ***REMOVED***;
 
 
-// Add custom terms if there is a certain pattern:
-// - Gleason score 5
-// - Diabetes mellitus type 2
-// - Diabetes mellitus type II
-// - etc.
+function findExact(query) {
+***REMOVED*** Exact term is indexed without dashes
+    var wantedTerm = string.removeDashes(query);
 
-function generateTerms(unique, strings) {
+    var queryObj = {
+        "index": "autocomplete",
+        "size" : 4,
+        "body": {
+            "_source": source,
+            "query": {
+                "term" : {
+                    "exact" : wantedTerm
+            ***REMOVED***
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***;
 
-    var generated = _.map(strings, string.replaceAppendix);
-    var to_add = _.uniq(_.filter(generated, function(s) {
-        return !_.includes(strings, s);
-***REMOVED***));
-
-
-    var added = [];
-    for (var i=0; i < to_add.length; i++) {
-        added.push({
-            "str"      : to_add[i],
-            "pref"     : to_add[i],
-            "cui"      : 'generated',
-            "category" : 'keyword'
-    ***REMOVED***);
-***REMOVED***
-
-    return [].concat(added, unique);
+    return getResults(queryObj);
 ***REMOVED***
 
 
@@ -170,43 +170,6 @@ function findUserLikes(query, userId, environment) {
 ***REMOVED***
 ***REMOVED***
 
-function findExact(query, query_type) {
-    var queryObj = {***REMOVED***;
-
-    if (query_type === "cui") {
-        queryObj["body"] = {
-            "_source": source,
-            "size": 4,
-            "query": {
-                "term" : {
-                    "cui" : query
-            ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***;
-
-        queryObj["index"] = "autocomplete";
-***REMOVED***
-    ***REMOVED***
-    ***REMOVED*** Exact term is indexed without dashes
-        var wantedTerm = string.removeDashes(query);
-
-        queryObj["body"] = {
-            "_source": source,
-            "size": 3,
-            "query": {
-                "term" : {
-                    "exact" : wantedTerm
-            ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***;
-
-        queryObj["index"] = "autocomplete";
-***REMOVED***
-
-
-    return getResults(queryObj);
-***REMOVED***
-
 
 function findMatches(query) {
     var queryObj = {***REMOVED***;
@@ -223,13 +186,13 @@ function findMatches(query) {
                 ***REMOVED***
             ***REMOVED***,
 
-            ***REMOVED*** Boost disease/disorders category
+            ***REMOVED*** Slightly boost disease/disorders category
                 "functions" : [
                     {
                         "filter": {
                             "terms": { "types": ["DISO", "PROC", "T200"] ***REMOVED***
                     ***REMOVED***,
-                        "weight": 1.5
+                        "weight": 1.2
                 ***REMOVED***
                 ]
         ***REMOVED***
@@ -247,7 +210,7 @@ function spellingMatches(query) {
     queryObj["index"] = "autocomplete";
     queryObj["body"] =  {
         "_source": source,
-        "size": 5,
+        "size": 6,
         "query": {
             "match" : {
                 "str" : {
@@ -287,4 +250,32 @@ function getResults (queryObj) {
         ***REMOVED***);
     ***REMOVED***);
 ***REMOVED***
+***REMOVED***
+
+
+
+// Add custom terms if there is a certain pattern:
+// - Gleason score 5
+// - Diabetes mellitus type 2
+// - Diabetes mellitus type II
+// - etc.
+
+function generateTerms(unique, strings) {
+    var generated = _.map(strings, string.replaceAppendix);
+    var to_add = _.uniq(_.filter(generated, function(s) {
+        return !_.includes(strings, s);
+***REMOVED***));
+
+
+    var added = [];
+    for (var i=0; i < to_add.length; i++) {
+        added.push({
+            "str"      : to_add[i],
+            "pref"     : to_add[i],
+            "cui"      : 'generated',
+            "category" : 'keyword'
+    ***REMOVED***);
+***REMOVED***
+
+    return [].concat(added, unique);
 ***REMOVED***
