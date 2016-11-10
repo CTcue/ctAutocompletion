@@ -10,7 +10,7 @@ const db = new neo4j.GraphDatabase({
 ***REMOVED***);
 
 // @params -> parameters for build query
-// @query  -> Cypher query that is able to `COLLECT(x) as list`
+// @query  -> Cypher query that is able to `COLLECT(distinct x) as list`
 
 // --> returns list of CUI's
 

@@ -105,5 +105,6 @@ function buildCypherObj(cui) {
 ***REMOVED***
 
 function buildQuery(cui) {
-    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***), (t1)<-[:child_of]-(c) return COLLECT(c) as children`
+    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***), (t1)<-[:child_of]-(c)
+                return COLLECT(distinct c) as children`
 ***REMOVED***

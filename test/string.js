@@ -23,20 +23,24 @@ describe("Replace appendix strings", function () {
         assert.equal("Diabetes mellitus", clean);
 ***REMOVED***);
 
+
     it("Should replace 'type + roman'", function () {
         var clean = string.replaceAppendix("Diabetes mellitus type II");
         assert.equal("Diabetes mellitus", clean);
 ***REMOVED***);
+
 
     it("Should replace 'stage + roman'", function () {
         var clean = string.replaceAppendix("Carcinoma stage II");
         assert.equal("Carcinoma", clean);
 ***REMOVED***);
 
+
     it("Should replace 'stage + roman'", function () {
         var clean = string.replaceAppendix("Carcinoma stage IV");
         assert.equal("Carcinoma", clean);
 ***REMOVED***);
+
 
     it("Should replace 'stadum + num'", function () {
         var clean = string.replaceAppendix("Carcinoma stadium 0");
@@ -48,4 +52,5 @@ describe("Replace appendix strings", function () {
         var clean = string.replaceAppendix("Carcinoma phase 0");
         assert.equal("Carcinoma", clean);
 ***REMOVED***);
+
 ***REMOVED***);

@@ -94,7 +94,7 @@ module.exports = function *() {
 ***REMOVED***
 
 
-    var result = yield getTermsByCui(_.get(cuiResult, "cui"));
+    var result      = yield getTermsByCui(_.get(cuiResult, "cui"));
     var pref        = "";
     var found_terms = [];
 
@@ -102,6 +102,7 @@ module.exports = function *() {
         pref        = result[0];
         found_terms = _.uniq( _.sortBy(result[1], "lang"), s => string.compareFn(s.str) );
 ***REMOVED***
+
 
 ***REMOVED*** Group terms by label / language
     var terms = {***REMOVED***;
@@ -138,6 +139,7 @@ module.exports = function *() {
     if (config.neo4j["is_active"] && _.get(cuiResult, "source") === "farma_compas") {
         var cui = _.get(cuiResult, "cui");
 
+
         var cypherObj = {
             "query"  : buildQuery(cui),
             "params" : {
@@ -170,10 +172,12 @@ module.exports = function *() {
                 continue;
         ***REMOVED***
 
-            var _pref = child_synonyms[0];
+            var _pref  = child_synonyms[0];
             var _terms = child_synonyms[1];
 
-            terms[_pref] = [_pref].concat(_terms.map(s => s["str"]));
+            var key = string.forComparison(_pref, false);
+
+            terms[key] = [_pref].concat(_terms.map(s => s["str"]));
     ***REMOVED***
 ***REMOVED***
 
@@ -246,5 +250,16 @@ function getTermsByCui(cui, size) {
 
 
 function buildQuery(cui) {
-    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***), (t1)<-[:child_of]-(c) return COLLECT(c) as children`
+    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
+        (t1)<-[:child_of]-(c)
+            return COLLECT(distinct c) as children`
+
+
+***REMOVED*** Too much results if brands are included
+
+***REMOVED*** return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
+***REMOVED***     (t1)<-[:child_of]-(c),
+***REMOVED***     (t1)<-[:brand]-(b)
+***REMOVED***         return COLLECT(distinct c) as children,
+***REMOVED***                COLLECT(distinct b) as brands`
 ***REMOVED***
