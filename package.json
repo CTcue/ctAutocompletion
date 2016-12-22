@@ -39,7 +39,8 @@
     "request": "^2.74.0",
     "request-json": "^0.6.1",
     "split2": "^2.1.0",
-    "through2": "^2.0.1"
+    "through2": "^2.0.1",
+    "winston": "^2.3.0"
   ***REMOVED***,
   "devDependencies": {
     "supertest": "*",

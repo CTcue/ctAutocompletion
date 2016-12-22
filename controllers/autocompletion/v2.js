@@ -9,6 +9,8 @@
 */
 
 const config  = require('../../config/config.js');
+
+const fs = require("fs");
 const _ = require("lodash");
 
 const neo4j = require('neo4j');
@@ -28,6 +30,8 @@ const elasticClient = new elastic.Client({
 ***REMOVED***
   ],
 ***REMOVED***);
+
+
 
 
 const source = ["cui", "str", "pref"];

@@ -12,6 +12,39 @@ var compress = require('koa-compress');
 
 
 /////
+// Logging (simple)
+var winston = require('winston');
+
+winston.add(winston.transports.File, {
+    filename: `${__dirname***REMOVED***/logs/user_selected.log`,
+    level: 'info',
+    timestamp: true,
+    handleExceptions: true
+***REMOVED***);
+
+// Only log it in log file
+winston.remove(winston.transports.Console);
+
+
+var logUserSelection = function *() {
+***REMOVED*** - user_id=>environment (keeps it reasonably anonymous)
+    var headers = this.req.headers;
+
+***REMOVED*** User selected CUI (by clicking)
+    var query   = this.request.body.query || "";
+
+***REMOVED*** String used to create autocompletion suggestion list
+    var user_typed = this.request.body.user_typed || "";
+
+***REMOVED*** Pref. term of the clicked suggestion
+    var pref = this.pref_term || "";
+
+    winston.info(`${headers["x-user"]***REMOVED*** | ${user_typed***REMOVED*** | ${query***REMOVED*** | ${pref***REMOVED***`);
+***REMOVED***
+
+
+
+/////
 // Middleware
 
 var bodyParser = require('./middleware/parse');
@@ -72,6 +105,8 @@ var customConcepts = require('./controllers/concepts/list');
 var customConceptsbyDate  = require('./controllers/concepts/byDate');
 
 
+var log
+
 router['get']('/', function *() {
     this.body = {
         "version" : version
@@ -84,8 +119,8 @@ router['post']('/v2/autocomplete', extractUserId, autocomplete_dev);
 
 router['post']('/term_lookup', term_lookup);
 router['post']('/expand', expander);
-router['post']('/expand-grouped', extractUserId, expandGrouped);
-router['post']('/expand-by-string', extractUserId, expandByString);
+router['post']('/expand-grouped', extractUserId, expandGrouped, logUserSelection);
+router['post']('/expand-by-string', extractUserId, expandByString, logUserSelection);
 router['post']('/suggest', suggester);
 router['post']('/children', concept_children);
 router['post']('/related', concept_related);

@@ -16,7 +16,6 @@ output/
 *.gz
 .DS_Store
 pids
-logs
 npm-debug.log*
 node_modules
 uploads/

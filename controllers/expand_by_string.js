@@ -42,7 +42,7 @@ const language_map = {
 
 
 
-module.exports = function *() {
+module.exports = function *(next) {
     var body = this.request.body;
 
     var term = _.get(body, "query") || null;
@@ -203,6 +203,10 @@ module.exports = function *() {
       "terms"    : terms,
       "uncheck"  : []
 ***REMOVED***;
+
+***REMOVED*** For logging
+    this.pref_term = pref;
+    yield next;
 ***REMOVED***;
 
 

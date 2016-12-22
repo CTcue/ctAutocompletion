@@ -40,7 +40,8 @@ const language_map = {
 ***REMOVED***;
 
 
-module.exports = function *() {
+
+module.exports = function *(next) {
     var body = this.request.body.query;
 
     var result = yield function(callback) {
@@ -212,4 +213,9 @@ module.exports = function *() {
       "terms"    : terms,
       "uncheck"  : []
 ***REMOVED***;
+
+
+***REMOVED*** For logging
+    this.pref_term = pref;
+    yield next;
 ***REMOVED***;
