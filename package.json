@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
-    "test" : "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
+    "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
   ***REMOVED***,
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "elasticsearch": "11.0.1",
     "elasticsearch-writable-stream": "^2.0.0",
     "koa": "1.2.4",
+    "koa-compress": "^1.0.9",
     "koa-cors": "0.0.16",
     "koa-router": "5.4.0",
     "lodash": "^4.15.0",

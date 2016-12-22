@@ -8,6 +8,7 @@ var app = module.exports = koa();
 var router = require('koa-router')();
 var request = require('request-json');
 var cors = require('koa-cors');
+var compress = require('koa-compress');
 
 
 /////
@@ -34,12 +35,23 @@ app.use(cors({
 
 app.use(bodyParser);
 
+app.use(compress({
+    "filter": function (content_type) {
+        return /text/i.test(content_type)
+***REMOVED***,
+
+    "threshold": 2048,
+    "flush": require('zlib').Z_SYNC_FLUSH
+***REMOVED***))
 
 /////
 // API
 
+// Autocompletion (versions to test with master / dev / canary etc.)
+var autocomplete_master = require('./controllers/autocompletion/v1.js');
+var autocomplete_dev    = require('./controllers/autocompletion/v2.js');
 
-var autocomplete_v1  = require('./controllers/v1/autocomplete.js');
+// All other API's (don't really need versioning yet)
 var term_lookup      = require('./controllers/term_lookup.js');
 var expander         = require('./controllers/expand.js');
 var expandGrouped    = require('./controllers/expand_grouped.js'); // Groups result by language
@@ -67,7 +79,9 @@ router['get']('/', function *() {
 ***REMOVED***);
 
 
-router['post']('/v1/autocomplete', extractUserId, autocomplete_v1);
+router['post']('/v1/autocomplete', extractUserId, autocomplete_master);
+router['post']('/v2/autocomplete', extractUserId, autocomplete_dev);
+
 router['post']('/term_lookup', term_lookup);
 router['post']('/expand', expander);
 router['post']('/expand-grouped', extractUserId, expandGrouped);
