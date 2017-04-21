@@ -16,6 +16,17 @@ exports.__siblings = function() {
     return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***), (t1)-[:sibling_of]-(s) return COLLECT(distinct s) as list`
 ***REMOVED***
 
+exports.__brands = function() {
+    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
+        (t1)<-[:brand]-(b)
+            return COLLECT(distinct b)[0..20] as list`
+***REMOVED***
+
+exports.__related_brands = function() {
+    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
+        (t1)-[:brand]->(b)<-[:brand]-(N)
+            return b + COLLECT(distinct N)[0..20] as list`
+***REMOVED***
 
 // Currently not used
 exports.__shortestPath = function() {

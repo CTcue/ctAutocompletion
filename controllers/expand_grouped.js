@@ -94,74 +94,74 @@ module.exports = function *(next) {
 
 ***REMOVED*** Check for user contributions
 ***REMOVED*** - If the current user added custom concepts/synonyms
-    if (config.neo4j["is_active"]) {
-        if (this.user) {
-            var user_contributed = yield function(callback) {
-                var cypherObj = {
-                    "query": `MATCH
-                                (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:LIKES]-(u:User { id: { _USER_ ***REMOVED***, env: { _ENV_ ***REMOVED*** ***REMOVED***)
-                              RETURN
-                                s.str as str, s.label as label`,
+***REMOVED*** if (config.neo4j["is_active"]) {
+***REMOVED***     if (this.user) {
+***REMOVED***         var user_contributed = yield function(callback) {
+***REMOVED***             var cypherObj = {
+***REMOVED***                 "query": `MATCH
+***REMOVED***                             (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:LIKES]-(u:User { id: { _USER_ ***REMOVED***, env: { _ENV_ ***REMOVED*** ***REMOVED***)
+***REMOVED***                           RETURN
+***REMOVED***                             s.str as str, s.label as label`,
 
-                    "params": {
-                        "_CUI_"  : body,
-                        "_USER_" : this.user._id,
-                        "_ENV_"  : this.user.env
-                ***REMOVED***,
+***REMOVED***                 "params": {
+***REMOVED***                     "_CUI_"  : body,
+***REMOVED***                     "_USER_" : this.user._id,
+***REMOVED***                     "_ENV_"  : this.user.env
+***REMOVED***             ***REMOVED***,
 
-                    "lean": true
-            ***REMOVED***
-
-
-                db.cypher(cypherObj, function(err, res) {
-                    if (err) {
-                        console.error(err);
-                        callback(false, []);
-                ***REMOVED***
-                    ***REMOVED***
-                        callback(false, res);
-                ***REMOVED***
-            ***REMOVED***);
-        ***REMOVED***
-
-        ***REMOVED*** Add user contributions
-            if (user_contributed && user_contributed.length) {
-                found_terms = found_terms.concat(user_contributed);
-        ***REMOVED***
-    ***REMOVED***
+***REMOVED***                 "lean": true
+***REMOVED***         ***REMOVED***
 
 
-    ***REMOVED*** Check if anyone (any user) has unchecked concepts/synonyms
-    ***REMOVED*** - Need more than 1 "downvote"
-        var uncheck = yield function(callback) {
-            var cypherObj = {
-                "query": `MATCH
-                            (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
-                          WITH
-                            type(r) as rel, s, count(s) as amount
-                          WHERE
-                            amount > 1
-                          RETURN
-                            s.str as term, s.label as label, rel, amount`,
+***REMOVED***             db.cypher(cypherObj, function(err, res) {
+***REMOVED***                 if (err) {
+***REMOVED***                     console.error(err);
+***REMOVED***                     callback(false, []);
+***REMOVED***             ***REMOVED***
+***REMOVED***                 ***REMOVED***
+***REMOVED***                     callback(false, res);
+***REMOVED***             ***REMOVED***
+***REMOVED***         ***REMOVED***);
+***REMOVED***     ***REMOVED***
 
-                "params": {
-                  "_CUI_": body
-            ***REMOVED***,
+***REMOVED***     ***REMOVED*** Add user contributions
+***REMOVED***         if (user_contributed && user_contributed.length) {
+***REMOVED***             found_terms = found_terms.concat(user_contributed);
+***REMOVED***     ***REMOVED***
+***REMOVED*** ***REMOVED***
 
-                "lean": true
-        ***REMOVED***
 
-            db.cypher(cypherObj, function(err, res) {
-                if (err) {
-                    console.info(err);
-                    callback(false, []);
-            ***REMOVED***
-                ***REMOVED***
-                    callback(false, res);
-            ***REMOVED***
-        ***REMOVED***);
-    ***REMOVED***
-***REMOVED***
+***REMOVED*** ***REMOVED*** Check if anyone (any user) has unchecked concepts/synonyms
+***REMOVED*** ***REMOVED*** - Need more than 1 "downvote"
+***REMOVED***     var uncheck = yield function(callback) {
+***REMOVED***         var cypherObj = {
+***REMOVED***             "query": `MATCH
+***REMOVED***                         (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
+***REMOVED***                       WITH
+***REMOVED***                         type(r) as rel, s, count(s) as amount
+***REMOVED***                       WHERE
+***REMOVED***                         amount > 1
+***REMOVED***                       RETURN
+***REMOVED***                         s.str as term, s.label as label, rel, amount`,
+
+***REMOVED***             "params": {
+***REMOVED***               "_CUI_": body
+***REMOVED***         ***REMOVED***,
+
+***REMOVED***             "lean": true
+***REMOVED***     ***REMOVED***
+
+***REMOVED***         db.cypher(cypherObj, function(err, res) {
+***REMOVED***             if (err) {
+***REMOVED***                 console.info(err);
+***REMOVED***                 callback(false, []);
+***REMOVED***         ***REMOVED***
+***REMOVED***             ***REMOVED***
+***REMOVED***                 callback(false, res);
+***REMOVED***         ***REMOVED***
+***REMOVED***     ***REMOVED***);
+***REMOVED*** ***REMOVED***
+***REMOVED*** ***REMOVED***
 
 
 
@@ -185,11 +185,11 @@ module.exports = function *(next) {
     ***REMOVED***
 
 
-        if (terms.hasOwnProperty(key)) {
-            terms[key].push(t["str"]);
+        if (terms.hasOwnProperty("custom")) {
+            terms["custom"].push(t["str"]);
     ***REMOVED***
         ***REMOVED***
-            terms[key] = [ t["str"] ];
+            terms["custom"] = [ t["str"] ];
     ***REMOVED***
 ***REMOVED***
 

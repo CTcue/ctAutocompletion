@@ -32,8 +32,6 @@ const elasticClient = new elastic.Client({
 ***REMOVED***);
 
 
-
-
 const source = ["cui", "str", "pref"];
 
 
@@ -41,6 +39,7 @@ module.exports = function *() {
     var headers = this.req.headers;
     var body    = this.request.body;
     var query   = _.deburr(body.query);
+
 
 ***REMOVED*** Search for suggestions in Elasticsearch
     var exactMatches = yield findExact(query);
@@ -154,10 +153,9 @@ function findUserLikes(query, userId, environment) {
 
         db.cypher(cypherObj, function(err, res) {
             if (err) {
-                console.error(err);
-                callback(false, []);
+                console.error("[findUserLikes]", err);
         ***REMOVED***
-            ***REMOVED***
+            else if (!_.isEmpty(res)) {
                 var result = res.map(function(s) {
                 ***REMOVED*** For display / uniqueness test
                     s["pref"]  = s["str"];
@@ -165,10 +163,16 @@ function findUserLikes(query, userId, environment) {
                     s["contributed"] = true;
 
                     return s;
-            ***REMOVED***)
+            ***REMOVED***);
 
-                callback(false, result);
+                var unique = _.uniqBy(result, s => string.compareFn(s["str"]));
+
+                callback(false, unique);
+                return;
         ***REMOVED***
+
+
+            callback(false, []);
     ***REMOVED***);
 ***REMOVED***
 ***REMOVED***
@@ -249,19 +253,11 @@ function getResults (queryObj) {
             var hits = res.hits;
             var result = [];
 
-        ***REMOVED*** console.log(JSON.stringify(hits, null, 4))
-
             if (hits && hits.total > 0) {
-
                 result = hits.hits.map(function(hit) {
-                    var tmp = hit["_source"];
-                    ***REMOVED*** tmp["_score"] = hit["_score"];
-
-                    return tmp;
+                    return hit["_source"];
             ***REMOVED***);
         ***REMOVED***
-
-        ***REMOVED*** _.sortBy(result, (t => t.str.length))
 
             callback(err, {
                 "took": res.took,

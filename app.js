@@ -8,7 +8,6 @@ var app = module.exports = koa();
 var router = require('koa-router')();
 var request = require('request-json');
 var cors = require('koa-cors');
-var compress = require('koa-compress');
 
 
 /////
@@ -47,9 +46,9 @@ var logUserSelection = function *() {
 /////
 // Middleware
 
-var bodyParser = require('./middleware/parse');
+var bodyParser    = require('./middleware/parse');
 var extractUserId = require("./middleware/extractUser");
-var verify = require("./middleware/verify");
+var verify        = require("./middleware/verify");
 
 
 app.use(cors({
@@ -68,14 +67,7 @@ app.use(cors({
 
 app.use(bodyParser);
 
-app.use(compress({
-    "filter": function (content_type) {
-        return /text/i.test(content_type)
-***REMOVED***,
 
-    "threshold": 2048,
-    "flush": require('zlib').Z_SYNC_FLUSH
-***REMOVED***))
 
 /////
 // API

@@ -1,6 +1,6 @@
 {
   "name": "ct-autocompletion",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
@@ -23,24 +23,23 @@
   "dependencies": {
     "cheerio": "^0.22.0",
     "co-monk": "1.0.0",
-    "elasticsearch": "11.0.1",
+    "elasticsearch": "13.0.0-rc2",
     "elasticsearch-writable-stream": "^2.0.0",
-    "koa": "1.2.4",
-    "koa-compress": "^1.0.9",
+    "koa": "2.2.0",
     "koa-cors": "0.0.16",
-    "koa-router": "5.4.0",
-    "lodash": "^4.15.0",
+    "koa-router": "7.1.1",
+    "lodash": "^4.17.4",
     "minimist": "^1.2.0",
-    "moment": "^2.15.0",
-    "mongodb": "^2.2.10",
-    "monk": "3.1.2",
+    "moment": "^2.18.1",
+    "mongodb": "^2.2.26",
+    "monk": "4.0.0",
     "neo4j": "^2.0.0-RC2",
     "neo4j-batch-index-stream": "0.0.1",
-    "request": "^2.74.0",
+    "request": "^2.81.0",
     "request-json": "^0.6.1",
-    "split2": "^2.1.0",
-    "through2": "^2.0.1",
-    "winston": "^2.3.0"
+    "split2": "^2.1.1",
+    "through2": "^2.0.3",
+    "winston": "^2.3.1"
   ***REMOVED***,
   "devDependencies": {
     "supertest": "*",

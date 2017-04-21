@@ -4,7 +4,7 @@
 
   curl -X POST -H "Content-Type: application/json" -d '{
       "query": "C1306459"
-  ***REMOVED***' "http://localhost:4080/expand-grouped"
+  ***REMOVED***' "http://localhost:4080/expand-by-string"
 
 */
 
@@ -68,7 +68,7 @@ module.exports = function *(next) {
         "size" : 1,
 
         "body": {
-            "_source": ["cui", "pref", "source"],
+        ***REMOVED*** "_source": ["cui", "pref", "source"],
             "query": {
                 "term" : {
                     "exact" : wantedTerm
@@ -105,7 +105,10 @@ module.exports = function *(next) {
 
 
 ***REMOVED*** Group terms by label / language
-    var terms = {***REMOVED***;
+    var terms = {
+        "custom"   : [],
+        "suggested": []
+***REMOVED***;
 
     for (var i=0; i < found_terms.length; i++) {
         var t = found_terms[i];
@@ -128,7 +131,7 @@ module.exports = function *(next) {
             terms[key].push(t["str"]);
     ***REMOVED***
         ***REMOVED***
-            terms[key] = [ t["str"] ];
+            terms[key] = [t["str"]];
     ***REMOVED***
 ***REMOVED***
 
@@ -136,49 +139,14 @@ module.exports = function *(next) {
 ***REMOVED***
 ***REMOVED*** for farma-compas terms => check for children to add as synonyms
 
-    if (config.neo4j["is_active"] && _.get(cuiResult, "source") === "farma_compas") {
+***REMOVED*** && _.get(cuiResult, "source") === "farma_compas"
+
+    if (config.neo4j["is_active"] && _.get(cuiResult, "cui")) {
         var cui = _.get(cuiResult, "cui");
 
+        var extra = yield findSuggestions(cui, { "brands": [], "related_brands": [] ***REMOVED***);
 
-        var cypherObj = {
-            "query"  : buildQuery(cui),
-            "params" : {
-                "A": cui,
-        ***REMOVED***,
-
-            "lean": true
-    ***REMOVED***;
-
-        var children = yield function(callback) {
-            db.cypher(cypherObj, function(err, paths) {
-                if (err) {
-                  console.error(err);
-                  return callback(false, [])
-            ***REMOVED***
-
-                if (!paths || paths.length < 1 || !_.get(paths[0], "children")) {
-                    return callback(false, []);
-            ***REMOVED***
-
-                callback(null, paths[0]["children"].map(s => s["cui"]));
-        ***REMOVED***);
-    ***REMOVED***;
-
-
-        for (var i=0; i < children.length; i++) {
-            var child_synonyms = yield getTermsByCui(children[i], 2);
-
-            if (!child_synonyms) {
-                continue;
-        ***REMOVED***
-
-            var _pref  = child_synonyms[0];
-            var _terms = child_synonyms[1];
-
-            var key = string.forComparison(_pref, false);
-
-            terms[key] = [_pref].concat(_terms.map(s => s["str"]));
-    ***REMOVED***
+        terms = _.extend(terms, extra);
 ***REMOVED***
 
 
@@ -207,6 +175,57 @@ module.exports = function *(next) {
 ***REMOVED*** For logging
     this.pref_term = pref;
     yield next;
+***REMOVED***;
+
+
+const queries  = require("./_cypher/queries");
+const _cypher  = require("./_cypher/cypher");
+const _elastic = require("./_cypher/expand_by_cui");
+
+const neoQuery = {
+    "children"  : queries.__children(),
+    "brands"    : queries.__brands(),
+    "related_brands": queries.__related_brands(),
+    "siblings"  : queries.__siblings(),
+***REMOVED***;
+
+
+function * findSuggestions(findBy, result) {
+    if (_.isEmpty(result)) {
+        var result = {
+        ***REMOVED*** "children": [],
+        ***REMOVED*** "siblings": [],
+            "brands" : []
+    ***REMOVED***;
+***REMOVED***
+
+***REMOVED*** var result = {
+***REMOVED***     "children": [],
+***REMOVED***     "siblings": [],
+***REMOVED***     "brands"  : []
+***REMOVED*** ***REMOVED***;
+
+***REMOVED*** Obtain given "cui" parameter
+***REMOVED*** var body = this.request.body.query;
+    var params = {
+        "A": findBy,
+***REMOVED***;
+
+    for (var k in result) {
+        if (!_.has(neoQuery, k)) {
+            continue;
+    ***REMOVED***
+
+        for (let cui of yield _cypher(params, neoQuery[k])) {
+            var item = yield _elastic(cui);
+
+            if (item && _.has(item, "pref")) {
+                result[k].push(item.pref)
+        ***REMOVED***
+    ***REMOVED***
+***REMOVED***
+
+    return result;
 ***REMOVED***;
 
 
@@ -254,16 +273,24 @@ function getTermsByCui(cui, size) {
 
 
 function buildQuery(cui) {
-    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
-        (t1)<-[:child_of]-(c)
-            return COLLECT(distinct c) as children`
-
+***REMOVED*** return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
+***REMOVED***     (t1)<-[:child_of]-(c)
+***REMOVED***         return COLLECT(distinct c) as children`
 
 ***REMOVED*** Too much results if brands are included
 
+    return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
+        (t1)<-[:child_of]-(c),
+        (t1)<-[:brand]-(b)
+            return COLLECT(distinct c) as children,
+                   COLLECT(distinct b) as brands`
+
 ***REMOVED*** return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
-***REMOVED***     (t1)<-[:child_of]-(c),
+***REMOVED***     (t1)<-[:child_of]-(c)
+***REMOVED***         return COLLECT(distinct c) as children`
+
+
+***REMOVED*** return `MATCH (t1:Concept { cui: {A***REMOVED*** ***REMOVED***),
 ***REMOVED***     (t1)<-[:brand]-(b)
-***REMOVED***         return COLLECT(distinct c) as children,
-***REMOVED***                COLLECT(distinct b) as brands`
+***REMOVED***         return COLLECT(distinct b) as brands`
 ***REMOVED***
