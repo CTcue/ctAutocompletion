@@ -131,8 +131,10 @@ function findExact(query) {
 
 
 function findUserLikes(query, userId, environment) {
-    ***REMOVED*** For now, only get the "Dislikes" to uncheck stuff
     return function(callback) {
+
+    ***REMOVED*** Suggest USER added only:  (s:Synonym)<-[r:LIKES]-(u:User { id: { _USER_ ***REMOVED***, env: { _ENV_ ***REMOVED*** ***REMOVED***)
+    ***REMOVED*** Suggest from all users in ENV:  (s:Synonym)<-[r:LIKES]-(u:User { env: { _ENV_ ***REMOVED*** ***REMOVED***)
 
         var cypherObj = {
             "query": `MATCH
@@ -143,9 +145,9 @@ function findUserLikes(query, userId, environment) {
                         s.str as str, s.label as label, s.cui as cui`,
 
             "params": {
-              "_USER_": userId,
-              "_ENV_" : environment,
-              "_QUERY_": "(?i)" + string.escapeRegExp(query) + ".*"
+                "_USER_"  : userId,
+                "_ENV_"   : environment,
+                "_QUERY_" : "(?i)" + string.escapeRegExp(query) + ".*"
         ***REMOVED***,
 
             "lean": true
@@ -186,28 +188,12 @@ function findMatches(query) {
         "_source": source,
         "size": 14,
         "query": {
-            "function_score" : {
-                "query" : {
-                    "match_phrase" : {
-                        "str" : query.trim()
-                ***REMOVED***
-            ***REMOVED***,
-
-                "functions" : [
+            "bool" : {
+                "must": [
                     {
-                    ***REMOVED*** Prefer some sources
-                        "filter": {
-                            "terms": { "source": [ "SNOMEDCT_US", "MSHDUT", "MDRDUT"] ***REMOVED***
-                    ***REMOVED***,
-                        "weight": 1
-                ***REMOVED***,
-
-                    {
-                    ***REMOVED*** Boost disease/disorders category
-                        "filter": {
-                            "terms": { "types": ["DISO", "PROC"] ***REMOVED***
-                    ***REMOVED***,
-                        "weight": 2
+                        "match_phrase" : {
+                            "str" : query.trim()
+                    ***REMOVED***
                 ***REMOVED***
                 ]
         ***REMOVED***
@@ -231,7 +217,7 @@ function spellingMatches(query) {
                 "str" : {
                     "query" : query.trim(),
                     "fuzziness": "AUTO",
-                    "operator": "AND",
+                    "operator" : "AND",
                     "prefix_length"   : 2,
                     "max_expansions"  : 10
             ***REMOVED***

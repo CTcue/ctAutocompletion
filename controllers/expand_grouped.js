@@ -13,6 +13,7 @@ const config  = require('../config/config.js');
 const neo4j = require('neo4j');
 const _ = require("lodash");
 const string = require("../lib/string");
+const queryHelper = require("../lib/queryHelper");
 const getCategory = require("../lib/category");
 
 const db = new neo4j.GraphDatabase({
@@ -32,7 +33,6 @@ const elasticClient = new elastic.Client({
 ***REMOVED***);
 
 
-const source = ["str", "lang", "types", "pref"];
 
 const language_map = {
     "DUT" : "dutch",
@@ -42,43 +42,9 @@ const language_map = {
 
 
 module.exports = function *(next) {
-    var body = this.request.body.query;
+    var cui = this.request.body.query || "";
 
-    var result = yield function(callback) {
-        elasticClient.search({
-            "index" : 'autocomplete',
-            "size": 100,
-
-            "sort": ["_doc"],
-            "_source": source,
-
-            "body" : {
-                "query" : {
-                    "term" : {
-                        "cui" : body
-                 ***REMOVED***
-             ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***,
-        function(err, resp) {
-            if (resp && !!resp.hits && resp.hits.total > 0) {
-                var hits = resp.hits.hits;
-
-            ***REMOVED*** Return ES source part only
-                if (hits.length > 0) {
-                    var pref  = hits[0]._source.pref;
-                    var types = hits[0]._source.types;
-
-                    return callback(false, [types, pref, hits.map(s => s._source)]);
-            ***REMOVED***
-        ***REMOVED***
-            ***REMOVED***
-                callback(false, false);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
-
-
+    var result      = yield queryHelper.getTermsByCui(cui, 100);
     var pref        = "";
     var types       = [];
     var found_terms = [];
@@ -88,6 +54,7 @@ module.exports = function *(next) {
         pref        = result[1];
         found_terms = result[2];
 
+    ***REMOVED*** Get unique terms per language
         found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => string.compareFn(s.str) );
 ***REMOVED***
 
@@ -185,17 +152,16 @@ module.exports = function *(next) {
     ***REMOVED***
 
 
-        if (terms.hasOwnProperty("custom")) {
-            terms["custom"].push(t["str"]);
+        if (terms.hasOwnProperty(key)) {
+            terms[key].push(t["str"]);
     ***REMOVED***
         ***REMOVED***
-            terms["custom"] = [ t["str"] ];
+            terms[key] = [ t["str"] ];
     ***REMOVED***
 ***REMOVED***
 
 ***REMOVED*** - Remove empty key/values
 ***REMOVED*** - Sort terms by their length
-
     for (var k in terms) {
         if (! terms[k].length) {
             delete terms[k];

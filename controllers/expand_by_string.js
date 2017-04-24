@@ -8,12 +8,11 @@
 
 */
 
-
 const config  = require('../config/config');
 
 const _ = require("lodash");
 const string = require("../lib/string");
-
+const queryHelper = require("../lib/queryHelper");
 
 const neo4j = require('neo4j');
 const db = new neo4j.GraphDatabase({
@@ -32,8 +31,6 @@ const elasticClient = new elastic.Client({
   ]
 ***REMOVED***);
 
-
-const source = ["str", "lang", "pref"];
 
 const language_map = {
     "DUT" : "dutch",
@@ -63,12 +60,10 @@ module.exports = function *(next) {
         .toLowerCase();
 
     var queryObj = {
-        "index": "autocomplete",
-
-        "size" : 1,
+        "index" : "autocomplete",
+        "size"  : 1,
 
         "body": {
-        ***REMOVED*** "_source": ["cui", "pref", "source"],
             "query": {
                 "term" : {
                     "exact" : wantedTerm
@@ -94,13 +89,18 @@ module.exports = function *(next) {
 ***REMOVED***
 
 
-    var result      = yield getTermsByCui(_.get(cuiResult, "cui"));
+    var result      = yield queryHelper.getTermsByCui(_.get(cuiResult, "cui"));
     var pref        = "";
+    var types       = [];
     var found_terms = [];
 
     if (result) {
-        pref        = result[0];
-        found_terms = _.uniq( _.sortBy(result[1], "lang"), s => string.compareFn(s.str) );
+        types       = result[0];
+        pref        = result[1];
+        found_terms = result[2];
+
+    ***REMOVED*** Get unique terms per language
+        found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => string.compareFn(s.str) );
 ***REMOVED***
 
 
@@ -136,18 +136,16 @@ module.exports = function *(next) {
 ***REMOVED***
 
 
-***REMOVED***
-***REMOVED*** for farma-compas terms => check for children to add as synonyms
+***REMOVED*** ------------
+***REMOVED*** Check Neo4j for suggestions
+***REMOVED*** - brands / related_brands / siblings etc.
+***REMOVED*** if (config.neo4j["is_active"] && _.get(cuiResult, "cui")) {
+***REMOVED***     var cui = _.get(cuiResult, "cui");
 
-***REMOVED*** && _.get(cuiResult, "source") === "farma_compas"
+***REMOVED***     var extra = yield findSuggestions(cui, { "brands": [], "related_brands": [] ***REMOVED***);
 
-    if (config.neo4j["is_active"] && _.get(cuiResult, "cui")) {
-        var cui = _.get(cuiResult, "cui");
-
-        var extra = yield findSuggestions(cui, { "brands": [], "related_brands": [] ***REMOVED***);
-
-        terms = _.extend(terms, extra);
-***REMOVED***
+***REMOVED***     terms = _.extend(terms, extra);
+***REMOVED*** ***REMOVED***
 
 
 
@@ -230,46 +228,6 @@ function * findSuggestions(findBy, result) {
 
 
 
-function getTermsByCui(cui, size) {
-    if (typeof size === "undefined") {
-        size = 60;
-***REMOVED***
-
-
-    return function(callback) {
-        if (!cui) {
-            return callback(false, false);
-    ***REMOVED***
-
-        elasticClient.search({
-            "index": 'autocomplete',
-            "size": size,
-            "sort": ["_doc"],
-            "body" : {
-                "query" : {
-                    "term" : {
-                        "cui" : cui
-                 ***REMOVED***
-             ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***,
-        function(err, resp) {
-            if (resp && !!resp.hits && resp.hits.total > 0) {
-                var hits = resp.hits.hits;
-
-            ***REMOVED*** Return ES source part only
-                if (hits.length > 0) {
-                    var pref  = hits[0]._source.pref;
-
-                    return callback(false, [pref, hits.map(s => s._source)]);
-            ***REMOVED***
-        ***REMOVED***
-            ***REMOVED***
-                callback(false, false);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
-***REMOVED***
 
 
 function buildQuery(cui) {

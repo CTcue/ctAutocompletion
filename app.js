@@ -72,32 +72,36 @@ app.use(bodyParser);
 /////
 // API
 
-// Autocompletion (versions to test with master / dev / canary etc.)
-var autocomplete_master = require('./controllers/autocompletion/v1.js');
-var autocomplete_dev    = require('./controllers/autocompletion/v2.js');
+// try {
+***REMOVED*** Autocompletion (versions to test with master / dev / canary etc.)
+    var autocomplete_master = require('./controllers/autocompletion/v1.js');
+    var autocomplete_dev    = require('./controllers/autocompletion/v2.js');
 
-// All other API's (don't really need versioning yet)
-var term_lookup      = require('./controllers/term_lookup.js');
-var expander         = require('./controllers/expand.js');
-var expandGrouped    = require('./controllers/expand_grouped.js'); // Groups result by language
-var expandByString   = require('./controllers/expand_by_string.js');
-var suggester        = require('./controllers/suggest.js');
-var concept_children = require('./controllers/children.js');
-var concept_related  = require('./controllers/related.js');
-var dbc              = require("./controllers/dbc.js");
-var dbc_diagnosis    = require("./controllers/dbc_diagnosis.js");
-
-
-// Allow users to add/recommend custom terms
-var recommend = require('./controllers/recommend.js');
+***REMOVED*** All other API's (don't really need versioning yet)
+    var term_lookup      = require('./controllers/term_lookup.js');
+    var expander         = require('./controllers/expand.js');
+    var expandGrouped    = require('./controllers/expand_grouped.js');
+    var expandByString   = require('./controllers/expand_by_string.js');
+    var suggester        = require('./controllers/suggest.js');
+    var concept_children = require('./controllers/children.js');
+    var concept_related  = require('./controllers/related.js');
+    var dbc              = require("./controllers/dbc.js");
+    var dbc_diagnosis    = require("./controllers/dbc_diagnosis.js");
 
 
-// Allow management of -custom- added terms from users
-var customConcepts = require('./controllers/concepts/list');
-var customConceptsbyDate  = require('./controllers/concepts/byDate');
+***REMOVED*** Allow users to add/recommend custom terms
+    var recommend = require('./controllers/recommend.js');
 
 
-var log
+***REMOVED*** Allow management of -custom- added terms from users
+    var customConcepts = require('./controllers/concepts/list');
+    var customConceptsbyDate  = require('./controllers/concepts/byDate');
+// ***REMOVED***
+// catch (err) {
+//     console.error(err);
+// ***REMOVED***
+
+
 
 router['get']('/', function *() {
     this.body = {
@@ -131,30 +135,30 @@ console.info('listening on port %d', port);
 
 
 
-//
-// Check if Elasticsearch and Neo4j are available
-//
+// //
+// // Check if Elasticsearch and Neo4j are available
+// //
 
-var elasticCheck = request.createClient("http://localhost:9200");
-var elasticVersion = elasticCheck.get("", function(err, res, body) {
-    if (err) {
-        console.info("Elasticsearch is OFF");
-        console.info(err);
-***REMOVED***
-    ***REMOVED***
-        console.info("Elasticsearch is ON");
-***REMOVED***
-***REMOVED***);
+// var elasticCheck = request.createClient("http://localhost:9200");
+// var elasticVersion = elasticCheck.get("", function(err, res, body) {
+//     if (err) {
+//         console.info("Elasticsearch is OFF");
+//         console.info(err);
+// ***REMOVED***
+//     ***REMOVED***
+//         console.info("Elasticsearch is ON");
+// ***REMOVED***
+// ***REMOVED***);
 
-var neoCheck = request.createClient("http://localhost:7474");
-var neoVersion = neoCheck.get("", function(err, res, body) {
-    if (err) {
-        console.info("Neo4j is OFF");
-        console.info(err);
-        config.neo4j["is_active"] = false;
-***REMOVED***
-    ***REMOVED***
-        console.info("Neo4j is ON");
-        ***REMOVED***
-***REMOVED***
-***REMOVED***);
+// var neoCheck = request.createClient("http://localhost:7474");
+// var neoVersion = neoCheck.get("", function(err, res, body) {
+//     if (err) {
+//         console.info("Neo4j is OFF");
+//         console.info(err);
+//         config.neo4j["is_active"] = false;
+// ***REMOVED***
+//     ***REMOVED***
+//         console.info("Neo4j is ON");
+//         ***REMOVED***
+// ***REMOVED***
+// ***REMOVED***);
