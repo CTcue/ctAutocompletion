@@ -4,7 +4,7 @@ var version = require("./package").version;
 var config = require('./config/config');
 
 var koa = require('koa');
-var app = module.exports = koa();
+var app = module.exports = new koa();
 var router = require('koa-router')();
 var request = require('request-json');
 var cors = require('koa-cors');
