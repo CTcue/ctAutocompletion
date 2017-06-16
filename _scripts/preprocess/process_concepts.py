@@ -150,7 +150,7 @@ class AggregatorJob(MRJob):
                     v = tmp_terms
 
                 # Get unique terms per language
-                unique = {t.lower(): t for t in v***REMOVED***.values()
+                unique = {t.lower(): t for t in v}.values()
 
                 if not unique:
                     continue

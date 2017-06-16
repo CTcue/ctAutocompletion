@@ -46,33 +46,33 @@ if __name__ == '__main__':
 
     # Include labels
     specialties = [
-        { "number": "0301", "label": "Oogheelkunde" ***REMOVED***,
-        { "number": "0302", "label": "KNO" ***REMOVED***,
-        { "number": "0303", "label": "Heelkunde" ***REMOVED***,
-        { "number": "0304", "label": "Plastische chirurgie" ***REMOVED***,
-        { "number": "0305", "label": "Orthopedie" ***REMOVED***,
-        { "number": "0306", "label": "Urologie" ***REMOVED***,
-        { "number": "0307", "label": "Gynaecologie" ***REMOVED***,
-        { "number": "0308", "label": "Neurochirurgie" ***REMOVED***,
-        { "number": "0310", "label": "Dermatologie" ***REMOVED***,
-        { "number": "0313", "label": "Inwendige Geneeskunde" ***REMOVED***,
-        { "number": "0316", "label": "Kindergeneeskunde" ***REMOVED***,
-        { "number": "0318", "label": "MDL" ***REMOVED***,
-        { "number": "0320", "label": "Cardiologie" ***REMOVED***,
-        { "number": "0322", "label": "Longgeneeskunde" ***REMOVED***,
-        { "number": "0324", "label": "Reumatologie" ***REMOVED***,
-        { "number": "0326", "label": "Allergologie" ***REMOVED***,
-        { "number": "0327", "label": "Revalidatiegeneeskunde" ***REMOVED***,
-        { "number": "0328", "label": "Cardio pulmonale chirurgie" ***REMOVED***,
-        { "number": "0329", "label": "Consultatieve Psychiatrie" ***REMOVED***,
-        { "number": "0330", "label": "Neurologie" ***REMOVED***,
-        { "number": "0335", "label": "Klinische Geriatrie" ***REMOVED***,
-        { "number": "0361", "label": "Radiotherapie" ***REMOVED***,
-        { "number": "0362", "label": "Radiologie" ***REMOVED***,
-        { "number": "0389", "label": "Anesthesiologie" ***REMOVED***,
-        { "number": "0390", "label": "Klinische Genetica" ***REMOVED***,
-        { "number": "1900", "label": "Audiologie" ***REMOVED***,
-        { "number": "8418", "label": "Geriatrische revalidatiezorg" ***REMOVED***
+        { "number": "0301", "label": "Oogheelkunde" },
+        { "number": "0302", "label": "KNO" },
+        { "number": "0303", "label": "Heelkunde" },
+        { "number": "0304", "label": "Plastische chirurgie" },
+        { "number": "0305", "label": "Orthopedie" },
+        { "number": "0306", "label": "Urologie" },
+        { "number": "0307", "label": "Gynaecologie" },
+        { "number": "0308", "label": "Neurochirurgie" },
+        { "number": "0310", "label": "Dermatologie" },
+        { "number": "0313", "label": "Inwendige Geneeskunde" },
+        { "number": "0316", "label": "Kindergeneeskunde" },
+        { "number": "0318", "label": "MDL" },
+        { "number": "0320", "label": "Cardiologie" },
+        { "number": "0322", "label": "Longgeneeskunde" },
+        { "number": "0324", "label": "Reumatologie" },
+        { "number": "0326", "label": "Allergologie" },
+        { "number": "0327", "label": "Revalidatiegeneeskunde" },
+        { "number": "0328", "label": "Cardio pulmonale chirurgie" },
+        { "number": "0329", "label": "Consultatieve Psychiatrie" },
+        { "number": "0330", "label": "Neurologie" },
+        { "number": "0335", "label": "Klinische Geriatrie" },
+        { "number": "0361", "label": "Radiotherapie" },
+        { "number": "0362", "label": "Radiologie" },
+        { "number": "0389", "label": "Anesthesiologie" },
+        { "number": "0390", "label": "Klinische Genetica" },
+        { "number": "1900", "label": "Audiologie" },
+        { "number": "8418", "label": "Geriatrische revalidatiezorg" }
     ];
 
     for specialism in specialties:
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
             "label"      : specialism["label"],
             "specialism" : specialism["number"]
-    ***REMOVED***)
+        })
 
 
     for row in read_rows(args.file, args.delimiter):
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                 "label"     : row["DIAGNOSE_OMSCHRIJVING"],
                 "code"      : row["DIAGNOSE_CD"],
                 "specialism": row["SPECIALISME_CD"]
-        ***REMOVED***)
+            })
 
         except Exception as err:
             print err

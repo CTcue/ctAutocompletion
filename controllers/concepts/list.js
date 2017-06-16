@@ -6,33 +6,33 @@ var table = db.table('umls');
 
 module.exports = function *() {
 
-***REMOVED***
-***REMOVED*** Get most recent user added terms
+    //
+    // Get most recent user added terms
 
-    var recent = yield table.find({***REMOVED***, { "sort" : { "created": -1 ***REMOVED***, "limit": 5 ***REMOVED***);
+    var recent = yield table.find({}, { "sort" : { "created": -1 }, "limit": 5 });
 
 
-***REMOVED***
-***REMOVED*** Aggregate user added terms by month
+    //
+    // Aggregate user added terms by month
 
     var aggregated = yield function(callback) {
         table.aggregate([
             {
                 "$group" : {
                     "_id": {
-                        "month": { "$month": "$created" ***REMOVED***,
-                        "year":  { "$year": "$created" ***REMOVED***
-                ***REMOVED***,
-                    "count": { "$sum" : 1 ***REMOVED***
-            ***REMOVED***
-        ***REMOVED***
+                        "month": { "$month": "$created" },
+                        "year":  { "$year": "$created" }
+                    },
+                    "count": { "$sum" : 1 }
+                }
+            }
         ],
-        {***REMOVED***,
+        {},
         function(err, docs) {
             if (err) {
                 callback(false, []);
-        ***REMOVED***
-            ***REMOVED***
+            }
+            else {
                 var result = [];
 
                 for (var i=0; i < docs.length; i++) {
@@ -41,17 +41,17 @@ module.exports = function *() {
                         "month"  : docs[i]["_id"]["month"],
                         "date"   : new Date(docs[i]["_id"]["year"], +docs[i]["_id"]["month"] - 1),
                         "amount" : docs[i]["count"]
-                ***REMOVED***);
-            ***REMOVED***
+                    });
+                }
 
                 callback(false, result);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***
+            }
+        });
+    }
 
 
     this.body = {
         "concepts": recent,
         "calendar_view": aggregated
-***REMOVED***;
-***REMOVED***
+    };
+}

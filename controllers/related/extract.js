@@ -13,8 +13,8 @@ module.exports = function *() {
         return request(domain, function (err, resp, html) {
             if (err) {
                 callback(false, []);
-        ***REMOVED***
-            ***REMOVED***
+            }
+            else {
                 var $ = cheerio.load(html);
                 var rows = [];
 
@@ -24,24 +24,24 @@ module.exports = function *() {
                     $("td, th", row).each(function(j, col) {
                         var content = $(col).text().trim() || "";
                         current_row.push(content);
-                ***REMOVED***);
+                    });
 
                     current_row = current_row.filter( s => s.length > 2 )
 
                     if (current_row.length) {
                         rows.push(current_row);
-                ***REMOVED***
-            ***REMOVED***);
+                    }
+                });
 
                 callback(false, rows);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
+            }
+        });
+    };
 
     this.body = {
         "title" : "",
         "description": "",
 
         "tables": tables
-***REMOVED***;
-***REMOVED***
+    };
+}

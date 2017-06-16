@@ -8,9 +8,9 @@ const elasticClient = new elastic.Client({
     {
       "host": 'localhost',
       "auth": config.elastic_shield
-***REMOVED***
+    }
   ]
-***REMOVED***);
+});
 
 
 module.exports = function _elastic(cui) {
@@ -21,21 +21,21 @@ module.exports = function _elastic(cui) {
             "_source": ["pref"],
             "body" : {
                 "query" : {
-                    "term" : { "cui" : cui ***REMOVED***
-             ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***,
+                    "term" : { "cui" : cui }
+                 }
+            }
+        },
         function(err, resp) {
             if (resp && !!resp.hits && resp.hits.total > 0) {
                 var hits = resp.hits.hits;
 
-            ***REMOVED*** Return ES source part only
+                // Return ES source part only
                 if (hits.length > 0) {
-                    return callback(false, { "cui": cui, "pref": hits[0]._source.pref ***REMOVED***);
-            ***REMOVED***
-        ***REMOVED***
+                    return callback(false, { "cui": cui, "pref": hits[0]._source.pref });
+                }
+            }
 
             callback(false, false);
-    ***REMOVED***);
-***REMOVED***
-***REMOVED***
+        });
+    }
+}

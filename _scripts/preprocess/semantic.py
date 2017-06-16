@@ -3,7 +3,7 @@ import unicodecsv as csv
 import os
 
 
-semantic_types = {***REMOVED***
+semantic_types = {}
 basepath = os.path.dirname(__file__)
 
 with open(os.path.join(basepath, "lookup_data", "semantic_types.txt")) as t:

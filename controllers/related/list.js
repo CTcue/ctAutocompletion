@@ -7,7 +7,7 @@ var _ = require("lodash");
 var db = new neo4j.GraphDatabase({
     url: 'http://localhost:7474',
     auth: config.neo4j
-***REMOVED***);
+});
 
 
 module.exports = function *() {
@@ -16,18 +16,18 @@ module.exports = function *() {
         var cypherObj = {
             "query": `MATCH (g:Group) RETURN g.name as name`,
             "lean": true
-    ***REMOVED***
+        }
 
         db.cypher(cypherObj, function(err, res) {
             if (err) {
                 callback(false, []);
-        ***REMOVED***
-            ***REMOVED***
+            }
+            else {
                 callback(false, res);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***
+            }
+        });
+    }
 
 
     this.body = groups
-***REMOVED***
+}

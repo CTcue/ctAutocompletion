@@ -24,7 +24,7 @@ def clean(term):
 
 
 def dictify(ul, parent=None):
-    result = {***REMOVED***
+    result = {}
 
     for li in ul.find_all("li", recursive=False):
         key = next(li.stripped_strings)
@@ -61,7 +61,7 @@ def sha1(term):
 
 def find_cui(term, lookup_url="http://localhost:4080/term_lookup"):
     try:
-        r = requests.post(lookup_url, data=json.dumps({"query": term***REMOVED***))
+        r = requests.post(lookup_url, data=json.dumps({"query": term}))
         result = r.json()
         return result["hits"][0]["cui"]
     except Exception, e:
@@ -90,7 +90,7 @@ def generate_fake_concepts(tree, **kwargs):
     return [(sha1(t), t) for t in unique_concepts(tree)]
 
 def concepts_to_lookup(concepts):
-    return { v:k for (k, v) in concepts ***REMOVED***
+    return { v:k for (k, v) in concepts }
 
 def unique_terms(tree, **kwargs):
     return [t for t in unique_concepts(tree)]
@@ -114,7 +114,7 @@ def crawl_farma(url_pharma="https://www.farmacotherapeutischkompas.nl/bladeren-v
     soup = BeautifulSoup(html, "lxml")
 
     # Parse list(s) recursive to convert farma_kompas page to a dict
-    for li in  soup.find("li", {'id': "geneesmiddelen"***REMOVED***):
+    for li in  soup.find("li", {'id': "geneesmiddelen"}):
         for ul in li.find_all("ul", recursive=False):
             return dictify(ul)
 

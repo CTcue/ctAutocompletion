@@ -15,31 +15,31 @@ var cors = require('koa-cors');
 var winston = require('winston');
 
 winston.add(winston.transports.File, {
-    filename: `${__dirname***REMOVED***/logs/user_selected.log`,
+    filename: `${__dirname}/logs/user_selected.log`,
     level: 'info',
     timestamp: true,
     handleExceptions: true
-***REMOVED***);
+});
 
 // Only log it in log file
 winston.remove(winston.transports.Console);
 
 
 var logUserSelection = function *() {
-***REMOVED*** - user_id=>environment (keeps it reasonably anonymous)
+    // - user_id=>environment (keeps it reasonably anonymous)
     var headers = this.req.headers;
 
-***REMOVED*** User selected CUI (by clicking)
+    // User selected CUI (by clicking)
     var query   = this.request.body.query || "";
 
-***REMOVED*** String used to create autocompletion suggestion list
+    // String used to create autocompletion suggestion list
     var user_typed = this.request.body.user_typed || "";
 
-***REMOVED*** Pref. term of the clicked suggestion
+    // Pref. term of the clicked suggestion
     var pref = this.pref_term || "";
 
-    winston.info(`${headers["x-user"]***REMOVED*** | ${user_typed***REMOVED*** | ${query***REMOVED*** | ${pref***REMOVED***`);
-***REMOVED***
+    winston.info(`${headers["x-user"]} | ${user_typed} | ${query} | ${pref}`);
+}
 
 
 
@@ -63,7 +63,7 @@ app.use(cors({
         "umls-u-token",
         "umls-c-token"
     ]
-***REMOVED***));
+}));
 
 app.use(bodyParser);
 
@@ -73,11 +73,11 @@ app.use(bodyParser);
 // API
 
 // try {
-***REMOVED*** Autocompletion (versions to test with master / dev / canary etc.)
+    // Autocompletion (versions to test with master / dev / canary etc.)
     var autocomplete_master = require('./controllers/autocompletion/v1.js');
     var autocomplete_dev    = require('./controllers/autocompletion/v2.js');
 
-***REMOVED*** All other API's (don't really need versioning yet)
+    // All other API's (don't really need versioning yet)
     var term_lookup      = require('./controllers/term_lookup.js');
     var expander         = require('./controllers/expand.js');
     var expandGrouped    = require('./controllers/expand_grouped.js');
@@ -89,25 +89,25 @@ app.use(bodyParser);
     var dbc_diagnosis    = require("./controllers/dbc_diagnosis.js");
 
 
-***REMOVED*** Allow users to add/recommend custom terms
+    // Allow users to add/recommend custom terms
     var recommend = require('./controllers/recommend.js');
 
 
-***REMOVED*** Allow management of -custom- added terms from users
+    // Allow management of -custom- added terms from users
     var customConcepts = require('./controllers/concepts/list');
     var customConceptsbyDate  = require('./controllers/concepts/byDate');
-// ***REMOVED***
+// }
 // catch (err) {
 //     console.error(err);
-// ***REMOVED***
+// }
 
 
 
 router['get']('/', function *() {
     this.body = {
         "version" : version
-***REMOVED***;
-***REMOVED***);
+    };
+});
 
 
 router['post']('/v1/autocomplete', extractUserId, autocomplete_master);
@@ -144,11 +144,11 @@ console.info('listening on port %d', port);
 //     if (err) {
 //         console.info("Elasticsearch is OFF");
 //         console.info(err);
-// ***REMOVED***
-//     ***REMOVED***
+//     }
+//     else {
 //         console.info("Elasticsearch is ON");
-// ***REMOVED***
-// ***REMOVED***);
+//     }
+// });
 
 // var neoCheck = request.createClient("http://localhost:7474");
 // var neoVersion = neoCheck.get("", function(err, res, body) {
@@ -156,9 +156,9 @@ console.info('listening on port %d', port);
 //         console.info("Neo4j is OFF");
 //         console.info(err);
 //         config.neo4j["is_active"] = false;
-// ***REMOVED***
-//     ***REMOVED***
+//     }
+//     else {
 //         console.info("Neo4j is ON");
-//         ***REMOVED***
-// ***REMOVED***
-// ***REMOVED***);
+//         config.neo4j["is_active"] = true;
+//     }
+// });

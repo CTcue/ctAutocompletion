@@ -11,9 +11,9 @@ const elasticClient = new elastic.Client({
     {
       "host": 'localhost',
       "auth": argv.elastic || ""
-***REMOVED***
+    }
   ]
-***REMOVED***);
+});
 const ElasticsearchBulkIndexStream = require('elasticsearch-writable-stream');
 
 const index = argv.index || "autocomplete";
@@ -27,12 +27,12 @@ function stamp() {
     return new Date().toISOString()
       .replace(/T/, ' ')
       .replace(/\..+/, '')
-***REMOVED***
+}
 
-var buildRecords = through2({ "objectMode": true ***REMOVED***, function(chunk, enc, callback) {
+var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callback) {
     var line = chunk.toString().trim();
 
-***REMOVED*** (CUI, LAT, SAB, TYPES, PREF, TERMS)
+    // (CUI, LAT, SAB, TYPES, PREF, TERMS)
 
     if (line && line.length) {
         var parts = line.split("\t");
@@ -58,21 +58,21 @@ var buildRecords = through2({ "objectMode": true ***REMOVED***, function(chunk, 
                         "source" : sab,
                         "pref"   : pref,
                         "types"  : types
-                ***REMOVED***
-            ***REMOVED***);
-        ***REMOVED***
-    ***REMOVED***
-***REMOVED***
+                    }
+                });
+            }
+        }
+    }
 
 
     callback();
-***REMOVED***);
+});
 
 
 var elasticStream = new ElasticsearchBulkIndexStream(elasticClient, {
     "highWaterMark": 5000,
     "flushTimeout": 500
-***REMOVED***);
+});
 
 console.info("ELASTICSEARCH", stamp());
 
@@ -82,7 +82,7 @@ process.stdin
   .pipe(elasticStream)
   .on('error', function(error) {
       console.error(error);
-  ***REMOVED***)
+  })
   .on('finish', function() {
       console.info("DONE", stamp());
-  ***REMOVED***)
+  })

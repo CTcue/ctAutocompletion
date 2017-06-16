@@ -85,7 +85,7 @@ def normalize(term):
     else:
         # Some terms contain their own abbreviation
         # i.e. AS - Ankylosing spondylitis
-        if re.match(r"[A-Z]{1,6***REMOVED*** - .*", term, flags=re.U):
+        if re.match(r"[A-Z]{1,6} - .*", term, flags=re.U):
             split = term.split(" - ", 1)
             term = split[1]
 

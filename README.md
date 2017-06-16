@@ -55,7 +55,7 @@ import requests
 
 url = "http://localhost:4080/expand-grouped"
 
-response = requests.request("POST", url, json={ "query": "C0202117" ***REMOVED***)
+response = requests.request("POST", url, json={ "query": "C0202117" })
 
 print(response.text)
 ```

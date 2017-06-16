@@ -4,10 +4,10 @@
 
     curl -X POST -d '{
         "query": [
-            { "cui": "C0026187" ***REMOVED***,
-            { "str": "rituximab" ***REMOVED***
+            { "cui": "C0026187" },
+            { "str": "rituximab" }
         ]
-***REMOVED***' "https://ctcue.com/umls/suggest"
+    }' "https://ctcue.com/umls/suggest"
 
 */
 
@@ -27,14 +27,14 @@ module.exports = function *() {
 
     if (body.length < 2 || !config.neo4j["is_active"]) {
         return this.body = [];
-***REMOVED***
+    }
 
-***REMOVED*** Parameter input:
-***REMOVED*** query: [CUI1, CUI2]
+    // Parameter input:
+    // query: [CUI1, CUI2]
     var params = {
         "A": getCUI(body[0]),
         "B": getCUI(body[1]),
-***REMOVED***;
+    };
 
     var result = [];
 
@@ -43,20 +43,20 @@ module.exports = function *() {
 
         if (item) {
             result.push(item)
-    ***REMOVED***
-***REMOVED***
+        }
+    }
 
     this.body = result;
-***REMOVED***;
+};
 
 
 function getCUI(param) {
     if (typeof param === "string") {
         return param;
-***REMOVED***
+    }
     else if (typeof param === "object") {
         return _.get(param, "cui");
-***REMOVED***
+    }
 
     return null;
-***REMOVED***
+}

@@ -6,41 +6,41 @@ var table = db.table('umls');
 
 module.exports = function *() {
 
-***REMOVED*** Find all terms/synonyms added more than once
+    // Find all terms/synonyms added more than once
     this.body =  yield function(callback) {
         table.aggregate([
             {
                 "$group" : {
                     "_id": {
                         "synonym": "$synonym.term"
-                ***REMOVED***,
+                    },
 
-                    "set" : { "$addToSet" : "$synonym.cui" ***REMOVED***,
+                    "set" : { "$addToSet" : "$synonym.cui" },
 
-                    "count": { "$sum" : 1 ***REMOVED***
-            ***REMOVED***
-        ***REMOVED***,
+                    "count": { "$sum" : 1 }
+                }
+            },
             {
                 "$match": {
-                    "_id": { "$ne" : null ***REMOVED*** ,
-                    "count": { "$gt": 1 ***REMOVED***
-            ***REMOVED***
-        ***REMOVED***
-        ], {***REMOVED***,
+                    "_id": { "$ne" : null } ,
+                    "count": { "$gt": 1 }
+                }
+            }
+        ], {},
         function(err, docs) {
             if (err) {
                 callback(false, []);
-        ***REMOVED***
-            ***REMOVED***
+            }
+            else {
                 callback(false, docs.map(function(item) {
-                    var tmp = {***REMOVED***;
+                    var tmp = {};
                         tmp["set"]     = item["set"]
                         tmp["synonym"] = item["_id"]["synonym"];
                         tmp["amount"]  = item["count"];
 
                     return tmp;
-            ***REMOVED***));
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
-***REMOVED***
+                }));
+            }
+        });
+    };
+}

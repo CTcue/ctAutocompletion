@@ -4,7 +4,7 @@
 
   curl -X POST -H "Content-Type: application/json" -d '{
       "query": "C1306459"
-  ***REMOVED***' "http://localhost:4080/expand"
+  }' "http://localhost:4080/expand"
 
 */
 
@@ -19,9 +19,9 @@ const elasticClient = new elastic.Client({
     {
       "host": 'localhost',
       "auth": config.elastic_shield
-***REMOVED***
+    }
   ]
-***REMOVED***);
+});
 
 
 
@@ -30,8 +30,8 @@ module.exports = function *() {
   var cui  = _.get(body, "query") || null;
 
   if (!cui) {
-      this.body = { "terms": [] ***REMOVED***
-  ***REMOVED***
+      this.body = { "terms": [] }
+  }
 
   if (_.isArray(cui)) {
       var result = yield function(callback) {
@@ -46,49 +46,49 @@ module.exports = function *() {
                   "query" : {
                       "terms" : {
                           "cui" : _.filter(cui)
-                  ***REMOVED***
-              ***REMOVED***
-          ***REMOVED***
-      ***REMOVED***,
+                      }
+                  }
+              }
+          },
           function(err, resp) {
               if (resp && !!resp.hits && resp.hits.total > 0) {
                   callback(false, resp.hits.hits);
-          ***REMOVED***
-              ***REMOVED***
+              }
+              else {
                   callback(err, []);
-          ***REMOVED***
-      ***REMOVED***);
-  ***REMOVED***;
+              }
+          });
+      };
 
       if (result && result.length > 0) {
-          var terms = {***REMOVED***;
+          var terms = {};
 
           result.forEach(function(s) {
               var key = s._source.cui;
 
-          ***REMOVED*** Filter long terms (hacky for now)
+              // Filter long terms (hacky for now)
               if (s._source.str.length > 30) {
                   return;
-          ***REMOVED***
+              }
 
               if (terms.hasOwnProperty(s._source.cui)) {
                   terms[key].push(s._source.str);
-          ***REMOVED***
-              ***REMOVED***
+              }
+              else {
                   terms[key] = [s._source.str]
-          ***REMOVED***
-      ***REMOVED***);
+              }
+          });
 
 
           for (var k in terms) {
               terms[k] = _.uniqBy(terms[k], string.compareFn);
-      ***REMOVED***
+          }
 
           return this.body = terms;
-  ***REMOVED***
+      }
 
-  ***REMOVED***
-  ***REMOVED***
+  }
+  else {
       var result = yield function(callback) {
           elasticClient.search({
               "index" : 'autocomplete',
@@ -101,29 +101,29 @@ module.exports = function *() {
                   "query" : {
                       "term" : {
                           "cui" : this.request.body.query
-                   ***REMOVED***
-               ***REMOVED***
-          ***REMOVED***
-      ***REMOVED***,
+                       }
+                   }
+              }
+          },
           function(err, resp) {
               if (resp && !!resp.hits && resp.hits.total > 0) {
                   callback(false, resp.hits.hits);
-          ***REMOVED***
-              ***REMOVED***
+              }
+              else {
                   callback(err, []);
-          ***REMOVED***
-      ***REMOVED***);
-  ***REMOVED***;
+              }
+          });
+      };
 
       if (result && result.length > 0) {
           var terms = result.map(s => s._source.str);
 
           return this.body = {
               "terms" : _.uniqBy(terms, string.compareFn),
-      ***REMOVED***;
-  ***REMOVED***
-  ***REMOVED***
+          };
+      }
+  }
 
 
-  this.body = { "terms": [] ***REMOVED***
-***REMOVED***;
+  this.body = { "terms": [] }
+};

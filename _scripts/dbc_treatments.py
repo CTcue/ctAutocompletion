@@ -54,7 +54,7 @@ if __name__ == '__main__':
                 "description"       : row["CONSUMENT_OMS"],
                 "description_latin" : row["LATIJN_OMS"].split(" | "),
                 "product_code"      : row["ZORGPRODUCT_CD"]
-        ***REMOVED***)
+            })
 
         except Exception as err:
             print err

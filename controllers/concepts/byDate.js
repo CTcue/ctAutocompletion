@@ -9,9 +9,9 @@ var _ = require("lodash");
 module.exports = function *() {
     if (! _.has(this.params, "year") || !_.has(this.params, "month")) {
         return this.body = [];
-***REMOVED***
+    }
 
-***REMOVED*** Damn date with zero indexes
+    // Damn date with zero indexes
     var start = new Date(this.params.year, this.params.month-1,  1);
     var end   = new Date(this.params.year, this.params.month-1, 31);
 
@@ -19,6 +19,6 @@ module.exports = function *() {
         {
             "$gte" : start,
             "$lt"  : end
-    ***REMOVED***
-***REMOVED***);
-***REMOVED***
+        }
+    });
+}

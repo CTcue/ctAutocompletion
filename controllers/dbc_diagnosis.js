@@ -9,9 +9,9 @@ const elasticClient = new elastic.Client({
     {
       "host": 'localhost',
       "auth": config.elastic_shield
-***REMOVED***
+    }
   ]
-***REMOVED***);
+});
 
 
 // Autocomplete specialism diagnosis (given specific code)
@@ -21,7 +21,7 @@ module.exports = function *() {
 
     if (! specialty_code || specialty_code.length < 2) {
         return this.body = [];
-***REMOVED***
+    }
 
     var result = yield function(callback) {
         elasticClient.search({
@@ -33,10 +33,10 @@ module.exports = function *() {
               "query" : {
                   "term" : {
                       "specialism" : specialty_code
-               ***REMOVED***
-           ***REMOVED***
-      ***REMOVED***
-    ***REMOVED***,
+                   }
+               }
+          }
+        },
         function(err, resp) {
             if (resp && !!resp.hits && resp.hits.total > 0) {
                 var hits = resp.hits.hits;
@@ -44,26 +44,26 @@ module.exports = function *() {
                     return {
                         "label"  : s["_source"]["label"],
                         "number" : s["_source"]["code"]
-                ***REMOVED***
-            ***REMOVED***);
+                    }
+                });
 
-            ***REMOVED*** Sort the DBC codes
+                // Sort the DBC codes
                 sources = _.sortBy(sources, "number");
                 sources = _.uniq(sources, function(s) {
                     if (!s || !s.hasOwnProperty("number")) {
                         return false;
-                ***REMOVED***
+                    }
 
                     return s["number"].replace(/^0+/, "");
-            ***REMOVED***);
+                });
 
                 callback(false, sources);
-        ***REMOVED***
-            ***REMOVED***
+            }
+            else {
                 callback(err, []);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
+            }
+        });
+    };
 
     this.body = result;
-***REMOVED***
+}

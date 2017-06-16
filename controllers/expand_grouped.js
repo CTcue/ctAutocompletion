@@ -4,7 +4,7 @@
 
   curl -X POST -H "Content-Type: application/json" -d '{
       "query": "C1306459"
-  ***REMOVED***' "http://localhost:4080/expand-grouped"
+  }' "http://localhost:4080/expand-grouped"
 
 */
 
@@ -19,7 +19,7 @@ const getCategory = require("../lib/category");
 const db = new neo4j.GraphDatabase({
     url: 'http://localhost:7474',
     auth: config.neo4j
-***REMOVED***);
+});
 
 
 const elastic = require('elasticsearch');
@@ -28,16 +28,16 @@ const elasticClient = new elastic.Client({
     {
       "host": 'localhost',
       "auth": config.elastic_shield
-***REMOVED***
+    }
   ]
-***REMOVED***);
+});
 
 
 
 const language_map = {
     "DUT" : "dutch",
     "ENG" : "english"
-***REMOVED***;
+};
 
 
 
@@ -54,123 +54,123 @@ module.exports = function *(next) {
         pref        = result[1];
         found_terms = result[2];
 
-    ***REMOVED*** Get unique terms per language
+        // Get unique terms per language
         found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => string.compareFn(s.str) );
-***REMOVED***
+    }
 
 
-***REMOVED*** Check for user contributions
-***REMOVED*** - If the current user added custom concepts/synonyms
-***REMOVED*** if (config.neo4j["is_active"]) {
-***REMOVED***     if (this.user) {
-***REMOVED***         var user_contributed = yield function(callback) {
-***REMOVED***             var cypherObj = {
-***REMOVED***                 "query": `MATCH
-***REMOVED***                             (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:LIKES]-(u:User { id: { _USER_ ***REMOVED***, env: { _ENV_ ***REMOVED*** ***REMOVED***)
-***REMOVED***                           RETURN
-***REMOVED***                             s.str as str, s.label as label`,
+    // Check for user contributions
+    // - If the current user added custom concepts/synonyms
+    // if (config.neo4j["is_active"]) {
+    //     if (this.user) {
+    //         var user_contributed = yield function(callback) {
+    //             var cypherObj = {
+    //                 "query": `MATCH
+    //                             (s:Synonym {cui: {_CUI_} })<-[r:LIKES]-(u:User { id: { _USER_ }, env: { _ENV_ } })
+    //                           RETURN
+    //                             s.str as str, s.label as label`,
 
-***REMOVED***                 "params": {
-***REMOVED***                     "_CUI_"  : body,
-***REMOVED***                     "_USER_" : this.user._id,
-***REMOVED***                     "_ENV_"  : this.user.env
-***REMOVED***             ***REMOVED***,
+    //                 "params": {
+    //                     "_CUI_"  : body,
+    //                     "_USER_" : this.user._id,
+    //                     "_ENV_"  : this.user.env
+    //                 },
 
-***REMOVED***                 "lean": true
-***REMOVED***         ***REMOVED***
-
-
-***REMOVED***             db.cypher(cypherObj, function(err, res) {
-***REMOVED***                 if (err) {
-***REMOVED***                     console.error(err);
-***REMOVED***                     callback(false, []);
-***REMOVED***             ***REMOVED***
-***REMOVED***                 ***REMOVED***
-***REMOVED***                     callback(false, res);
-***REMOVED***             ***REMOVED***
-***REMOVED***         ***REMOVED***);
-***REMOVED***     ***REMOVED***
-
-***REMOVED***     ***REMOVED*** Add user contributions
-***REMOVED***         if (user_contributed && user_contributed.length) {
-***REMOVED***             found_terms = found_terms.concat(user_contributed);
-***REMOVED***     ***REMOVED***
-***REMOVED*** ***REMOVED***
+    //                 "lean": true
+    //             }
 
 
-***REMOVED*** ***REMOVED*** Check if anyone (any user) has unchecked concepts/synonyms
-***REMOVED*** ***REMOVED*** - Need more than 1 "downvote"
-***REMOVED***     var uncheck = yield function(callback) {
-***REMOVED***         var cypherObj = {
-***REMOVED***             "query": `MATCH
-***REMOVED***                         (s:Synonym {cui: {_CUI_***REMOVED*** ***REMOVED***)<-[r:DISLIKES]-(u:User)
-***REMOVED***                       WITH
-***REMOVED***                         type(r) as rel, s, count(s) as amount
-***REMOVED***                       WHERE
-***REMOVED***                         amount > 1
-***REMOVED***                       RETURN
-***REMOVED***                         s.str as term, s.label as label, rel, amount`,
+    //             db.cypher(cypherObj, function(err, res) {
+    //                 if (err) {
+    //                     console.error(err);
+    //                     callback(false, []);
+    //                 }
+    //                 else {
+    //                     callback(false, res);
+    //                 }
+    //             });
+    //         }
 
-***REMOVED***             "params": {
-***REMOVED***               "_CUI_": body
-***REMOVED***         ***REMOVED***,
-
-***REMOVED***             "lean": true
-***REMOVED***     ***REMOVED***
-
-***REMOVED***         db.cypher(cypherObj, function(err, res) {
-***REMOVED***             if (err) {
-***REMOVED***                 console.info(err);
-***REMOVED***                 callback(false, []);
-***REMOVED***         ***REMOVED***
-***REMOVED***             ***REMOVED***
-***REMOVED***                 callback(false, res);
-***REMOVED***         ***REMOVED***
-***REMOVED***     ***REMOVED***);
-***REMOVED*** ***REMOVED***
-***REMOVED*** ***REMOVED***
+    //         // Add user contributions
+    //         if (user_contributed && user_contributed.length) {
+    //             found_terms = found_terms.concat(user_contributed);
+    //         }
+    //     }
 
 
+    //     // Check if anyone (any user) has unchecked concepts/synonyms
+    //     // - Need more than 1 "downvote"
+    //     var uncheck = yield function(callback) {
+    //         var cypherObj = {
+    //             "query": `MATCH
+    //                         (s:Synonym {cui: {_CUI_} })<-[r:DISLIKES]-(u:User)
+    //                       WITH
+    //                         type(r) as rel, s, count(s) as amount
+    //                       WHERE
+    //                         amount > 1
+    //                       RETURN
+    //                         s.str as term, s.label as label, rel, amount`,
 
-***REMOVED*** Group terms by label / language
-    var terms = {***REMOVED***;
+    //             "params": {
+    //               "_CUI_": body
+    //             },
+
+    //             "lean": true
+    //         }
+
+    //         db.cypher(cypherObj, function(err, res) {
+    //             if (err) {
+    //                 console.info(err);
+    //                 callback(false, []);
+    //             }
+    //             else {
+    //                 callback(false, res);
+    //             }
+    //         });
+    //     }
+    // }
+
+
+
+    // Group terms by label / language
+    var terms = {};
 
     for (var i=0; i < found_terms.length; i++) {
         var t = found_terms[i];
         var key = "custom";
 
-    ***REMOVED*** Skip two letter abbreviations
+        // Skip two letter abbreviations
         if (!t["str"] || t["str"].length < 3) {
             continue;
-    ***REMOVED***
+        }
 
         if (t.hasOwnProperty("label")) {
             key = t["label"].toLowerCase();
-    ***REMOVED***
+        }
         else if (t.hasOwnProperty("lang")) {
             key = language_map[t["lang"]] || "custom";
-    ***REMOVED***
+        }
 
 
         if (terms.hasOwnProperty(key)) {
             terms[key].push(t["str"]);
-    ***REMOVED***
-        ***REMOVED***
+        }
+        else {
             terms[key] = [ t["str"] ];
-    ***REMOVED***
-***REMOVED***
+        }
+    }
 
-***REMOVED*** - Remove empty key/values
-***REMOVED*** - Sort terms by their length
+    // - Remove empty key/values
+    // - Sort terms by their length
     for (var k in terms) {
         if (! terms[k].length) {
             delete terms[k];
-    ***REMOVED***
-        ***REMOVED***
+        }
+        else {
             var unique = _.uniqBy(terms[k], s => string.forComparison(s));
             terms[k]   = _.sortBy(unique, "length");
-    ***REMOVED***
-***REMOVED***
+        }
+    }
 
 
     this.body = {
@@ -178,10 +178,10 @@ module.exports = function *(next) {
       "pref"     : pref,
       "terms"    : terms,
       "uncheck"  : []
-***REMOVED***;
+    };
 
 
-***REMOVED*** For logging
+    // For logging
     this.pref_term = pref;
     yield next;
-***REMOVED***;
+};

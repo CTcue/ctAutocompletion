@@ -9,9 +9,9 @@ const elasticClient = new elastic.Client({
     {
       "host": 'localhost',
       "auth": config.elastic_shield
-***REMOVED***
+    }
   ]
-***REMOVED***);
+});
 
 
 module.exports = function *() {
@@ -19,25 +19,25 @@ module.exports = function *() {
 
     if (! term || term.length < 2) {
         return this.body = [];
-***REMOVED***
+    }
 
-***REMOVED*** Clean input term
-    var clean = _.deburr(term) ***REMOVED*** remove accents
-      .toLowerCase()           ***REMOVED*** lowercased
+    // Clean input term
+    var clean = _.deburr(term)     // remove accents
+      .toLowerCase()               // lowercased
       .replace(/[^a-z0-9\* ]/g, " ") // remove symbols
-      .replace(/\s+/g, " ")    ***REMOVED*** reduce spaces
+      .replace(/\s+/g, " ")        // reduce spaces
       .trim();
 
     var res_treatments = yield getTreatments(clean);
     var res_specialism = [];
 
-***REMOVED*** If hardly anything is found, check if person is (accidentaly) inserting a specialism
+    // If hardly anything is found, check if person is (accidentaly) inserting a specialism
     if (res_treatments.length < 5) {
         res_specialism = yield getSpecialism(clean);
-***REMOVED***
+    }
 
     this.body = [].concat(res_specialism, res_treatments);
-***REMOVED***
+}
 
 
 function getSpecialism(clean) {
@@ -49,7 +49,7 @@ function getSpecialism(clean) {
     return function(callback) {
         if (!letters.length) {
             callback(false, []);
-    ***REMOVED***
+        }
 
         elasticClient.search({
           "index" : 'dbc_zorgproduct',
@@ -65,8 +65,8 @@ function getSpecialism(clean) {
                           {
                               "prefix" : {
                                   "label": letters.split(" ")[0]
-                          ***REMOVED***
-                      ***REMOVED***
+                              }
+                          }
                       ],
 
                       "should": [
@@ -78,14 +78,14 @@ function getSpecialism(clean) {
                                   "fuzziness": 0,
                                   "enable_position_increments": false,
                                   "fields": ["label", "specialism"]
-                          ***REMOVED***
-                      ***REMOVED***
+                              }
+                          }
                       ]
-              ***REMOVED***
+                  }
 
-          ***REMOVED***
-      ***REMOVED***
-    ***REMOVED***,
+              }
+          }
+        },
         function(err, resp) {
             if (resp && !!resp.hits && resp.hits.total > 0) {
                 var hits = resp.hits.hits || [];
@@ -93,45 +93,45 @@ function getSpecialism(clean) {
                 var sources = hits.map(function(s) {
                     var base = {
                         "_type": s["_type"],
-                ***REMOVED***;
+                    };
 
                     return _.extend(base, s["_source"]);
-            ***REMOVED***);
+                });
 
                 callback(false, sources)
-        ***REMOVED***
-            ***REMOVED***
+            }
+            else {
                 callback(err, []);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
-***REMOVED***
+            }
+        });
+    };
+}
 
 
 function getTreatments(clean) {
-  ***REMOVED*** Skip digits in phrase query
+      // Skip digits in phrase query
       var phrase = clean.replace(/[0-9\*]/g, "").trim();
 
-  ***REMOVED*** Create 'keywords'
+      // Create 'keywords'
       var keywords = clean
           .replace(/\b(and|or|de|het|een)\b/g, " ")  // remove stop words
-          .replace(/\s+/g, " ")    ***REMOVED*** reduce spaces
+          .replace(/\s+/g, " ")        // reduce spaces
           .trim()
           .split(" ");
 
-  ***REMOVED*** Create 'term expansions'
+      // Create 'term expansions'
       var expanded = keywords.map(function(s) {
           if (_.includes(s, "*")) {
               return s;
-      ***REMOVED***
-          ***REMOVED***
+          }
+          else {
               return s + "*";
-      ***REMOVED***
-  ***REMOVED***).join(" ");
+          }
+      }).join(" ");
 
 
-  ***REMOVED*** Base query
-  ***REMOVED*** - Include phrase part for normal description to boost natural language
+      // Base query
+      // - Include phrase part for normal description to boost natural language
       var queryBody = {
         "query" : {
             "bool": {
@@ -141,8 +141,8 @@ function getTreatments(clean) {
                     {
                         "match_phrase_prefix" : {
                             "description": phrase
-                    ***REMOVED***
-                ***REMOVED***,
+                        }
+                    },
 
                     {
                         "query_string" : {
@@ -151,32 +151,32 @@ function getTreatments(clean) {
                             "default_operator": "AND",
                             "phrase_slop": 1,
                             "fields": ["description", "description_latin", "product_code"]
-                    ***REMOVED***
-                ***REMOVED***
+                        }
+                    }
                 ]
-        ***REMOVED***
-    ***REMOVED***
-***REMOVED***;
+            }
+        }
+    };
 
-***REMOVED*** If first word is part of code:
-***REMOVED*** - make sure we have the product_code part
+    // If first word is part of code:
+    // - make sure we have the product_code part
     if (/^[\d\*]+$/.test(keywords[0])) {
         queryBody.query.bool.must.push({
             "query_string" : {
                 "query": expanded.split(" ")[0],
                 "phrase_slop": 0,
                 "fields": [ "product_code" ]
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***
+            }
+        });
+    }
 
-***REMOVED*** For every long keyword, allow them to be fuzzy
+    // For every long keyword, allow them to be fuzzy
     for (var i=0; i < keywords.length; i++) {
         var t = keywords[i].replace(/[^a-z]/g, "").trim();
 
         if (!t.length || t.length < 8) {
             continue;
-    ***REMOVED***
+        }
 
         queryBody.query.bool.should.push({
             "fuzzy" : {
@@ -184,19 +184,19 @@ function getTreatments(clean) {
                     "value"         : keywords[i],
                     "prefix_length" : 3,
                     "max_expansions": 100
-            ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***
+                }
+            }
+        });
+    }
 
-***REMOVED*** Finally, build query and return results;
+    // Finally, build query and return results;
     return function(callback) {
         elasticClient.search({
           "index" : 'dbc_zorgproduct',
           "type"  : "treatments",
           "size"  : 15,
           "body" : queryBody,
-    ***REMOVED***,
+        },
         function(err, resp) {
             if (resp && !!resp.hits && resp.hits.total > 0) {
                 var hits = resp.hits.hits || [];
@@ -204,29 +204,29 @@ function getTreatments(clean) {
                 var sources = hits.map(function(s) {
                     var base = {
                         "_type": s["_type"],
-                ***REMOVED***;
+                    };
 
                     var short_description = _.get(s, "_source.description_latin") || null;
                     if (short_description) {
                         if (short_description.length < 3) {
                             s._source.short_description = short_description.join(" | ");
-                    ***REMOVED***
-                        ***REMOVED***
+                        }
+                        else {
                             s._source.short_description = short_description.slice(0, 3).join(" | ")
-                    ***REMOVED***
-                ***REMOVED***
-                    ***REMOVED***
+                        }
+                    }
+                    else {
                         s._source.short_description = "...";
-                ***REMOVED***
+                    }
 
                     return _.extend(base, s["_source"]);
-            ***REMOVED***);
+                });
 
                 callback(false, sources);
-        ***REMOVED***
-            ***REMOVED***
+            }
+            else {
                 callback(err, []);
-        ***REMOVED***
-    ***REMOVED***);
-***REMOVED***;
-***REMOVED***
+            }
+        });
+    };
+}

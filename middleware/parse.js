@@ -3,13 +3,13 @@ module.exports = function *(next) {
     var maxLength = 1024;
 
     if (this.req.method === 'POST') {
-        this.request.body = {***REMOVED***;
+        this.request.body = {};
 
         if (this.req.headers['content-length'] > maxLength) {
             this.status = 413;
             this.body   = "Request too large";
             return;
-    ***REMOVED***
+        }
 
         var req_body = yield function(callback) {
             var chunks = "";
@@ -19,38 +19,38 @@ module.exports = function *(next) {
 
                 if (chunks.length > maxLength) {
                     callback(false, false);
-            ***REMOVED***
-        ***REMOVED***);
+                }
+            });
 
             this.req.on('end', function() {
                 if (!chunks || chunks.length === 0) {
-                    callback(null, {***REMOVED***);
-            ***REMOVED***
+                    callback(null, {});
+                }
 
-            ***REMOVED***
+                try {
                     var parsed = JSON.parse(chunks);
                     callback(null, parsed);
-            ***REMOVED***
-            ***REMOVED***
+                }
+                catch (err) {
                     callback(false, false);
-            ***REMOVED***
-        ***REMOVED***);
-    ***REMOVED***
+                }
+            });
+        }
 
         if (!req_body) {
             this.status = 413;
             this.body   = "Request is too large or contains invalid JSON";
             return;
-    ***REMOVED***
+        }
 
         if (! req_body.hasOwnProperty("query")) {
             this.status = 400;
-            this.body = 'Please provide a valid request object: { "query": "Your search term" ***REMOVED***';
+            this.body = 'Please provide a valid request object: { "query": "Your search term" }';
             return;
-    ***REMOVED***
+        }
 
         this.request.body = req_body;
-***REMOVED***
+    }
 
     yield next;
-***REMOVED***
+}

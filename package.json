@@ -6,11 +6,11 @@
   "scripts": {
     "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
     "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
-  ***REMOVED***,
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:CTcue/ctAutocompletion.git"
-  ***REMOVED***,
+  },
   "keywords": [
     "umls",
     "autosuggest",
@@ -41,11 +41,11 @@
     "split2": "^2.1.0",
     "through2": "^2.0.1",
     "winston": "^2.3.0"
-  ***REMOVED***,
+  },
   "devDependencies": {
     "supertest": "*",
     "mocha": "*"
-  ***REMOVED***,
+  },
   "license": "Proprietary",
   "private": true
-***REMOVED***
+}

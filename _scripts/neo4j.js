@@ -10,9 +10,9 @@ function stamp() {
     return new Date().toISOString()
       .replace(/T/, ' ')
       .replace(/\..+/, '')
-***REMOVED***
+}
 
-var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, enc, callback) {
+var buildRecords = through2({ objectMode: true }, function(chunk, enc, callback) {
     var line = chunk.toString().trim();
 
     if (line && line.length) {
@@ -21,26 +21,26 @@ var buildRecords = through2({ objectMode: true ***REMOVED***, function(chunk, en
         var Right = {
             "label" : "Concept",
             "cui" : parts[0],
-    ***REMOVED***;
+        };
 
         var Left = {
             "label": "Concept",
             "cui" : parts[2],
-    ***REMOVED***
+        }
 
         var relation = {
             "relation" : parts[1],
             "start"    : Left,
             "end"      : Right,
-    ***REMOVED***
+        }
 
         this.push(Left);
         this.push(Right);
         this.push(relation);
-***REMOVED***
+    }
 
     callback();
-***REMOVED***);
+});
 
 
 var username = "neo4j";
@@ -51,12 +51,12 @@ if (argv.neo4j) {
 
     username = _auth[0];
     password = _auth[1];
-***REMOVED***
+}
 
 var stream = new Neo4jStream(username, password, {
     "index_key"     : "cui",
     "highWaterMark" : 10000
-***REMOVED***);
+});
 
 stream.index([
     ["Concept", "cui"]
@@ -70,7 +70,7 @@ process.stdin
 .pipe(stream)
 .on('error', function(error) {
     console.error(error);
-***REMOVED***)
+})
 .on('finish', function() {
     console.info("DONE", stamp());
-***REMOVED***)
+})
