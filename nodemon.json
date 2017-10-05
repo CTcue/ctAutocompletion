@@ -1,0 +1,9 @@
+{
+  "verbose": false,
+  "ignore": [".git", "test/*", "_scripts/*", "_mappings/*"],
+  "watch": [
+    "*.*",
+    "../config/*"
+  ],
+  "ext": "js"
+}

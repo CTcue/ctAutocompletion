@@ -1,10 +1,11 @@
 {
   "name": "ct-autocompletion",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
+    "start": "node app.js",
+    "dev": "node ./node_modules/nodemon/bin/nodemon.js app.js",
     "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
   },
   "repository": {
@@ -23,20 +24,21 @@
   "dependencies": {
     "cheerio": "^0.22.0",
     "co-monk": "1.0.0",
-    "elasticsearch": "11.0.1",
+    "elasticsearch": "13.3.1",
     "elasticsearch-writable-stream": "^2.0.0",
     "koa": "1.2.4",
     "koa-compress": "^1.0.9",
     "koa-cors": "0.0.16",
     "koa-router": "5.4.0",
-    "lodash": "^4.15.0",
+    "lodash": "^4.17.4",
     "minimist": "^1.2.0",
-    "moment": "^2.15.0",
-    "mongodb": "^2.2.10",
-    "monk": "3.1.2",
+    "moment": "^2.14.1",
+    "mongodb": "2.2.22",
+    "mongodb-core": "2.1.7",
+    "monk": "^3.1.4",
     "neo4j": "^2.0.0-RC2",
     "neo4j-batch-index-stream": "0.0.1",
-    "request": "^2.74.0",
+    "request": "^2.79.0",
     "request-json": "^0.6.1",
     "split2": "^2.1.0",
     "through2": "^2.0.1",
@@ -44,7 +46,79 @@
   },
   "devDependencies": {
     "supertest": "*",
-    "mocha": "*"
+    "mocha": "^3.2.0",
+    "nodemon": "^1.11.0",
+    "xo": "^0.17.1"
+  },
+  "xo": {
+    "space": 4,
+    "rules": {
+      "brace-style": [
+        "error",
+        "stroustrup"
+      ],
+      "quotes": [
+        "error",
+        "double",
+        {
+          "allowTemplateLiterals": true
+        }
+      ],
+      "quote-props": [
+        "error",
+        "consistent"
+      ],
+      "spaced-comment": [
+        "error",
+        "always",
+        {
+          "line": {
+            "exceptions": [
+              "-"
+            ]
+          }
+        }
+      ],
+      "comma-dangle": [
+        "error",
+        "only-multiline"
+      ],
+      "object-curly-spacing": 0,
+      "key-spacing": 0,
+      "linebreak-style": 0,
+      "no-multiple-empty-lines": 0,
+      "no-multi-spaces": 0,
+      "block-scoped-var": 0,
+      "dot-notation": 0,
+      "new-cap": 0,
+      "camelcase": 0,
+      "require-yield": 0,
+      "array-bracket-spacing": 0,
+      "space-in-parens": 0,
+      "space-infix-ops": 0,
+      "no-warning-comments": 0,
+      "space-before-function-paren": 0,
+      "unicorn/filename-case": "off",
+      "import/order": 0,
+      "import/newline-after-import": 0,
+      "generator-star-spacing": 0,
+      "space-unary-ops": 0,
+      "no-negated-condition": 0,
+      "padded-blocks": 0,
+      "no-useless-escape": 0,
+      "eol-last": 0,
+      "unicorn/no-new-buffer": "off",
+      "unicorn/custom-error-definition": "off",
+      "unicorn/no-array-instanceof": "off",
+      "unicorn/catch-error-name": "off",
+      "unicorn/no-process-exit": "off",
+      "unicorn/throw-new-error": "off",
+      "unicorn/number-literal-case": "off",
+      "unicorn/prefer-starts-ends-with": "off",
+      "unicorn/prefer-type-error": "off",
+      "unicorn/explicit-length-check": "off",
+      "unicorn/no-abusive-eslint-disable": "off"
+    }
   },
   "license": "Proprietary",
   "private": true

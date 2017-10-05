@@ -11,7 +11,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="ctAutocompletion database clearing script")
     parser.add_argument('--src', dest='src', help='Index/document source type (AUTOCOMPLETE | DBC)')
     parser.add_argument('--elastic', dest='elastic', default=None, help='Elasticsearch authentication (optional)')
-    parser.add_argument('--neo4j', dest='neo4j', help='Neo4j authentication (required)')
     args = parser.parse_args()
 
     try:
@@ -22,7 +21,7 @@ if __name__ == '__main__':
             _auth = ("", "")
 
     except Exception as err:
-        print "Please provide elasticsearch authentication\n\t--elastic 'username:secret-password'"
+        print("Please provide elasticsearch authentication argument: --elastic\n\tExample 'username:secret-password'")
         sys.exit(1)
 
 
@@ -30,15 +29,17 @@ if __name__ == '__main__':
 
     if args.src == "AUTOCOMPLETE":
         # Setup autocomplete index
-        print "CLEARING FOR AUTOCOMPLETE"
-        es.indices.delete(index="autocomplete", ignore=[400, 404])
-        es.indices.create(index="autocomplete", body=json.load(open("../_mappings/autocomplete.json")))
 
-    elif args.src == "DBC":
-        # Setup dbc index
-        print "CLEARING FOR DBC"
-        es.indices.delete(index="dbc_zorgproduct", ignore=[400, 404])
-        es.indices.create(index="dbc_zorgproduct", body=json.load(open("../_mappings/dbc.json")))
+        with open("../_mappings/mapping-5.x.json", "rb") as f:
+            es.indices.delete(index="autocomplete", ignore=[400, 404])
+            es.indices.create(index="autocomplete", body=json.load(f))
+            print("Created autocompletion index")
+
+    # elif args.src == "DBC":
+    #     # Setup dbc index
+    #     es.indices.delete(index="dbc_zorgproduct", ignore=[400, 404])
+    #     es.indices.create(index="dbc_zorgproduct", body=json.load(open("../_mappings/dbc.json")))
+    #     print("Created DBC index")
 
     else:
-        print "PLEASE PROVIDE A VALID: --type"
+        print("Please provide argument: --src\n\tExample --src AUTOCOMPLETE")

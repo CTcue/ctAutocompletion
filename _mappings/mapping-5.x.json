@@ -1,0 +1,150 @@
+{
+    "settings" : {
+        "number_of_shards"   : 1,
+        "number_of_replicas" : 0,
+        "index.refresh_interval": "60s",
+
+        "analysis": {
+            "char_filter": {
+                "ignore_chars": {
+                    "type": "mapping",
+                    "mappings": [
+                        "\u0091=>",
+                        "\u0092=>",
+                        "“=>",
+                        "”=>",
+                        "‘=>",
+                        "’=>",
+                        "`=>"
+                    ]
+                },
+
+                "ignore_quotes": {
+                    "type": "mapping",
+                    "mappings": [
+                        "\"=>",
+                        "'=>",
+                        "“=>",
+                        "”=>",
+                        "‘=>",
+                        "’=>",
+                        "`=>"
+                    ]
+                },
+
+                "replace_symbols": {
+                    "type": "mapping",
+                    "mappings": [
+                        "\\u00A0=> ",
+                        "\\u1680=> ",
+                        "\\u180E=> ",
+                        "\\u2000=> ",
+                        "\\u2001=> ",
+                        "\\u2002=> ",
+                        "\\u2003=> ",
+                        "\\u2004=> ",
+                        "\\u2005=> ",
+                        "\\u2006=> ",
+                        "\\u2007=> ",
+                        "\\u2008=> ",
+                        "\\u2009=> ",
+                        "\\u200A=> ",
+                        "\\u202F=> ",
+                        "\\u205F=> ",
+                        "\\u3000=> ",
+
+                        "\\u200B=>",
+                        "\\uFEFF=>"
+                    ]
+                },
+
+                "add_spaces": {
+                    "type": "pattern_replace",
+                    "pattern": "[\\.\\!\\?,:;|/\\_]",
+                    "replacement": " "
+                },
+
+                "needs_space_between_words": {
+                    "type": "pattern_replace",
+                    "pattern": "(\\w+)[-:](?=\\w)",
+                    "replacement": "$1 "
+                },
+
+                "skip_brackets": {
+                    "type": "pattern_replace",
+                    "pattern": "[\\(\\)\\[\\]{}@#$*<>]",
+                    "replacement": " "
+                }
+            },
+
+            "filter": {
+                "autocomplete_filter": {
+                    "type"     : "edge_ngram",
+                    "min_gram" : 1,
+                    "max_gram" : 20
+                }
+            },
+
+            "analyzer": {
+                "autocomplete": {
+                    "type":      "custom",
+                    "tokenizer": "standard",
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "autocomplete_filter"
+                    ],
+
+                    "char_filter": [
+                        "ignore_chars",
+                        "replace_symbols",
+                        "skip_brackets",
+                        "needs_space_between_words",
+                        "add_spaces"
+                    ]
+                }
+            }
+        }
+    },
+
+    "mappings" : {
+        "records": {
+            "_all" : {
+                "enabled" : false
+            },
+
+            "properties": {
+                "cui": {
+                     "type": "keyword"
+                },
+
+                "source": {
+                     "type": "keyword"
+                },
+
+                "lang": {
+                     "type": "keyword"
+                },
+
+                "pref": {
+                     "type": "keyword"
+                },
+
+                "str": {
+                    "type": "text",
+                    "analyzer": "autocomplete",
+
+                    "fields": {
+                        "exact" : {
+                            "type": "keyword"
+                        }
+                    }
+                },
+
+                "types": {
+                     "type": "keyword"
+                }
+            }
+        }
+    }
+}
