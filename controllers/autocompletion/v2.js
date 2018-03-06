@@ -250,7 +250,7 @@ function getResults (queryObj) {
                 "hits": result,
             });
         });
-    }
+    };
 }
 
 

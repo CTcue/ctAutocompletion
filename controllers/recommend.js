@@ -12,7 +12,7 @@ var mongoDb = require('../lib/database');
 var table   = mongoDb.table('umls');
 
 
-module.exports = function * recommend() {
+module.exports = function * () {
     var params = this.request.body.query;
 
 
@@ -21,7 +21,7 @@ module.exports = function * recommend() {
         var cypherObj = buildCypherObj(params.user, params.relation, params.synonym);
 
         if (cypherObj) {
-            var addedRelation = yield function(callback) {
+            yield function(callback) {
                 db.cypher(cypherObj, function(err, res) {
                     if (err) {
                         callback(false, false);
@@ -30,7 +30,7 @@ module.exports = function * recommend() {
                         callback(false, true);
                     }
                 });
-            }
+            };
         }
     }
 

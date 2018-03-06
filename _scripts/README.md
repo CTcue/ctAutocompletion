@@ -27,15 +27,34 @@ Copyright_Notice.txt
 README.txt
 ```
 
-* Extract the contents of `mmsys.zip` to obtain the UMLS .RRF files (they are like csv's)
-* Place all downloads into this directory. **Including mmsys.zip itself!** (so the hash can be verified)
-* Go into the directory and activate `run_linux.sh` or `run.bat`
-* Follow MetamorphoSys steps
-* On the final step where it asks for `.prop` file use the `props/level_0.prop` or `props/all.prop` for instant configuration.
-    * Level_0 contains far less terms
-* Click Done > start creation process
+* Steps to obtain the UMLS .RRF files (they are like csv's)
+    1. Extract the contents of `mmsys.zip` into `~/UMLS`
+    2. Now also move the `mmsis.zip` into `~/UMLS` directory (so the hash can be verified)
+    3. Go into the `~/UMLS` directory and run `./run_linux.sh` or `./run.bat`
+        - If it gives an error like cannot run `C:\Program`, then update the script to include the correct JAVA_HOME path
+    4. MetamorphoSys opens
+    5. From the header menu, under "File" choose "Validate Distribution"
+    6. In the application choose "Install UMLS"
+    7. Choose "Active Subset" (Include only active UMLS sources)
+    8. Then, pick the default options given
+    9. In the header menu of the configuration, choose "Done"
 
-> This will take quite some time
+* You can now get some coffee, it will take ~45 minutes.
+
+
+#### JAVA_HOME with quotes (Windows) working
+
+```
+REM Specify CLASSPATH
+set CLASSPATH=.;lib\jpf-boot.jar
+
+"%JAVA_HOME%\bin\java" -Dfile.encoding=UTF-8 ^
+ -Xms1000M -Xmx2000M  ^
+ -Dswing.defaultlaf=com.sun.java.swing.plaf.windows.WindowsLookAndFeel ^
+ -Dscript_type=.bat  ^
+ org.java.plugin.boot.Boot
+```
+
 
 
 #### Building
