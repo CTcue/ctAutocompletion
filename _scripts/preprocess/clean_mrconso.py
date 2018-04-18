@@ -34,9 +34,7 @@ def stamp():
 
 
 if __name__ == '__main__':
-
-
-    print "[%s]  Starting MRCONSO cleaning." % stamp()
+    print("[%s]  Starting MRCONSO cleaning." % stamp())
 
     consoPath = os.path.join(basepath, "..", "2015AA", "META", "MRCONSO.RRF")
 
@@ -74,7 +72,7 @@ if __name__ == '__main__':
 
                     writer.writerow([CUI, normalized, LAT, SAB, TS])
         except:
-            print "\n\tMRCONSO.rrf not found at %s." % consoPath
+            print("\n\tMRCONSO.rrf not found at %s." % consoPath)
             sys.exit(1)
 
-    print "[%s]  Done." % stamp()
+    print("[%s]  Done." % stamp())

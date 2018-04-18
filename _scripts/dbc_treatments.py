@@ -38,14 +38,14 @@ if __name__ == '__main__':
     elastic = Elasticsearch(http_auth=_auth)
 
 
-    print "[%s]  Starting upload." % stamp()
+    print("[%s]  Starting upload." % stamp())
 
     bulk = []
     counter = 1
 
     for row in read_rows(args.file, args.delimiter):
         try:
-            # VERSIE, DATUM_BESTAND, PEILDATUM, ZORGPRODUCT_CD, LATIJN_OMS, CONSUMENT_OMS, DECLARATIE_VERZEKERD_CD,DECLARATIE_ONVERZEKERD_CD
+            # VERSIE, DATUM_BESTAND, PEILDATUM, ZORGPRODUCT_CD, LATIJN_OMS, CONSUMENT_OMS, DECLARATIE_VERZEKERD_CD, DECLARATIE_ONVERZEKERD_CD
 
             bulk.append({
                 "_index": "dbc_zorgproduct",
@@ -57,8 +57,8 @@ if __name__ == '__main__':
             })
 
         except Exception as err:
-            print err
-            print "ERROR: The provided csv file has a different header / contents than expected."
+            print(err)
+            print("ERROR: The provided csv file has a different header / contents than expected.")
             break
 
         counter += 1
@@ -69,4 +69,4 @@ if __name__ == '__main__':
 
 
     helpers.bulk(elastic, bulk)
-    print "[%s]  Uploading complete." % stamp()
+    print("[%s]  Uploading complete." % stamp())

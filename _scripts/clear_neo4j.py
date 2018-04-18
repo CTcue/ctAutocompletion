@@ -25,5 +25,5 @@ if __name__ == '__main__':
         db.delete_all()
 
     except Exception as err:
-        print "Please provide Neo4j authentication\n\t--neo4j 'username:secret-password'"
+        print("Please provide Neo4j authentication\n\t--neo4j 'username:secret-password'")
         sys.exit(1)

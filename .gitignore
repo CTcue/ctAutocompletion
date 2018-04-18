@@ -19,3 +19,4 @@ pids
 npm-debug.log*
 node_modules
 uploads/
+package-lock.json

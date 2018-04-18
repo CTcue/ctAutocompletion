@@ -21,6 +21,7 @@ if (process.env.NODE_ENV === 'production') {
     }
     catch (err) {
         config.neo4j = {
+            "is_active": false,
             "username": "neo4j",
             "password": "password",
             "verification_token": "sample123",
@@ -47,6 +48,7 @@ else {
     // If need_tokens is true, you need to provide verification tokens similar to
     // production version of `config.neo4j = require(secretConfig + 'neo4j')`
     config.neo4j = {
+        "is_active": false,
         "username": "neo4j",
         "password": "test123",
     };
@@ -57,8 +59,6 @@ else {
 }
 
 
-// Assume neo4j is active
-config.neo4j["is_active"] = true;
 config.path = 'http://'+ config.host + ':' + config.port;
 config.elastic = "http://localhost:9200";
 

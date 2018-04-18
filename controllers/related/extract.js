@@ -2,7 +2,6 @@
 
 var config  = require('../../config/config.js');
 var cheerio = require('cheerio');
-// var tableparser = require('cheerio-tableparser');
 var request = require('request');
 
 

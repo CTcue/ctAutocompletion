@@ -122,7 +122,7 @@ def crawl_farma(url_pharma="https://www.farmacotherapeutischkompas.nl/bladeren-v
 
 
 if __name__ == '__main__':
-    print "[%s]  Begin crawl." % stamp()
+    print("[%s]  Begin crawl." % stamp())
 
     farma_dict = crawl_farma()
     concepts   = generate_concepts(farma_dict)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
             w.writerow([CUI, term, "DUT", "farma_compas", "Y", "T200"])
 
 
-    print "[%s]  Generating relations." % stamp()
+    print("[%s]  Generating relations." % stamp())
 
     # Output for neo4j
     lookup     = concepts_to_lookup(concepts)
@@ -150,5 +150,4 @@ if __name__ == '__main__':
         for (CUI1, rel, CUI2) in relations:
             w.writerow([CUI1, rel, CUI2])
 
-
-    print "[%s]  Done." % stamp()
+    print("[%s]  Done." % stamp())

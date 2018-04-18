@@ -22,7 +22,7 @@ if __name__ == '__main__':
             _auth = ("", "")
 
     except Exception as err:
-        print "Please provide elasticsearch authentication\n\t--elastic 'username:secret-password'"
+        print("Please provide elasticsearch authentication\n\t--elastic 'username:secret-password'")
         sys.exit(1)
 
 
@@ -30,15 +30,15 @@ if __name__ == '__main__':
 
     if args.src == "AUTOCOMPLETE":
         # Setup autocomplete index
-        print "CLEARING FOR AUTOCOMPLETE"
+        print("CLEARING FOR AUTOCOMPLETE")
         es.indices.delete(index="autocomplete", ignore=[400, 404])
         es.indices.create(index="autocomplete", body=json.load(open("../_mappings/autocomplete.json")))
 
     elif args.src == "DBC":
         # Setup dbc index
-        print "CLEARING FOR DBC"
+        print("CLEARING FOR DBC")
         es.indices.delete(index="dbc_zorgproduct", ignore=[400, 404])
         es.indices.create(index="dbc_zorgproduct", body=json.load(open("../_mappings/dbc.json")))
 
     else:
-        print "PLEASE PROVIDE A VALID: --type"
+        print("PLEASE PROVIDE A VALID: --type")

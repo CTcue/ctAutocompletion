@@ -164,7 +164,7 @@ class AggregatorJob(MRJob):
                     pref_term = list(unique)[0]
 
                 out = "\t".join([CUI, LAT, SAB, "|".join(combined_types), pref_term, "|".join(unique)])
-                print out.encode("utf-8")
+                print(out.encode("utf-8"))
 
 if __name__ == "__main__":
     AggregatorJob.run()

@@ -24,7 +24,7 @@ try:
             (CUI, LAT, SAB, CODE, PREF, TERMS) = line
             usedCUI[CUI].add(PREF)
 except:
-    print "Please run `python process_concepts.py` first to generate a list of used CUI's"
+    print("Please run `python process_concepts.py` first to generate a list of used CUI's")
 
 
 class AggregatorJob(MRJob):
@@ -102,7 +102,7 @@ class AggregatorJob(MRJob):
 
         for rel, (CUI1, CUI2) in relations.iteritems():
             out = "\t".join([CUI1, rel, CUI2])
-            print out.encode("utf-8")
+            print(out.encode("utf-8"))
 
 
 if __name__ == "__main__":
