@@ -29,11 +29,15 @@ README.txt
 
 * Extract the contents of `mmsys.zip` to obtain the UMLS .RRF files (they are like csv's)
 * Place all downloads into this directory. **Including mmsys.zip itself!** (so the hash can be verified)
-* Go into the directory and activate `run_linux.sh` or `run.bat`
+* Go into the directory and activate `run_linux.sh` or `run.bat` or `run64.bat`
 * Follow MetamorphoSys steps
-* On the final step where it asks for `.prop` file use the `props/level_0.prop` or `props/all.prop` for instant configuration.
-    * Level_0 contains far less terms
-* Click Done > start creation process
+   * pick a destination and check the UMLS knwledge sources
+   * It will ask for a config file. select new configuration   
+   * choose the active subset configuration (Note: Level_0 contains far less terms)
+   * A window with input options/output options/source list/ precedens/suppressibility pops up
+   * You can select non englist/dutch sources in the Source list tab to exclude them
+   * asks for `.prop` file use the `props/level_0.prop` or `props/all.prop` for instant configuration. 
+* Click Done > start subset
 
 > This will take quite some time
 
