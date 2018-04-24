@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from elasticsearch import Elasticsearch, helpers
-import unicodecsv as csv
+
+import csv
 import argparse
 import time
 import json
@@ -11,7 +12,7 @@ import os
 
 def read_rows(filename, delimiter=";"):
     with open(filename, "rb") as f:
-        datareader = csv.reader(f, encoding="utf-8", delimiter=str(delimiter))
+        datareader = csv.reader(f, delimiter=str(delimiter))
         header = next(datareader)
 
         for line in datareader:

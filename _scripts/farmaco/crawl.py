@@ -3,7 +3,7 @@
 import urllib2
 import requests
 from bs4 import BeautifulSoup
-import unicodecsv as csv
+import csv
 import hashlib
 import json
 import time

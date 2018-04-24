@@ -3,7 +3,7 @@
 from mrjob.job import MRJob
 import tempfile
 from collections import defaultdict
-from normalize import normalize
+from normalize_fn import normalize
 from semantic import get_group
 from body_parts import is_bodypart
 from skip_term import skip_term
@@ -42,16 +42,18 @@ class AggregatorJob(MRJob):
     """
 
     def mapper(self, _, line):
-        split = line.decode("utf-8").split("|")
+        split = line.split("|")
 
         # MRCONSO Header
         if len(split) == 19:
             (CUI, LAT, TS, LUI, STT, SUI, ISPREF, AUI, SAUI, SCUI, SDUI, SAB, TTY, CODE, STR, SRL, SUPPRESS, CVF, _) = split
 
+            norm = normalize(STR)
+
             if TS == "P":
-                yield CUI, ["PREF", LAT, normalized, SAB]
+                yield CUI, ["PREF", LAT, norm, SAB]
             else:
-                yield CUI, ["TERM", LAT, normalized, SAB]
+                yield CUI, ["TERM", LAT, norm, SAB]
 
         # Additional Terms header
         elif len(split) == 4:
@@ -139,9 +141,9 @@ class AggregatorJob(MRJob):
         if any(x for x in category if x in ["LIVB", "CONC", "ACTI", "GEOG", "OBJC", "OCCU", "DEVI", "ORGA"]):
             return
 
-        for LAT, SAB_terms in terms.iteritems():
-            for SAB, v in SAB_terms.iteritems():
-                # If ANATOMY category -> skip checking for anatomoy terms
+        for LAT, SAB_terms in terms.items():
+            for SAB, v in SAB_terms.items():
+                # If ANATOMY category -> skip checking for anatomy terms
                 if not any(x for x in category if x == "ANAT"):
                     tmp_terms = set()
                     for t in v:
@@ -165,6 +167,7 @@ class AggregatorJob(MRJob):
 
                 out = "\t".join([CUI, LAT, SAB, "|".join(combined_types), pref_term, "|".join(unique)])
                 print(out.encode("utf-8"))
+
 
 if __name__ == "__main__":
     AggregatorJob.run()
