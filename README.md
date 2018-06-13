@@ -11,7 +11,6 @@ Find relevant UMLS terms based on user input. The autocompletion algorithm prior
 
 * Make sure you have NodeJS (>5.x) and Elasticsearch (>2.x) installed
   * Check if elasticsearch running
-  * Optionally you can install Neo4j (**NOTE** Without it, the app notifies you Neo4j is off, but that is ok if you only need it for `term_lookup`)
 
 * In this directory install the dependencies with:
     * Run `npm install`
@@ -41,9 +40,6 @@ node app.js
 * Make sure elasticsearch is running:
     * Check your directory `~/elasticsearch-[version]/bin`
     * Start the service with `./elasticsearch`  (or click the .bat)
-
-* Neo4j is only required to obtain sibling/child/brand information about concepts
-
 
 
 ## Is it working?

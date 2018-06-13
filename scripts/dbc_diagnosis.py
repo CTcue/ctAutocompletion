@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from elasticsearch import Elasticsearch, helpers
-import unicodecsv as csv
+import csv
 import argparse
 import time
 import json
@@ -11,7 +11,7 @@ import os
 
 def read_rows(filename, delimiter=";"):
     with open(filename, "rb") as f:
-        datareader = csv.reader(f, encoding="utf-8", delimiter=str(delimiter))
+        datareader = csv.reader(f, delimiter=str(delimiter))
         header = next(datareader)
 
         for line in datareader:
@@ -38,8 +38,7 @@ if __name__ == '__main__':
 
     elastic = Elasticsearch(http_auth=_auth)
 
-
-    print "[%s]  Starting upload." % stamp()
+    print("[%s]  Starting upload." % stamp())
 
     bulk = []
     counter = 1
@@ -99,8 +98,8 @@ if __name__ == '__main__':
             })
 
         except Exception as err:
-            print err
-            print "ERROR: The provided csv file has a different header / contents than expected."
+            print(err)
+            print("ERROR: The provided csv file has a different header / contents than expected.")
             break
 
         counter += 1
@@ -110,4 +109,4 @@ if __name__ == '__main__':
 
 
     helpers.bulk(elastic, bulk)
-    print "[%s]  Uploading complete." % stamp()
+    print("[%s]  Uploading complete." % stamp())

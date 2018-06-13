@@ -1,15 +1,7 @@
-"use strict";
 
 const config  = require("../../config/config.js");
 
 const _ = require("lodash");
-
-// const neo4j = require("neo4j");
-// const db = new neo4j.GraphDatabase({
-//     "url": "http://localhost:7474",
-//     "auth": config.neo4j,
-// });
-
 
 const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
@@ -109,16 +101,8 @@ module.exports = function *() {
     //     misspelledMatches = yield spellingMatches(query);
     // }
 
-
-    // // Find user added contributions (if needed)
-    // var likes = [];
-
-    // if (config.neo4j["is_active"] && this.user) {
-    //     likes = yield findUserLikes(query, this.user._id, this.user.env);
-    // }
-
     // // Combine suggestions
-    // var allMatches = [].concat(exactHits, likes, closeMatches.hits, misspelledMatches.hits);
+    // var allMatches = [].concat(exactHits, closeMatches.hits, misspelledMatches.hits);
 
     // // Also check for common appendixes (STADIUM, STAGE, etc.)
     // var just_str = allMatches.map(s => s["str"].toLowerCase());

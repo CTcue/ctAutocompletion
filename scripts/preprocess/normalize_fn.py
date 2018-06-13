@@ -89,7 +89,7 @@ def normalize(term):
             split = term.split(" - ", 1)
             term = split[1]
 
-    # Skip things with digits, probably a scienctific notation
+    # Skip things with digits, probably a scientific notation
     if contains_digits(term):
         return term.strip()
 

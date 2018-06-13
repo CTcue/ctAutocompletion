@@ -1,4 +1,3 @@
-"use strict";
 
 /** Usage
 
@@ -13,6 +12,7 @@ const config  = require('../config/config.js');
 const string = require("../lib/string");
 
 const _ = require("lodash");
+
 const elastic = require('elasticsearch');
 const elasticClient = new elastic.Client({
   "host": [
@@ -24,8 +24,7 @@ const elasticClient = new elastic.Client({
 });
 
 
-
-module.exports = function *() {
+module.exports = function* () {
   var body = this.request.body;
   var cui  = _.get(body, "query") || null;
 
@@ -66,7 +65,7 @@ module.exports = function *() {
           result.forEach(function(s) {
               var key = s._source.cui;
 
-              // Filter long terms (hacky for now)
+              // Filter long terms
               if (s._source.str.length > 30) {
                   return;
               }

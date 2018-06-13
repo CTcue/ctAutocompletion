@@ -1,6 +1,6 @@
 {
   "verbose": false,
-  "ignore": [".git", "test/*", "_scripts/*", "_mappings/*"],
+  "ignore": [".git", "test/*", "scripts/*", "config/elasticsearch/*"],
   "watch": [
     "*.*",
     "../config/*"

@@ -1,16 +1,12 @@
 Scripts
 =======
 
-Generate, process and UMLS concepts into Elasticsearch.
+Generate, process and add UMLS concepts into Elasticsearch.
 
 
-## Building from scratch
+#### Obtaining UMLS sources
 
 If you don't have a copy of the `output` directory, you can generate the `processed` files yourself too!
-
-
-
-#### Downloading UMLS sources
 
 * Login and get accepted for an NLM account
 * Download the UMLS Full Release Files [download link](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html)
@@ -27,22 +23,32 @@ Copyright_Notice.txt
 README.txt
 ```
 
+
 * Steps to obtain the UMLS .RRF files (they are like csv's)
     1. Extract the contents of `mmsys.zip` into `~/UMLS`
-    2. Now also move the `mmsis.zip` into `~/UMLS` directory (so the hash can be verified)
-    3. Go into the `~/UMLS` directory and run `./run_linux.sh` or `./run.bat`
-        - If it gives an error like cannot run `C:\Program`, then update the script to include the correct JAVA_HOME path
-    4. MetamorphoSys opens
-    5. From the header menu, under "File" choose "Validate Distribution"
-    6. In the application choose "Install UMLS"
-    7. Choose "Active Subset" (Include only active UMLS sources)
-    8. Then, pick the default options given
-    9. In the header menu of the configuration, choose "Done"
+    2. Now also move the `mmsis.zip` into `~/UMLS` directory (so the checksum can be verified)
 
-* You can now get some coffee, it will take ~45 minutes.
+    3. Go into the `~/UMLS` directory
+        * Then you can activate `run_linux.sh` or `run.bat` or `run64.bat`
+        * If it gives an error like cannot run `C:\Program`, then update the script to include the correct `JAVA_HOME` path
+        * An example script that worked on Windows can be found below
+
+    4. MetamorphoSys opens.
+        * From the header menu, under "File" choose "Validate Distribution" (this validates the checksum)
+        * In the application choose "Install UMLS"
+
+    5. Follow these MetamorphoSys steps:
+        * Pick a destination and check the UMLS knowledge sources
+        * It will ask for a config file. So you have to select "new configuration"
+            * Choose the active subset configuration (Note: Level_0 contains far less terms)
+            * A window with input options, output options, a source list, precedence and suppressibility pops up
+            * You can select non english/dutch sources in the "Source" list to exclude these
+        * It now asks for a `.prop` file. Use the `props/level_0.prop` or `props/all.prop` for an instant configuration.
+
+* In the header menu of the configuration, choose "Done" > "Start subset"
 
 
-#### JAVA_HOME with quotes (Windows) working
+#### JAVA_HOME with quotes (Windows)
 
 ```
 REM Specify CLASSPATH
@@ -54,7 +60,6 @@ set CLASSPATH=.;lib\jpf-boot.jar
  -Dscript_type=.bat  ^
  org.java.plugin.boot.Boot
 ```
-
 
 
 #### Building
@@ -79,5 +84,4 @@ set CLASSPATH=.;lib\jpf-boot.jar
 CUI      | Name       | Language | Source       | PREF? | STY  |
 ---------|------------|----------|--------------|-------|------|
 C0054836 | Carvedilol | DUT      | farma_compas | Y     |T200  |
-
 ```

@@ -1,11 +1,8 @@
-"use strict";
 
-var db    = require('../../lib/database');
-var table = db.table('umls');
-
+const db    = require("../../lib/database");
+const table = db.table("umls");
 
 module.exports = function *() {
-
     // Find all terms/synonyms added more than once
     this.body =  yield function(callback) {
         table.aggregate([
@@ -34,9 +31,10 @@ module.exports = function *() {
             else {
                 callback(false, docs.map(function(item) {
                     var tmp = {};
-                        tmp["set"]     = item["set"]
-                        tmp["synonym"] = item["_id"]["synonym"];
-                        tmp["amount"]  = item["count"];
+
+                    tmp["set"]     = item["set"]
+                    tmp["synonym"] = item["_id"]["synonym"];
+                    tmp["amount"]  = item["count"];
 
                     return tmp;
                 }));

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import unicodecsv as csv
+import csv
 import os
 import re
 
@@ -8,7 +8,7 @@ body_parts = set()
 basepath = os.path.dirname(__file__)
 
 with open(os.path.join(basepath, "lookup_data", "anatomic_data.txt")) as t:
-    datareader = csv.reader(t, encoding="utf-8", delimiter=str("\t"))
+    datareader = csv.reader(t, delimiter=str("\t"))
     for line in datareader:
         (CUI, LAT, PREF, CODE, TERMS) = line
 
