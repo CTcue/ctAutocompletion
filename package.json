@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node ./node_modules/nodemon/bin/nodemon.js app.js",
-    "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
+    "test": "set PORT=4088 && mocha -R spec --recursive ./test"
   },
   "repository": {
     "type": "git",
@@ -18,29 +18,28 @@
     "autocomplete"
   ],
   "dependencies": {
-    "cheerio": "0.22.0",
+    "@koa/cors": "2",
     "co-monk": "1.0.0",
     "elasticsearch": "15.0.0",
-    "elasticsearch-writable-stream": "2.0.0",
-    "koa": "2.5.0",
+    "elasticsearch-writable-stream": "2.0.1",
+    "koa": "2.5.1",
+    "koa-body": "4.0.3",
     "koa-cors": "0.0.16",
-    "koa-router": "5.4.0",
+    "koa-logger": "3.2.0",
+    "koa-router": "7.4.0",
     "lodash": "4.17.10",
     "minimist": "1.2.0",
     "moment": "2.22.2",
-    "mongodb": "2.2.22",
-    "mongodb-core": "2.1.7",
-    "monk": "3.1.4",
-    "request": "2.87.0",
-    "request-json": "0.6.3",
-    "split2": "^2.1.0",
-    "through2": "^2.0.1",
-    "winston": "^2.3.0"
+    "mongodb": "3.1.0-beta4",
+    "mongodb-core": "3.1.0-beta4",
+    "monk": "6.0.6"
   },
   "devDependencies": {
-    "supertest": "3.0.0",
+    "split2": "2.1.0",
+    "through2": "2.0.1",
     "mocha": "5.2.0",
-    "nodemon": "1.17.5"
+    "nodemon": "1.17.5",
+    "supertest": "3.1.0"
   },
   "license": "Proprietary",
   "private": true

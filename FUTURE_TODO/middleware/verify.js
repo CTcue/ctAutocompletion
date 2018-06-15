@@ -6,11 +6,7 @@ var _ = require("lodash");
 module.exports = function *(next) {
     var headers = this.req.headers;
 
-
-    if (config.api_token === "Not-a-real-token") {
-        yield next;
-    }
-    else if (_.get(headers, "x-token") === config.api_token || _.get(headers, "x-token") === "Banananana-ram mystic fleet 3!sixtyfivethousand world") {
+    if (_.get(headers, "x-token") === config.api_token) {
         yield next;
     }
     else {
@@ -18,5 +14,4 @@ module.exports = function *(next) {
         this.response.message = "Please provide the correct Authorization header";
         return;
     }
-
 };
