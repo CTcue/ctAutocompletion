@@ -1,5 +1,5 @@
 
-const app = require("../app");
+const app = require("../../src/app");
 const server = app.listen();
 const request = require("supertest").agent(server);
 
@@ -9,7 +9,7 @@ describe("Middlware tests", function() {
         server.close();
     });
 
-    describe("Body parser", function() {
+    describe.only("Body parser", function() {
         describe("Body parser accepts JSON", function() {
             it("should 200", function(done) {
                 request
@@ -40,6 +40,7 @@ describe("Middlware tests", function() {
             });
         });
 
+        // [FUTURE TODO]
         // describe("Can parse `x-user` header if available", function() {
         //     it("should 200", function(done) {
         //         request

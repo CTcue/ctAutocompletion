@@ -12,6 +12,7 @@ If you don't have a copy of the `output` directory, you can generate the `proces
 * Download the UMLS Full Release Files [download link](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html)
 * It contains the following, but the actual contents are in the `mmsys.zip` folder.
 
+
 ```
 2015AA.CHK
 2015AA.MD5

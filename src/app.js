@@ -1,13 +1,10 @@
 
-const version = require("./package").version;
-const config = require("./config/config");
+const version = require("../package.json").version;
+const config = require("../config/config");
 const PORT = process.env.PORT || config.port;
 
 
-// // --------------
-// // API
-
-// const autocomplete_es5 = require("./controllers/autocompletion/v3.js");
+const autocomplete = require("./controllers/autocomplete.js");
 // const expandGrouped    = require("./controllers/expand_grouped.js");
 // const expandByString   = require("./controllers/expand_by_string.js");
 
@@ -32,10 +29,6 @@ const PORT = process.env.PORT || config.port;
 // router["get"]("/umls/:year/:month", verify, customConceptsByDate);
 
 
-
-
-
-
 const logger = require('koa-logger');
 const router = require('koa-router')();
 const koaBody = require('koa-body');
@@ -48,15 +41,6 @@ const app = module.exports = new Koa();
 async function health(ctx) {
     ctx.body = { "version": version };
 };
-
-async function autocomplete(ctx) {
-    const body = ctx.request.body;
-
-    console.log(body, ctx.user);
-
-    ctx.body = { "response": body };
-};
-
 
 
 app.use(cors());

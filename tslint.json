@@ -1,0 +1,73 @@
+{
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {
+    "indent": [
+      true,
+      "spaces",
+      4
+    ],
+    "one-line": false,
+    "no-string-literal": false,
+    "prefer-conditional-expression": false,
+    "switch-default": true,
+    "no-debugger": true,
+    "prefer-object-spread": true,
+    "no-console": [
+      true,
+      "log"
+    ],
+    "max-line-length": [
+      true,
+      180
+    ],
+    "no-var-keyword": true,
+    "quotemark": [true, "double", "avoid-escape"],
+    "comment-format": [true, "check-space"],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "never",
+        "singleline": "never"
+      }
+    ],
+    "object-literal-sort-keys": false,
+    "linebreak-style": [
+      false,
+      ""
+    ],
+    "space-before-function-paren": [
+      true,
+      {
+        "anonymous": "always",
+        "named": "never"
+      }
+    ],
+    "no-consecutive-blank-lines": [true, 2]
+  },
+  "rules": {
+    "ordered-imports": false,
+    "import-spacing": false,
+    "indent": [
+      true,
+      "spaces",
+      4
+    ],
+    "max-line-length": [
+      true,
+      180
+    ],
+    "no-console": [
+      true,
+      "log"
+    ],
+    "no-empty": false,
+    "no-inferrable-types": [
+      true
+    ],
+    "no-unused-variable": true,
+    "object-literal-sort-keys": false,
+    "member-access": false
+  }
+}

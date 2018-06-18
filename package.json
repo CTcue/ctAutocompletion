@@ -4,9 +4,11 @@
   "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js app.js",
-    "test": "set PORT=4088 && mocha -R spec --recursive ./test"
+    "start": "node src/app.js",
+    "dev": "node ./node_modules/nodemon/bin/nodemon.js src/app.js",
+    "e2e": "cross-env NODE_ENV=e2e && jest --config=jest-e2e.json --runInBand",
+    "test": "set PORT=4088 && mocha -R spec --recursive ./test/unittest",
+    "test:all": "yarn test && yarn run e2e"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,11 @@
     "autosuggest",
     "autocomplete"
   ],
+  "husky": {
+    "hooks": {
+        "pre-commit": "yarn run test:all"
+    }
+  },
   "dependencies": {
     "@koa/cors": "2",
     "co-monk": "1.0.0",
@@ -29,17 +36,18 @@
     "koa-router": "7.4.0",
     "lodash": "4.17.10",
     "minimist": "1.2.0",
-    "moment": "2.22.2",
-    "mongodb": "3.1.0-beta4",
-    "mongodb-core": "3.1.0-beta4",
-    "monk": "6.0.6"
+    "moment": "2.22.2"
   },
   "devDependencies": {
-    "split2": "2.1.0",
-    "through2": "2.0.1",
+    "husky": "0.15.0-rc.9",
+    "cross-env": "5.2.0",
+    "jest": "23.1.0",
     "mocha": "5.2.0",
     "nodemon": "1.17.5",
-    "supertest": "3.1.0"
+    "split2": "2.2.0",
+    "supertest": "3.1.0",
+    "through2": "2.0.3",
+    "tslint": "5.10.0"
   },
   "license": "Proprietary",
   "private": true

@@ -3,26 +3,39 @@ const config  = require("../../config/config.js");
 
 const _ = require("lodash");
 
-const elastic = require("elasticsearch");
-const elasticClient = new elastic.Client({
-    "apiVersion": config.elasticsearch.version || "2.4",
-    "host": [
-        {
-            "host": config.elasticsearch.host || "localhost",
-            "auth": config.elasticsearch.auth || ""
-        }
-    ],
-    // Only wait for 5 seconds
-    "requestTimeout": 5000
-});
+const elasticHelper = require("../lib/elasticHelper");
+const elasticClient = elasticHelper.client();
 
 
 const FIELDS = ["cui", "str", "pref"];
 
 
-module.exports = function *() {
-    var body    = this.request.body;
-    var query   = _.deburr(body.query);
+module.exports = async function autocomplete(ctx) {
+    const start = Date.now();
+    const body = ctx.request.body;
+    const query = String(body.query).trim();
+
+    // Limit to N characters input;
+    const clean = _.deburr(query).slice(0, 42);
+
+    let hits = [];
+
+    if (!query || query === "") {
+        ctx.body = {
+            "took": Math.ceil(Date.now() - start),
+            "hits": hits
+        };
+
+        return;
+    }
+
+    console.log(body, ctx.user);
+
+    ctx.body = {
+        "took": Math.ceil(Date.now() - start),
+        "hits": hits
+    };
+};
 
 
     // var queryObj = {};
@@ -78,10 +91,10 @@ module.exports = function *() {
     //         // }
     //     });
 
-    var respo = yield autocompletion(query);
+    // var respo = yield autocompletion(query);
 
 
-    this.body = respo;
+    // this.body = respo;
 
     // // Search for suggestions in Elasticsearch
     // var exactMatches = yield findExact(query);
@@ -113,13 +126,13 @@ module.exports = function *() {
     //     "took" : (exactMatches.took || 10) + (closeMatches.took || 20),
     //     "hits" : reducePayload(unique)
     // };
-};
 
 
 function autocompletion(query="") {
     var queryObj = {};
 
     queryObj["index"] = "autocomplete";
+
     queryObj["body"] =  {
         "_source": FIELDS,
         "size": 15,
@@ -127,7 +140,7 @@ function autocompletion(query="") {
             "match" : {
                 "str" : {
                     "query" : query.toLowerCase().trim(),
-                    // "fuzziness": "AUTO",
+
                     "operator" : "AND",
                     "prefix_length"   : 2,
                     "max_expansions"  : 10
