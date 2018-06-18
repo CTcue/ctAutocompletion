@@ -76,7 +76,7 @@ set CLASSPATH=.;lib\jpf-boot.jar
 
 * The `./output` directory contains:
     * `./output/concepts.txt` is a copy of MRCONSO + additional sources in combination with a type from MRSTY.
-    * `./output/relations.txt` contains (useful) relations extracted from MRREL.
+    * `./output/relations.txt` contains (useful) relations extracted from MRREL (OPTIONAL as we don't use Neo4j anymore).
 
 * `./additional_terms` contains extracted concepts from farmacompas (mapped_farmaco.csv).
 * You can also put your own .csv file with concepts in there. It uses the following format:
