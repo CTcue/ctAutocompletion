@@ -9,7 +9,7 @@ Find relevant UMLS terms based on user input. The autocompletion algorithm prior
 
 #### Installation
 
-* Make sure you have NodeJS (>5.x) and Elasticsearch (>2.x) installed
+* Make sure you have NodeJS (>10.x) and Elasticsearch (>6.x) installed
   * Check if elasticsearch running
 
 * In this directory install the dependencies with:

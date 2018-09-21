@@ -1,6 +1,7 @@
 
 const _ = require("lodash");
 const config = require("../../config/config.js");
+const ES_MAPPING = require("../../config/elasticsearch/autocomplete.json");
 
 const defaultConfig = parseElasticConfig(config.elasticsearch);
 const configInUse = _.clone(defaultConfig);
@@ -72,4 +73,30 @@ exports.client = function (customConfig = {}) {
     }
 
     return elasticClient;
+};
+
+
+exports.createIndexMapping = async function (indexName = "autocomplete") {
+    await exports.deleteMapping();
+
+    try {
+        const indexSettings = {
+            index: indexName,
+            body: ES_MAPPING
+        };
+
+        return await elasticClient.indices.create(indexSettings);
+    } catch (err) {
+        // tslint:disable-next-line:no-console
+        console.error("[Could not create ES index]", err);
+    }
+};
+
+
+exports.deleteMapping = async function(indexName = "autocomplete") {
+    try {
+        return await elasticClient.indices.delete({ index: indexName });
+    } catch (err) {}
+
+    return null;
 };

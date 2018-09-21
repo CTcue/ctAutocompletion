@@ -1,23 +1,27 @@
 #!/usr/bin/env bash
 
-mkdir output
-mkdir additional_terms
+# Get (cross OS) path to the script dir
+SCRIPTDIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+mkdir "$SCRIPTDIR/output"
+mkdir "$SCRIPTDIR/additional_terms"
 
 set -e
 
-# # Clear elasticsearch
-# python clear_elasticsearch.py --src AUTOCOMPLETE $*
+
+# Setup elasticsearch index
+(cd $SCRIPTDIR && node mapping.js)
 
 # Extract normalized concept list from MRCONSO.RRF
 # python preprocess/clean_mrconso.py
 
 # Build list of UMLS concepts + Type
-python preprocess/process_concepts.py ./cleaned_terms/CLEAN_MRCONSO.RRF ./2015AA/META/MRSTY.RRF > ./output/concepts.txt
+# python preprocess/process_concepts.py ./cleaned_terms/CLEAN_MRCONSO.RRF ./2015AA/META/MRSTY.RRF > ./output/concepts.txt
 
 # python preprocess/process_concepts.py ./cleaned_terms/testje.txt ./2015AA/META/MRSTY.RRF > ./output/concepts2.txt
 
-# # + Initial upload to elasticsearch
-# less ./output/concepts.txt | node elasticsearch.js $*
+# + Initial upload to elasticsearch
+(cd $SCRIPTDIR && less ./output/concepts.txt | node elasticsearch.js $*)
 
 # # Crawl farmaceutisch kompas
 # # - Needs initial UMLS for lookup

@@ -48,7 +48,7 @@ describe("elasticHelper: client", function () {
         client.close();
     });
 
-    it.only("Can generate a client that uses default configs", async () => {
+    it("Can generate a client that uses default configs", async () => {
         const info = await client.info();
         expect(info).toBeTruthy();
     });

@@ -29,12 +29,12 @@ const autocomplete = require("./controllers/autocomplete.js");
 // router["get"]("/umls/:year/:month", verify, customConceptsByDate);
 
 
-const logger = require('koa-logger');
-const router = require('koa-router')();
-const koaBody = require('koa-body');
-const cors = require('@koa/cors');
+const logger = require("koa-logger");
+const router = require("koa-router")();
+const koaBody = require("koa-body");
+const cors = require("@koa/cors");
 
-const Koa = require('koa');
+const Koa = require("koa");
 const app = module.exports = new Koa();
 
 
@@ -47,9 +47,29 @@ app.use(cors());
 app.use(logger());
 app.use(koaBody({ jsonLimit: "4kb" }));
 
+app.use(async (ctx, next) => {
+    try {
+        await next();
+    }
+    catch (err) {
+        const timestamp = new Date().toISOString();
+
+        console.error("[API ERROR]", timestamp, this.path || "");
+        console.error(err);
+
+        ctx.status = err.status || 500;
+        ctx.body = {
+            "error": "500:SERVER_ERROR",
+            "error-details": "Sorry, this request resulted in an error!"
+        };
+    }
+});
 
 router.get("/", health);
 router.post("/autocomplete", autocomplete);
+
+// Allow smooth transition (with current endpoint in use)
+router.post("/v2/autocomplete", autocomplete);
 
 
 app.use(router.routes());

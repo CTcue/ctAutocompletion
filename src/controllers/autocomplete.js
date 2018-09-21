@@ -15,59 +15,59 @@ module.exports = async function autocomplete(ctx) {
     const body = ctx.request.body;
     const query = String(body.query).trim();
 
-    // Limit to N characters input;
-    const clean = _.deburr(query).slice(0, 42);
+    // // Limit to N characters input;
+    // const clean = _.deburr(query).slice(0, 42);
 
-    if (!query || query === "") {
-        ctx.body = {
-            "took": Math.ceil(Date.now() - start),
-            "hits": []
-        };
+    // if (!query || query === "") {
+    //     ctx.body = {
+    //         "took": Math.ceil(Date.now() - start),
+    //         "hits": []
+    //     };
 
-        return;
-    }
-
-
-    const queryObj = {
-        // TEMP/WIP (should be the autocompletion index)
-        "index": "suggester-measurement",
-        "size" : 15,
-
-        "body": {
-            "sort": [ { "hits": "desc" } ],
-
-            "query": {
-                "exists": { "field": "description" }
-            }
-        }
-    };
+    //     return;
+    // }
 
 
-    const response = await elasticClient.search(queryObj) || {};
+    // const queryObj = {
+    //     // TEMP/WIP (should be the autocompletion index)
+    //     "index": "suggester-measurement",
+    //     "size" : 15,
 
-    if (!response) {
-        ctx.body = {
-            "took": Math.ceil(Date.now() - start),
-            "hits": []
-        };
+    //     "body": {
+    //         "sort": [ { "hits": "desc" } ],
 
-        return;
-    }
+    //         "query": {
+    //             "exists": { "field": "description" }
+    //         }
+    //     }
+    // };
 
 
-    const hits = _.get(response, "hits.hits", []).map(r => {
-        const source = _.get(r, "_source", {});
+    // const response = await elasticClient.search(queryObj) || {};
 
-        return {
-            "str" : _.get(source, "description.input"),
-            "cui" : _.get(source, "cui", "C110912"),
-            "pref": ""
-        };
-    });
+    // if (!response) {
+    //     ctx.body = {
+    //         "took": Math.ceil(Date.now() - start),
+    //         "hits": []
+    //     };
+
+    //     return;
+    // }
+
+
+    // const hits = _.get(response, "hits.hits", []).map(r => {
+    //     const source = _.get(r, "_source", {});
+
+    //     return {
+    //         "str" : _.get(source, "description.input"),
+    //         "cui" : _.get(source, "cui", "C110912"),
+    //         "pref": ""
+    //     };
+    // });
 
 
     ctx.body = {
         "took": Math.ceil(Date.now() - start),
-        "hits": hits
+        "hits": []
     };
 };

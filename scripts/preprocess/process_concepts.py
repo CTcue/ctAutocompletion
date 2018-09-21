@@ -21,7 +21,6 @@ obsolete_types = ['N1', 'PM', 'OAS', 'OAF', 'OAM', 'OAP', 'OA', 'OCD', 'OET', 'O
 useful_sources = [
     "MSH",
     "SNOMEDCT_US",
-    # "LNC",
     "RXNORM",
     "MEDCIN",
     "MTH",
@@ -98,7 +97,6 @@ class AggregatorJob(MRJob):
         elif len(split) == 7:
             (CUI, TUI, STN, STY, ATUI, CVF, _) = split
 
-            # Skipabble categories
             if STY in skip_categories:
                 return
 

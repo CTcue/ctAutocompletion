@@ -5,7 +5,9 @@ from elasticsearch import Elasticsearch
 import argparse
 import sys
 import json
+import os
 
+script_dir = os.path.dirname(__file__)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="ctAutocompletion database clearing script")
@@ -28,17 +30,19 @@ if __name__ == '__main__':
     es = Elasticsearch(timeout=60, http_auth=_auth)
 
     if args.src == "AUTOCOMPLETE":
-        # Setup autocomplete index
-        with open("../_mappings/mapping-5.x.json", "rb") as f:
+        mappingLocation = os.path.join(script_dir, "../config/elasticsearch/autocomplete.json")
+
+        with open(mappingLocation, "rb") as f:
             es.indices.delete(index="autocomplete")
             es.indices.create(index="autocomplete", body=json.load(f))
+
             print("Created autocompletion index")
 
-    elif args.src == "DBC":
-        # Setup dbc index
-        print("CLEARING FOR DBC")
-        es.indices.delete(index="dbc_zorgproduct")
-        es.indices.create(index="dbc_zorgproduct", body=json.load(open("../_mappings/dbc.json")))
+    # elif args.src == "DBC":
+    #     # Setup dbc index
+    #     print("CLEARING FOR DBC")
+    #     es.indices.delete(index="dbc_zorgproduct")
+    #     es.indices.create(index="dbc_zorgproduct", body=json.load(open("../_mappings/dbc.json")))
 
     else:
         print("PLEASE PROVIDE A VALID: --type")

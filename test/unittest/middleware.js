@@ -4,7 +4,7 @@ const server = app.listen();
 const request = require("supertest").agent(server);
 
 
-describe("Middlware tests", function() {
+describe("Middleware tests", function() {
     after(function() {
         server.close();
     });
@@ -29,7 +29,6 @@ describe("Middlware tests", function() {
         });
     });
 
-
     describe("User extract", function() {
         describe("Allows correct headers", function() {
             it("should 200", function(done) {
@@ -39,16 +38,5 @@ describe("Middlware tests", function() {
                     .expect(200, done);
             });
         });
-
-        // [FUTURE TODO]
-        // describe("Can parse `x-user` header if available", function() {
-        //     it("should 200", function(done) {
-        //         request
-        //             .post("/autocomplete")
-        //             .set('x-user', '1234=>CTcue')
-        //             .send({ "query": "Hyperten" })
-        //             .expect(200, done);
-        //     });
-        // });
     });
 });
