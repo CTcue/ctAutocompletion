@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-"use strict";
+
 
 // -----
-// pipes input through this script, which then stores it into Elasticsearch
+// pipe input through this script, which then stores it into Elasticsearch
+
 
 const _        = require("lodash");
 const argv     = require("minimist")(process.argv.slice(2));
@@ -33,8 +34,7 @@ var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callbac
     }
 
     // (CUI, LAT, SAB, TYPES, PREF, TERMS)
-    const stripped = line.substring(2, line.length - 1);
-    const parts = stripped.split("\\t");
+    const parts = line.split("\t");
 
     if (!parts || parts.length !== 6) {
         callback();

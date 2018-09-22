@@ -129,12 +129,6 @@ if __name__ == '__main__':
             self.assertEqual(skip_term("levomilnacipran 120 MG Extended Release Oral Capsule"), True)
             self.assertEqual(skip_term("Amlodipine / atorvastatin Oral Tablet"), True)
 
-
-        def test_multi_term(self):
-            # Ezetimibe+Simvastatin
-            # self.assertEqual(skip_term("Piperonyl Butoxide / Pyrethrins Medicated Shampoo"), True)
-            pass
-
         def test_constructs(self):
             self.assertEqual(skip_term("Skin structure of labium"), True)
             self.assertEqual(skip_term("Subcutaneous tissue structure of head"), True)

@@ -3,8 +3,6 @@
 # Get (cross OS) path to the script dir
 SCRIPTDIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-mkdir "$SCRIPTDIR/output"
-mkdir "$SCRIPTDIR/additional_terms"
 
 set -e
 
@@ -20,7 +18,7 @@ set -e
 
 # python preprocess/process_concepts.py ./cleaned_terms/testje.txt ./2015AA/META/MRSTY.RRF > ./output/concepts2.txt
 
-# + Initial upload to elasticsearch
+# Upload concepts to elasticsearch
 (cd $SCRIPTDIR && less ./output/concepts.txt | node elasticsearch.js $*)
 
 # # Crawl farmaceutisch kompas
