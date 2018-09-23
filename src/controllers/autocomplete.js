@@ -27,25 +27,6 @@ module.exports = async function autocomplete(ctx) {
     }
 
 
-    const exactQuery = {
-        "index": "autocomplete",
-        "size" : 4,
-
-        "body": {
-            "_source": { "includes": FIELDS },
-
-            "query": {
-                "term" : {
-                    "str": clean.toLowerCase()
-                }
-            }
-        }
-    };
-
-    const exactResponse = await elasticClient.search(exactQuery) || {};
-    const exactHits = getResponseSources(exactResponse) || [];
-
-
     const matchQuery = {
         "index": "autocomplete",
         "size" : 12,
@@ -54,25 +35,59 @@ module.exports = async function autocomplete(ctx) {
             "_source": { "includes": FIELDS },
 
             "query": {
-                "match_phrase" : {
-                    "str": clean
+                "bool": {
+                    "should": [
+                        {
+                            "term" : {
+                                "exact": {
+                                    "value": clean.toLowerCase(),
+                                    "boost": 3
+                                }
+                            }
+                        },
+
+                        {
+                            "match_phrase": {
+                                "str": clean
+                            }
+                        },
+
+                        {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "range": {
+                                            "votes": {
+                                                "gte": 1.5,
+                                                "boost": 2
+                                            }
+                                        }
+                                    },
+
+                                    {
+                                        "match_phrase": {
+                                            "str": clean
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
                 }
             }
         }
     };
 
-    const matchResponse = await elasticClient.search(matchQuery) || {};
-    const matchHits = getResponseSources(matchResponse) || [];
+    const response = await elasticClient.search(matchQuery) || {};
+    const hits = getResponseSources(response) || [];
+
+    // If there are only a few hits, also include 'fuzzy' hits
+    let extra = [];
+
+    // if (_.isEmpty(matchHits) && matchHits.length < 4) {}
 
 
-    // if (_.isEmpty(matchHits) && matchHits.length < 4)
-
-
-    const allMatches = [].concat(exactHits, matchHits, []);
-
-    // const matchCompareStrings = allMatches.map(s => s["str"].toLowerCase());
-    // const uniqueHits = generateTerms(allMatches, matchCompareStrings);
-
+    const allMatches = [].concat(hits, extra);
 
     ctx.body = {
         "took": Math.ceil(Date.now() - start),
@@ -94,6 +109,7 @@ const uniqueFn = (s) => s["pref"].trim().replace("-", " ").toLowerCase();
 function reducePayload(hits = []) {
     const result = [];
     const grouped = _.groupBy(hits, "cui");
+
 
     for (const cui in grouped) {
         const tmp = grouped[cui][0];

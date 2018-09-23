@@ -29,7 +29,6 @@ const autocomplete = require("./controllers/autocomplete.js");
 // router["get"]("/umls/:year/:month", verify, customConceptsByDate);
 
 
-const logger = require("koa-logger");
 const router = require("koa-router")();
 const koaBody = require("koa-body");
 const cors = require("@koa/cors");
@@ -44,7 +43,6 @@ async function health(ctx) {
 
 
 app.use(cors());
-app.use(logger());
 app.use(koaBody({ jsonLimit: "4kb" }));
 
 app.use(async (ctx, next) => {

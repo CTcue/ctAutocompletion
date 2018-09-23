@@ -33,22 +33,28 @@ var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callbac
         return;
     }
 
-    // (CUI, LAT, SAB, TYPES, PREF, TERMS)
+    // (CUI, LAT, SAB, TYPES, PREF, TERMS, 'votes')
     const parts = line.split("\t");
 
-    if (!parts || parts.length !== 6) {
+    if (!parts || parts.length !== 7) {
         callback();
         return;
     }
 
-    const cui   = parts[0];
-    const lat   = parts[1];
-    const sab   = parts[2];
-    const types = parts[3].split("|");
-    const pref  = parts[4];
-    const terms = parts[5].split("|");
+    const cui     = parts[0];
+    const lat     = parts[1];
+    const sources = parts[2].split("|");
+    const types   = parts[3].split("|");
+    const pref    = parts[4];
+    const terms   = parts[5].split("|");
+    const votes   = parseFloat(parts[6], 10) || 0;
+
 
     for (const term of terms) {
+        if (!term.length || term.length > 45) {
+            continue;
+        }
+
         this.push({
             "index": index,
             "type" : type,
@@ -56,10 +62,13 @@ var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callbac
             "body": {
                 "cui"    : cui,
                 "str"    : term,
+                "exact"  : term,
+
                 "lang"   : lat,
-                "source" : sab,
+                "source" : sources,
                 "pref"   : pref,
-                "types"  : types
+                "types"  : types,
+                "votes"  : votes
             }
         });
     }

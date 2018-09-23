@@ -102,13 +102,13 @@ def main():
         help="MRSTY.RRF",
     )
 
-    # parser.add_argument(
-    #     "output_directory",
-    #     action="store",
-    #     widget="DirChooser",
-    #     default=stored_args.get("output_directory"),
-    #     help="Output directory for cleaned file",
-    # )
+    parser.add_argument(
+        "output_directory",
+        action="store",
+        widget="DirChooser",
+        default=stored_args.get("output_directory"),
+        help="Output directory for cleaned file",
+    )
 
     args = parser.parse_args()
 
@@ -268,8 +268,7 @@ def main():
                     writer.writerow([CUI, LAT, SAB, "|".join(combined_types), prefTerm, "|".join(unique)])
 
 
-    # print("Done. Created file: %s/CLEAN_MRCONSO.RRF" % (args.output_directory))
-    print("Done.")
+    print("Done. Created file: %s/CLEAN_MRCONSO.RRF" % (args.output_directory))
 
 
 if __name__ == "__main__":

@@ -53,6 +53,26 @@
                     "pattern": "\\p{Space}+",
                     "type": "pattern_replace",
                     "replacement": " "
+                },
+                "skip_brackets": {
+                    "pattern": "[\\(\\)\\[\\]{}@#$*<>]",
+                    "type": "pattern_replace",
+                    "replacement": " "
+                },
+                "trim_minimal_punctuation": {
+                    "type": "pattern_replace",
+                    "pattern": "(\\p{Alnum}+)([,!?;/\\_]|\\.-)",
+                    "replacement": "$1 "
+                },
+                "trim_whitespace": {
+                    "pattern": "^\\s+|\\s+$",
+                    "type": "pattern_replace",
+                    "replacement": ""
+                },
+                "remove_floating_dashes": {
+                    "type": "pattern_replace",
+                    "pattern": "\\s+-+\\s+",
+                    "replacement": " "
                 }
             },
             "filter": {
@@ -64,35 +84,30 @@
             },
             "normalizer": {
                 "uppercase": {
-                  "type": "custom",
-                  "filter": [
-                    "uppercase",
-                    "asciifolding"
-                  ]
-                }
-            },
-            "analyzer": {
-                "folding": {
-                    "char_filter": [
-                        "ignore_quotes",
-                        "replace_symbols",
-                        "remove_punctuation",
-                        "reduce_whitespace"
-                    ],
                     "type": "custom",
-                    "tokenizer": "keyword",
                     "filter": [
-                        "lowercase",
+                        "uppercase",
                         "asciifolding"
                     ]
                 },
-                "autocomplete": {
+                "raw_clean": {
+                    "type": "custom",
+                    "filter": [
+                        "lowercase",
+                        "asciifolding"
+                    ],
                     "char_filter": [
                         "ignore_quotes",
-                        "replace_symbols",
-                        "remove_punctuation",
-                        "reduce_whitespace"
-                    ],
+                        "skip_brackets",
+                        "trim_minimal_punctuation",
+                        "remove_floating_dashes",
+                        "reduce_whitespace",
+                        "trim_whitespace"
+                    ]
+                }
+            },
+            "analyzer": {
+                "autocomplete": {
                     "type": "custom",
                     "tokenizer": "standard",
                     "filter": [
@@ -107,7 +122,6 @@
     "mappings": {
         "_doc": {
             "dynamic": "strict",
-
             "properties": {
                 "cui": {
                     "type": "keyword",
@@ -115,15 +129,16 @@
                 },
                 "str": {
                     "type": "text",
-                    "analyzer": "autocomplete"
+                    "analyzer": "autocomplete",
+                    "search_analyzer": "standard"
                 },
                 "exact": {
-                    "type": "text",
-                    "analyzer": "folding"
+                    "type": "keyword",
+                    "normalizer": "raw_clean",
+                    "ignore_above": 40
                 },
                 "pref": {
-                    "type": "text",
-                    "index": false
+                    "type": "text"
                 },
                 "source": {
                     "type": "text",
@@ -136,6 +151,9 @@
                 "types": {
                     "type": "text",
                     "index": false
+                },
+                "votes": {
+                    "type": "float"
                 }
             }
         }
