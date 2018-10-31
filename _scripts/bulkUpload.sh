@@ -1,10 +1,16 @@
 #!/bin/sh
 set -e
 
+# ----
+# Usage:
+#   bash bulkUpload.sh --elastic username:password
+
+
 # Clear elasticsearch
 python clear_elasticsearch.py --src AUTOCOMPLETE $*
-# python clear_neo4j.py $*
+
+# Install script dependencies
+npm install
 
 # Bulk insert documents into ES / Neo4j
-less ./output/concepts.* | node elasticsearch.js $*
-# less ./output/*relations.* | node neo4j.js $*
+less ./output/concepts.txt | node elasticsearch.js $*

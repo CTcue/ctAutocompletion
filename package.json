@@ -4,7 +4,7 @@
   "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
-    "prestart": "yarn install --silent",
+    "prestart": "npm install --silent",
     "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
     "serve": "(cd demo/ && http-server -s -p 4040 -o)",
     "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"

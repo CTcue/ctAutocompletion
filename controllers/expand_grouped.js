@@ -8,38 +8,15 @@
 
 */
 
-
-const config  = require('../config/config.js');
-const neo4j = require('neo4j');
 const _ = require("lodash");
 const string = require("../lib/string");
 const queryHelper = require("../lib/queryHelper");
 const getCategory = require("../lib/category");
 
-const db = new neo4j.GraphDatabase({
-    url: 'http://localhost:7474',
-    auth: config.neo4j
-});
-
-
-const elastic = require('elasticsearch');
-const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": 'localhost',
-      "auth": config.elastic_shield
-    }
-  ]
-});
-
-
-
 const language_map = {
     "DUT" : "dutch",
     "ENG" : "english"
 };
-
-
 
 module.exports = function *(next) {
     var cui = this.request.body.query || "";
@@ -57,80 +34,6 @@ module.exports = function *(next) {
         // Get unique terms per language
         found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => string.compareFn(s.str) );
     }
-
-
-    // Check for user contributions
-    // - If the current user added custom concepts/synonyms
-    // if (config.neo4j["is_active"]) {
-    //     if (this.user) {
-    //         var user_contributed = yield function(callback) {
-    //             var cypherObj = {
-    //                 "query": `MATCH
-    //                             (s:Synonym {cui: {_CUI_} })<-[r:LIKES]-(u:User { id: { _USER_ }, env: { _ENV_ } })
-    //                           RETURN
-    //                             s.str as str, s.label as label`,
-
-    //                 "params": {
-    //                     "_CUI_"  : body,
-    //                     "_USER_" : this.user._id,
-    //                     "_ENV_"  : this.user.env
-    //                 },
-
-    //                 "lean": true
-    //             }
-
-
-    //             db.cypher(cypherObj, function(err, res) {
-    //                 if (err) {
-    //                     console.error(err);
-    //                     callback(false, []);
-    //                 }
-    //                 else {
-    //                     callback(false, res);
-    //                 }
-    //             });
-    //         }
-
-    //         // Add user contributions
-    //         if (user_contributed && user_contributed.length) {
-    //             found_terms = found_terms.concat(user_contributed);
-    //         }
-    //     }
-
-
-    //     // Check if anyone (any user) has unchecked concepts/synonyms
-    //     // - Need more than 1 "downvote"
-    //     var uncheck = yield function(callback) {
-    //         var cypherObj = {
-    //             "query": `MATCH
-    //                         (s:Synonym {cui: {_CUI_} })<-[r:DISLIKES]-(u:User)
-    //                       WITH
-    //                         type(r) as rel, s, count(s) as amount
-    //                       WHERE
-    //                         amount > 1
-    //                       RETURN
-    //                         s.str as term, s.label as label, rel, amount`,
-
-    //             "params": {
-    //               "_CUI_": body
-    //             },
-
-    //             "lean": true
-    //         }
-
-    //         db.cypher(cypherObj, function(err, res) {
-    //             if (err) {
-    //                 console.info(err);
-    //                 callback(false, []);
-    //             }
-    //             else {
-    //                 callback(false, res);
-    //             }
-    //         });
-    //     }
-    // }
-
-
 
     // Group terms by label / language
     var terms = {};

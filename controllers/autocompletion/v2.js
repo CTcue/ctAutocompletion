@@ -8,9 +8,8 @@
 
 */
 
-const config  = require('../../config/config.js');
+const config = require('../../config/config.js');
 
-const fs = require("fs");
 const _ = require("lodash");
 
 const neo4j = require('neo4j');
@@ -36,9 +35,8 @@ const source = ["cui", "str", "pref"];
 
 
 module.exports = function *() {
-    var headers = this.req.headers;
-    var body    = this.request.body;
-    var query   = _.deburr(body.query);
+    var body = this.request.body;
+    var query = _.deburr(body.query);
 
 
     // Search for suggestions in Elasticsearch
@@ -59,16 +57,8 @@ module.exports = function *() {
         misspelledMatches = yield spellingMatches(query);
     }
 
-
-    // Find user added contributions (if needed)
-    var likes = [];
-
-    if (config.neo4j["is_active"] && this.user) {
-        likes = yield findUserLikes(query, this.user._id, this.user.env);
-    }
-
     // Combine suggestions
-    var allMatches = [].concat(exactHits, likes, closeMatches.hits, misspelledMatches.hits);
+    var allMatches = [].concat(exactHits, closeMatches.hits, misspelledMatches.hits);
 
     // Also check for common appendixes (STADIUM, STAGE, etc.)
     var just_str = allMatches.map(s => s["str"].toLowerCase());
@@ -129,57 +119,6 @@ function findExact(query) {
     return getResults(queryObj);
 }
 
-
-function findUserLikes(query, userId, environment) {
-    return function(callback) {
-
-        // Suggest USER added only:  (s:Synonym)<-[r:LIKES]-(u:User { id: { _USER_ }, env: { _ENV_ } })
-        // Suggest from all users in ENV:  (s:Synonym)<-[r:LIKES]-(u:User { env: { _ENV_ } })
-
-        var cypherObj = {
-            "query": `MATCH
-                        (s:Synonym)<-[r:LIKES]-(u:User { id: { _USER_ }, env: { _ENV_ } })
-                      WHERE
-                        s.str =~ {_QUERY_}
-                      RETURN
-                        s.str as str, s.label as label, s.cui as cui`,
-
-            "params": {
-                "_USER_"  : userId,
-                "_ENV_"   : environment,
-                "_QUERY_" : "(?i)" + string.escapeRegExp(query) + ".*"
-            },
-
-            "lean": true
-        }
-
-        db.cypher(cypherObj, function(err, res) {
-            if (err) {
-                console.error("[findUserLikes]", err);
-            }
-            else if (!_.isEmpty(res)) {
-                var result = res.map(function(s) {
-                    // For display / uniqueness test
-                    s["pref"]  = s["str"];
-                    s["exact"] = s["str"];
-                    s["contributed"] = true;
-
-                    return s;
-                });
-
-                var unique = _.uniqBy(result, s => string.compareFn(s["str"]));
-
-                callback(false, unique);
-                return;
-            }
-
-
-            callback(false, []);
-        });
-    }
-}
-
-
 function findMatches(query) {
     var queryObj = {};
 
@@ -233,6 +172,7 @@ function getResults (queryObj) {
     return function(callback) {
         elasticClient.search(queryObj, function(err, res) {
             if (err) {
+                console.erorr("[ERROR elastic]", err);
                 return callback(false, { "error": true, "took": 10, "hits": []})
             }
 
