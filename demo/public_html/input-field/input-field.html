@@ -1,0 +1,81 @@
+<div class="full autocomplete-input suggestion-dropdown">
+    <input type="text" placeholder="Zoeken..." ng-model="obj[field]" ng-change="suggest(obj[field])" ng-model-options="{ updateOn: 'blur keyup', debounce: 220 }"
+        autocomplete="off" autofocus>
+
+
+    <div class="empty-state" ng-if="!obj[field] || !obj[field].length">
+        <div class="empty-search-icon"></div>
+
+        <div>
+            <h2>Zoek naar keywords</h2>
+            <small>Gebruik het veld hierboven om te zoeken</small>
+        </div>
+    </div>
+
+
+    <div class="full demo-results" ng-show="obj[field].length >= 1">
+        <div class="half left">
+            <h3>
+                Lokale server
+                <code class="right">http://localhost:4080</code>
+            </h3>
+
+            <div class="full autocomplete-results use-umls">
+                <ul class="simple">
+                    <li class="result-for">
+                        <span class="mini">
+                            <span ng-show="suggestions.local.length > 0">{{ suggestions.local.length }} resultaten</span>
+
+                            <b>{{ obj[field] | limitTo:45 }}</b>&nbsp;
+                        </span>
+                    </li>
+
+                    <li class="autosuggest-item" ng-show="tookLong || isBusyChoosing">
+                        <span class="loading-sentence">
+                            <i class="icon-spinner"></i>
+                        </span>
+                    </li>
+
+                    <li class="autosuggest-item k_nav noselect" ng-repeat="item in suggestions.local track by $index">
+                        <span class="capitalized">{{ item.str | limitTo:45 }}{{ item.str.length > 45 ? '...' : ''}}</span>
+                        <small ng-class="{ full: item.pref.length > 30 }">
+                            {{ item.pref | limitTo: 45 }}{{ item.pref.length > 45 ? '...' : ''}}
+                        </small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="half right">
+            <h3>
+                Online
+                <code class="right">https://ctcue.com/umls</code>
+            </h3>
+
+            <div class="full autocomplete-results use-umls">
+                <ul class="simple">
+                    <li class="result-for">
+                        <span class="mini">
+                            <span ng-show="suggestions.server.length > 0">{{ suggestions.server.length }} resultaten</span>
+
+                            <b>{{ obj[field] | limitTo:45 }}</b>&nbsp;
+                        </span>
+                    </li>
+
+                    <li class="autosuggest-item" ng-show="tookLong || isBusyChoosing">
+                        <span class="loading-sentence">
+                            <i class="icon-spinner"></i>
+                        </span>
+                    </li>
+
+                    <li class="autosuggest-item k_nav noselect" ng-repeat="item in suggestions.server track by $index">
+                        <span class="capitalized">{{ item.str | limitTo:45 }}{{ item.str.length > 45 ? '...' : ''}}</span>
+                        <small ng-class="{ full: item.pref.length > 30 }">
+                            {{ item.pref | limitTo: 45 }}{{ item.pref.length > 45 ? '...' : ''}}
+                        </small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

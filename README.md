@@ -1,11 +1,10 @@
 ctAutocompletion
 ================
 
-Find relevant UMLS terms based on user input. The autocompletion algorithm prioritizes exact matches, and if non are found it prefers prefix matches. You can also send multiple words and for each seperate term it does a prefix lookup, so you can send queries like `anky spondy` or `maj dep dis`.
+Find relevant UMLS terms based on user input. The autocompletion algorithm prioritizes exact matches, and if non are found it prefers prefix matches. You can also send multiple words and for each separate term it does a prefix lookup, so you can send queries like `anky spondy` or `maj dep dis`.
 
 
 ## ctAutocompletion locally
-
 
 #### Installation
 
@@ -25,15 +24,21 @@ Find relevant UMLS terms based on user input. The autocompletion algorithm prior
 * Finally, run `bash ./_scripts/bulkUpload.sh`
 
 
-#### Start the app
+#### Running the Demo
 
-Inside this directory run:
+Open a terminal and inside this directory run:
 
 ```
-node app.js
+npm start
 ```
 
-> ctAutocompletion will be running on `http://localhost:4080` by default
+* Open another terminal to serve the demo application and inside this directory run:
+
+```
+npm run serve
+```
+
+> The ctAutocompletion API will be running on `http://localhost:4080` and the demo application will be available on `http://localhost:4040`
 
 
 ###### Notes

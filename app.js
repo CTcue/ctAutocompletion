@@ -1,4 +1,3 @@
-'use strict';
 
 const version = require("./package").version;
 const config = require('./config/config');
@@ -7,36 +6,6 @@ const koa = require('koa');
 const app = module.exports = new koa();
 const router = require('koa-router')();
 const cors = require('koa-cors');
-
-const winston = require('winston');
-
-winston.add(winston.transports.File, {
-    filename: `${__dirname}/logs/user_selected.log`,
-    level: 'info',
-    timestamp: true,
-    handleExceptions: true
-});
-
-// Only log it in log file
-winston.remove(winston.transports.Console);
-
-
-const logUserSelection = function *() {
-    // - user_id=>environment (keeps it reasonably anonymous)
-    const headers = this.req.headers;
-
-    // User selected CUI (by clicking)
-    const query   = this.request.body.query || "";
-
-    // String used to create autocompletion suggestion list
-    const user_typed = this.request.body.user_typed || "";
-
-    // Pref. term of the clicked suggestion
-    const pref = this.pref_term || "";
-
-    winston.info(`${headers["x-user"]} | ${user_typed} | ${query} | ${pref}`);
-}
-
 
 
 /////
@@ -106,8 +75,8 @@ router['post']('/v2/autocomplete', extractUserId, autocomplete_dev);
 
 router['post']('/term_lookup', term_lookup);
 router['post']('/expand', expander);
-router['post']('/expand-grouped', extractUserId, expandGrouped, logUserSelection);
-router['post']('/expand-by-string', extractUserId, expandByString, logUserSelection);
+router['post']('/expand-grouped', extractUserId, expandGrouped);
+router['post']('/expand-by-string', extractUserId, expandByString);
 router['post']('/suggest', suggester);
 router['post']('/children', concept_children);
 router['post']('/related', concept_related);
