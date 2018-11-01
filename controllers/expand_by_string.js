@@ -1,25 +1,24 @@
-"use strict";
 
 /** Usage
 
-  curl -X POST -H "Content-Type: application/json" -d '{
+  curl -X POST -H "Content-Type: application/json" -d "{
       "query": "C1306459"
-  }' "http://localhost:4080/expand-by-string"
+  }" "http://localhost:4080/expand-by-string"
 
 */
 
-const config  = require('../config/config');
+const config  = require("../config/config");
 
 const _ = require("lodash");
 const string = require("../lib/string");
 const queryHelper = require("../lib/queryHelper");
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });

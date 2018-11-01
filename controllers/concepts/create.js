@@ -1,21 +1,21 @@
-'use strict';
+"use strict";
 
-var db    = require('../../lib/database');
-var table = db.table('umls');
+var db    = require("../../lib/database");
+var table = db.table("umls");
 
-const config  = require('../../config/config.js');
-const elastic = require('elasticsearch');
+const config  = require("../../config/config.js");
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });
 
 
-module.exports = function *(next) {
+module.exports = function* () {
 
     var body = this.request.body.query;
 
@@ -58,7 +58,7 @@ module.exports = function *(next) {
 
     if (esResult) {
         // Update document with _added and reference to elasticsearch
-        var updated = yield table.findAndModify(
+        yield table.findAndModify(
           { "_id": body._id },
           { "$set" : {  "_added": true, "_elasticId": esResult._id } });
     }

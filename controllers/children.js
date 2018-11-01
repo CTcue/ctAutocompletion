@@ -1,28 +1,27 @@
-"use strict";
 
 /** Usage
 
-    curl -X POST -d '{
+    curl -X POST -d "{
         "query": "C0006826"
-    }' "https://ctcue.com/umls/children"
+    }" "https://ctcue.com/umls/children"
 
 */
 
-const config  = require('../config/config.js');
+const config  = require("../config/config.js");
 const _ = require("lodash");
-const neo4j = require('neo4j');
+const neo4j = require("neo4j");
 const db = new neo4j.GraphDatabase({
-    "url": 'http://localhost:7474',
+    "url": "http://localhost:7474",
     "auth": config.neo4j
 });
 
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });
@@ -57,7 +56,7 @@ module.exports = function *() {
     for (var i=0; i < children.length; i++) {
         var lookup = yield function(callback) {
             elasticClient.search({
-                "index" : 'autocomplete',
+                "index" : "autocomplete",
                 "size": 1, // Only need the preferred term for now
                 "_source": ["pref"],
                 "body" : {

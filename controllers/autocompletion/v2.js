@@ -1,31 +1,23 @@
-"use strict";
 
 /** Usage
 
-    curl -X POST -H "Content-Type: application/json" -d '{
-        "query": "cabg"
-    }' "http://localhost:4080/autocomplete"
+    curl -X POST -H "Content-Type: application/json" -d "{
+        "query": "myo inf"
+    }" "http://localhost:4080/autocomplete"
 
 */
 
-const config = require('../../config/config.js');
+const config = require("../../config/config.js");
 
 const _ = require("lodash");
-
-const neo4j = require('neo4j');
-const db = new neo4j.GraphDatabase({
-    "url": 'http://localhost:7474',
-    "auth": config.neo4j,
-});
-
 const string = require("../../lib/string");
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ],
 });
@@ -72,7 +64,7 @@ module.exports = function *() {
 };
 
 
-// Groups by CUI and strips 'pref' if it's exactly the same as str
+// Groups by CUI and strips "pref" if it"s exactly the same as str
 function reducePayload(terms) {
 
     var result = [];
@@ -214,7 +206,7 @@ function generateTerms(unique, strings) {
         added.push({
             "str"      : to_add[i],
             "pref"     : "",
-            "cui"      : 'generated',
+            "cui"      : "generated",
         });
     }
 

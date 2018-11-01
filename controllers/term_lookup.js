@@ -1,16 +1,16 @@
 
 /** Module dependencies. */
 
-const config  = require('../config/config.js');
+const config  = require("../config/config.js");
 
 const _ = require("lodash");
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ],
 });
@@ -63,7 +63,7 @@ function findExact(query) {
 
         // Search in all indexes
         var queryObj = {
-            "index" : 'autocomplete',
+            "index" : "autocomplete",
             "body"  : elastic_query
         };
 

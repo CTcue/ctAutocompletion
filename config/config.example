@@ -1,0 +1,7 @@
+{
+    "elasticsearch": {
+        "auth"  : "elastic-username:password"
+    },
+
+    "api_token": "MY_API_TOKEN"
+}

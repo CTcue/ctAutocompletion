@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
 const _        = require("lodash");
-const argv     = require('minimist')(process.argv.slice(2));
-const split2   = require('split2');
-const through2 = require('through2');
+const argv     = require("minimist")(process.argv.slice(2));
+const split2   = require("split2");
+const through2 = require("through2");
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": argv.elastic || ""
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });
-const ElasticsearchBulkIndexStream = require('elasticsearch-writable-stream');
+const ElasticsearchBulkIndexStream = require("elasticsearch-writable-stream");
 
 const index = argv.index || "autocomplete";
 const type  = argv.type  || "records";
@@ -25,8 +25,8 @@ const type  = argv.type  || "records";
 
 function stamp() {
     return new Date().toISOString()
-      .replace(/T/, ' ')
-      .replace(/\..+/, '')
+      .replace(/T/, " ")
+      .replace(/\..+/, "")
 }
 
 var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callback) {
@@ -80,9 +80,9 @@ process.stdin
   .pipe(split2())
   .pipe(buildRecords)
   .pipe(elasticStream)
-  .on('error', function(error) {
+  .on("error", function(error) {
       console.error(error);
   })
-  .on('finish', function() {
+  .on("finish", function() {
       console.info("DONE", stamp());
   })

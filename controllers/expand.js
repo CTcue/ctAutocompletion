@@ -1,24 +1,23 @@
-"use strict";
 
 /** Usage
 
-  curl -X POST -H "Content-Type: application/json" -d '{
+  curl -X POST -H "Content-Type: application/json" -d "{
       "query": "C1306459"
-  }' "http://localhost:4080/expand"
+  }" "http://localhost:4080/expand"
 
 */
 
-const config  = require('../config/config.js');
+const config  = require("../config/config.js");
 
 const string = require("../lib/string");
 
 const _ = require("lodash");
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });
@@ -36,7 +35,7 @@ module.exports = function *() {
   if (_.isArray(cui)) {
       var result = yield function(callback) {
           elasticClient.search({
-              "index" : 'autocomplete',
+              "index" : "autocomplete",
               "size": 1000,
 
               "sort": ["_doc"],
@@ -91,7 +90,7 @@ module.exports = function *() {
   else {
       var result = yield function(callback) {
           elasticClient.search({
-              "index" : 'autocomplete',
+              "index" : "autocomplete",
               "size": 100,
 
               "sort": ["_doc"],

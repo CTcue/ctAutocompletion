@@ -1,13 +1,12 @@
-"use strict";
 
-const config  = require('../../config/config.js');
+const config  = require("../../config/config.js");
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });
@@ -16,7 +15,7 @@ const elasticClient = new elastic.Client({
 module.exports = function _elastic(cui) {
     return function(callback) {
         elasticClient.search({
-            "index" : 'autocomplete',
+            "index" : "autocomplete",
             "size": 1, // Only need the preferred term for now
             "_source": ["pref"],
             "body" : {

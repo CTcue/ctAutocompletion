@@ -1,14 +1,13 @@
-"use strict";
 
 const _ = require("lodash");
-const config  = require('../config/config.js');
+const config  = require("../config/config.js");
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });
@@ -18,12 +17,13 @@ module.exports = function *() {
     var term = _.get(this.request.body, "query") || null;
 
     if (! term || term.length < 2) {
-        return this.body = [];
+        this.body = [];
+        return;
     }
 
     // Clean input term
     var clean = _.deburr(term)     // remove accents
-      .toLowerCase()               // lowercased
+      .toLowerCase()               // lowercase
       .replace(/[^a-z0-9\* ]/g, " ") // remove symbols
       .replace(/\s+/g, " ")        // reduce spaces
       .trim();
@@ -41,7 +41,6 @@ module.exports = function *() {
 
 
 function getSpecialism(clean) {
-
     var letters = clean.replace(/[0-9]/g, "").trim()
     var parts = clean.split(" ");
     var expanded = parts.map(s => s + "*").join(" ");
@@ -52,7 +51,7 @@ function getSpecialism(clean) {
         }
 
         elasticClient.search({
-          "index" : 'dbc_zorgproduct',
+          "index" : "dbc_zorgproduct",
           "type"  : ["specialism", "diagnosis"],
 
           "size"  : 5,
@@ -98,10 +97,10 @@ function getSpecialism(clean) {
                     return _.extend(base, s["_source"]);
                 });
 
-                callback(false, sources)
+                callback(false, sources);
             }
             else {
-                callback(err, []);
+                callback(false, []);
             }
         });
     };
@@ -112,14 +111,14 @@ function getTreatments(clean) {
       // Skip digits in phrase query
       var phrase = clean.replace(/[0-9\*]/g, "").trim();
 
-      // Create 'keywords'
+      // Create "keywords"
       var keywords = clean
           .replace(/\b(and|or|de|het|een)\b/g, " ")  // remove stop words
           .replace(/\s+/g, " ")        // reduce spaces
           .trim()
           .split(" ");
 
-      // Create 'term expansions'
+      // Create "term expansions"
       var expanded = keywords.map(function(s) {
           if (_.includes(s, "*")) {
               return s;
@@ -192,7 +191,7 @@ function getTreatments(clean) {
     // Finally, build query and return results;
     return function(callback) {
         elasticClient.search({
-          "index" : 'dbc_zorgproduct',
+          "index" : "dbc_zorgproduct",
           "type"  : "treatments",
           "size"  : 15,
           "body" : queryBody,
@@ -207,6 +206,7 @@ function getTreatments(clean) {
                     };
 
                     var short_description = _.get(s, "_source.description_latin") || null;
+
                     if (short_description) {
                         if (short_description.length < 3) {
                             s._source.short_description = short_description.join(" | ");
@@ -225,7 +225,7 @@ function getTreatments(clean) {
                 callback(false, sources);
             }
             else {
-                callback(err, []);
+                callback(false, []);
             }
         });
     };

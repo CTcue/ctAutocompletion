@@ -61,11 +61,10 @@ router['get']('/', function *() {
 router['post']('/v2/autocomplete', extractUserId, autocompletion);
 
 router['post']('/term_lookup', term_lookup);
-router['post']('/expand', expander);
 router['post']('/expand-grouped', extractUserId, expandGrouped);
 router['post']('/expand-by-string', extractUserId, expandByString);
 router['get']('/dbc/:code', dbc_diagnosis);
-router['post']('/dbc', dbc);
+
 router['get'] ('/umls/list', verify, customConcepts);
 router['get'] ('/umls/:year/:month', verify, customConceptsbyDate);
 
