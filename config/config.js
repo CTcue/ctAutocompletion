@@ -11,7 +11,13 @@ let config = {
         "host"   : "localhost",
         "port"   : 9200,
         "auth"   : "elastic:changeme"
-    }
+    },
+
+    "mongodb": {
+        "path" : "mongodb://localhost/umls"
+    },
+
+    "api_token": "API_TOKEN"
 };
 
 

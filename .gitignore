@@ -23,6 +23,5 @@ node_modules
 uploads/
 package-lock.json
 local*
-
 *.sublime-project
 *.sublime-workspace

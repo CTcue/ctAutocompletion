@@ -25,9 +25,9 @@ function stamp() {
       .replace(/\..+/, "");
 }
 
-const SPLIT_TABS = /\s{2,}/;
+const SPLIT_TABS = /\s{2,}|\t/;
 
-var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callback) {
+var buildRecords = through2({ "objectMode": true }, function(chunk, enc = "utf8", callback) {
     var line = chunk.toString().trim();
 
     if (!line || !line.length) {
@@ -39,7 +39,7 @@ var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callbac
     // - splits on tabs or >2 spaces
     const parts = line.split(SPLIT_TABS);
 
-    if (!parts || parts.length < 6 || parts.length > 8) {
+    if (!parts || parts.length < 6) {
         callback();
         return;
     }

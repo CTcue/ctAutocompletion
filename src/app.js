@@ -5,28 +5,11 @@ const PORT = process.env.PORT || config.port;
 
 
 const autocomplete = require("./controllers/autocomplete.js");
-// const expandGrouped    = require("./controllers/expand_grouped.js");
-// const expandByString   = require("./controllers/expand_by_string.js");
+const expandGrouped = require("./controllers/expand_grouped.js");
+const expandByString = require("./controllers/expand_by_string.js");
 
-// const dbc              = require("./controllers/dbc.js");
-// const dbc_diagnosis    = require("./controllers/dbc_diagnosis.js");
-
-// // Management of custom added terms (from users)
-// const recommend = require("./controllers/recommend.js");
-// const customConcepts = require("./controllers/concepts/list");
-// const customConceptsByDate  = require("./controllers/concepts/byDate");
-
-
-// router["post"]("/v3/autocomplete", extractUserId, autocomplete_es5);
-// router["post"]("/expand-grouped", extractUserId, expandGrouped, logUserSelection);
-// router["post"]("/expand-by-string", extractUserId, expandByString, logUserSelection);
-
-// router["get"]("/dbc/:code", dbc_diagnosis);
-// router["post"]("/dbc", dbc);
-
-// router["post"]("/recommend", recommend);
-// router["get"]("/umls/list", verify, customConcepts);
-// router["get"]("/umls/:year/:month", verify, customConceptsByDate);
+// const dbc  = require("./controllers/dbc.js");
+// const dbcDiagnosis = require("./controllers/dbc_diagnosis.js");
 
 
 const router = require("koa-router")();
@@ -65,9 +48,13 @@ app.use(async (ctx, next) => {
 
 router.get("/", health);
 router.post("/autocomplete", autocomplete);
+router.post("/v2/autocomplete", autocomplete); // End-point can be removed if no longer used
 
-// Allow smooth transition (with current endpoint in use)
-router.post("/v2/autocomplete", autocomplete);
+router["post"]("/expand-grouped", expandGrouped);
+router["post"]("/expand-by-string", expandByString);
+
+// router["get"]("/dbc/:code", dbcDiagnosis);
+// router["post"]("/dbc", dbc);
 
 
 app.use(router.routes());

@@ -4,11 +4,14 @@
   "description": "Relevant UMLS terms based on user input",
   "main": "app.js",
   "scripts": {
+    "prestart": "npm install --silent",
     "start": "node src/app.js",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js src/app.js",
+    "dev": "nodemon --harmony --ignore _scripts/ --ignore scripts/ src/app.js",
+    "serve": "(cd demo/ && http-server -s -p 4040 -o)",
     "e2e": "cross-env NODE_ENV=e2e && jest --config=jest-e2e.json --runInBand",
     "test": "set PORT=4088 && mocha -R spec --recursive ./test/unittest",
-    "test:all": "yarn test && yarn run e2e"
+    "test:all": "yarn test && yarn run e2e",
+    "build:mapping": "(cd scripts && node es-mapping.js)"
   },
   "repository": {
     "type": "git",
@@ -46,7 +49,8 @@
     "split2": "3.0.0",
     "supertest": "3.3.0",
     "through2": "2.0.3",
-    "tslint": "5.11.0"
+    "tslint": "5.11.0",
+    "http-server": "0.11.1"
   },
   "license": "Proprietary",
   "private": true

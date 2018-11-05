@@ -1,14 +1,13 @@
-"use strict";
 
 const _ = require("lodash");
-const config  = require('../config/config.js');
+const config  = require("../config/config.js");
 
-const elastic = require('elasticsearch');
+const elastic = require("elasticsearch");
 const elasticClient = new elastic.Client({
   "host": [
     {
-      "host": 'localhost',
-      "auth": config.elastic_shield
+      "host": "localhost",
+      "auth": config.elasticsearch.auth
     }
   ]
 });
@@ -25,7 +24,7 @@ module.exports = function *() {
 
     var result = yield function(callback) {
         elasticClient.search({
-          "index" : 'dbc_zorgproduct',
+          "index" : "dbc_zorgproduct",
           "type": "diagnosis",
           "size": 500,
 
@@ -60,7 +59,7 @@ module.exports = function *() {
                 callback(false, sources);
             }
             else {
-                callback(err, []);
+                callback(false, []);
             }
         });
     };

@@ -1,12 +1,7 @@
 
 const _ = require("lodash");
-const stringLib = require("../lib/string");
-
 const elasticHelper = require("../lib/elasticHelper");
 const elasticClient = elasticHelper.client();
-
-
-const FIELDS = ["cui", "str", "pref"];
 
 
 module.exports = async function autocomplete(ctx) {
@@ -26,13 +21,12 @@ module.exports = async function autocomplete(ctx) {
         return;
     }
 
-
     const matchQuery = {
         "index": "autocomplete",
         "size" : 12,
 
         "body": {
-            "_source": { "includes": FIELDS },
+            "_source": { "includes": ["cui", "str", "pref"] },
 
             "query": {
                 "bool": {
@@ -81,17 +75,9 @@ module.exports = async function autocomplete(ctx) {
     const response = await elasticClient.search(matchQuery) || {};
     const hits = getResponseSources(response) || [];
 
-    // If there are only a few hits, also include 'fuzzy' hits
-    let extra = [];
-
-    // if (_.isEmpty(matchHits) && matchHits.length < 4) {}
-
-
-    const allMatches = [].concat(hits, extra);
-
     ctx.body = {
         "took": Math.ceil(Date.now() - start),
-        "hits": reducePayload(allMatches)
+        "hits": reducePayload(hits)
     };
 };
 
@@ -129,33 +115,4 @@ function reducePayload(hits = []) {
     }
 
     return result;
-}
-
-
-// Add custom terms if there is a certain pattern:
-// - "Gleason score" 5
-// - "Diabetes mellitus" type 2
-// - "Diabetes mellitus" type II
-//
-// The part between quotes can be the search term, in some cases,
-// but this is usually not an UMLS concept
-
-function generateTerms(unique, strings) {
-    const generated = _.map(strings, stringLib.replaceAppendix);
-
-    const toAdd = _.uniq(_.filter(generated, function(s) {
-        return !_.includes(strings, s);
-    }));
-
-    const added = [];
-
-    for (const term of toAdd) {
-        added.push({
-            "str"      : term,
-            "pref"     : "",
-            "cui"      : "generated",
-        });
-    }
-
-    return [].concat(added, unique);
 }

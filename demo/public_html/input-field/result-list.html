@@ -1,0 +1,51 @@
+<div class="full autocomplete-results use-umls">
+    <ul class="simple">
+        <li class="result-for">
+            <span class="mini">
+                <span ng-show="data.length > 0">{{ data.length }} resultaten</span>
+            </span>
+        </li>
+
+        <li class="autosuggest-item" ng-show="!data">
+            <span class="loading-sentence">
+                <i class="icon-spinner"></i>
+            </span>
+        </li>
+
+        <li ng-repeat="item in data track by $index">
+            <div class="autosuggest-item full noselect" ng-click="expand($event, item);" ng-class="{ active: item.clicked }">
+                <span class="full capitalized">
+                    <span class="large left">
+                        {{ item.str | limitTo:45 }}{{ item.str.length > 45 ? '...' : ''}}
+                    </span>
+
+                    <small class="small right cui">
+                        {{ item.cui }}
+                    </small>
+                </span>
+
+                <small class="full">
+                    {{ item.pref | limitTo: 45 }}{{ item.pref.length > 45 ? '...' : ''}}
+                </small>
+            </div>
+
+            <div class="full nested" ng-if="item.visible">
+                <div class="full" ng-show="item.error">
+                    <p>Hmm... dit resultaat heeft geen CUI</p>
+                </div>
+
+                <div class="full" ng-show="item.expanded">
+                    <div class="full" ng-show="item.expanded.terms.dutch && item.expanded.terms.dutch.length > 0">
+                        <b class="full">NL</b>
+                        <pre>{{ item.expanded.terms.dutch | json }}</pre>
+                    </div>
+
+                    <div class="full add-top" ng-show="item.expanded.terms.english && item.expanded.terms.english.length > 0">
+                        <b class="full">EN</b>
+                        <pre>{{ item.expanded.terms.english | json }}</pre>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>

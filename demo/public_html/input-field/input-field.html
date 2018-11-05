@@ -1,0 +1,33 @@
+<div class="full left autocomplete-input suggestion-dropdown">
+    <input type="text" placeholder="Zoeken..." ng-model="obj[field]" ng-change="suggest(obj[field])" ng-model-options="{ updateOn: 'blur keyup', debounce: 220 }"
+        autocomplete="off" autofocus>
+
+    <div class="empty-state" ng-if="!obj[field] || !obj[field].length">
+        <div class="empty-search-icon"></div>
+
+        <div>
+            <h2>Zoek naar keywords</h2>
+            <small>Gebruik het veld hierboven om te zoeken</small>
+        </div>
+    </div>
+
+    <div class="full demo-results" ng-show="obj[field].length >= 1">
+        <div class="half left">
+            <h3>
+                Lokale server
+                <code class="right">http://localhost:4080</code>
+            </h3>
+
+            <result-list data="suggestions.local" api="{{ API.local }}"></result-list>
+        </div>
+
+        <div class="half right">
+            <h3>
+                Online
+                <code class="right">https://ctcue.com/umls</code>
+            </h3>
+
+            <result-list data="suggestions.server" api="{{ API.server }}"></result-list>
+        </div>
+    </div>
+</div>

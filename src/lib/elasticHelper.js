@@ -1,6 +1,6 @@
 
 const _ = require("lodash");
-const config = require("../../config/config.js");
+const config = require("../../config/config");
 const ES_MAPPING = require("../../config/elasticsearch/autocomplete.json");
 
 const defaultConfig = parseElasticConfig(config.elasticsearch);

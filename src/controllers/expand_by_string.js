@@ -1,59 +1,40 @@
 
 /** Usage
 
-  curl -X POST -H "Content-Type: application/json" -d '{
+  curl -X POST -H "Content-Type: application/json" -d "{
       "query": "C1306459"
-  }' "http://localhost:4080/expand-by-string"
+  }" "http://localhost:4080/expand-by-string"
 
 */
 
-const config  = require("../config/config");
-
 const _ = require("lodash");
-const string = require("../lib/string");
+const elasticHelper = require("../lib/elasticHelper");
+const elasticClient = elasticHelper.client();
+
 const queryHelper = require("../lib/queryHelper");
 
-
-const elastic = require("elasticsearch");
-const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": "localhost",
-      "auth": config.elastic_shield
-    }
-  ]
-});
-
-
-const language_map = {
-    "DUT" : "dutch",
-    "ENG" : "english"
-};
-
-
-
-module.exports = function *(next) {
-    var body = this.request.body;
-    var term = _.get(body, "query") || null;
+module.exports = async function expandByString(ctx) {
+    const term = ctx.request.body.query || "";
 
     if (!term || term.length < 3) {
-        this.body = null;
+        ctx.body = null;
         return;
     }
 
-
     // Exact term is indexed without dashes
-    var wantedTerm = term
+    const wantedTerm = term
         .replace(/-/g, " ")
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
 
-    var queryObj = {
+    const queryObj = {
         "index" : "autocomplete",
         "size"  : 1,
 
         "body": {
+            "_source": { "includes": ["cui"] },
+
             "query": {
                 "term" : {
                     "exact": wantedTerm
@@ -62,93 +43,31 @@ module.exports = function *(next) {
         }
     };
 
-    var cuiResult = yield function(callback) {
-        elasticClient.search(queryObj, function(err, resp) {
-            if (err) {
-                callback(false, false);
-            }
+    const cuiResponse = await elasticClient.search(queryObj);
 
-            callback(false, _.get(resp, "hits.hits.0._source") || false);
-        });
-    };
-
-
-    if (!cuiResult) {
-        this.body = null;
+    if (!cuiResponse) {
+        ctx.body = null;
         return;
     }
 
+    const cuiResult = _.get(cuiResponse, "hits.hits.0._source");
 
-    var result      = yield queryHelper.getTermsByCui(_.get(cuiResult, "cui"));
-    var pref        = "";
-    var types       = [];
-    var found_terms = [];
-
-    if (result) {
-        types       = result[0];
-        pref        = result[1];
-        found_terms = result[2];
-
-        // Get unique terms per language
-        found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => string.compareFn(s.str) );
+    if (!cuiResult) {
+        ctx.body = null;
+        return;
     }
 
+    const result = await queryHelper.getTermsByCui(cuiResult.cui, 100);
 
-    // Group terms by label / language
-    var terms = {
-        "custom"   : [],
-        "suggested": []
-    };
-
-    for (var i=0; i < found_terms.length; i++) {
-        var t = found_terms[i];
-        var key = "custom";
-
-        // Skip two letter abbreviations
-        if (!t["str"] || t["str"].length < 3) {
-            continue;
-        }
-
-        if (t.hasOwnProperty("label")) {
-            key = t["label"].toLowerCase();
-        }
-        else if (t.hasOwnProperty("lang")) {
-            key = language_map[t["lang"]] || "custom";
-        }
-
-
-        if (terms.hasOwnProperty(key)) {
-            terms[key].push(t["str"]);
-        }
-        else {
-            terms[key] = [t["str"]];
-        }
+    if (!result || _.isEmpty(result)) {
+        ctx.body = {
+            "pref": "",
+            "terms": []
+        };
     }
 
+    const grouped = queryHelper.groupTerms(result);
+    grouped.cui = cuiResult.cui;
 
-    // - Remove empty key/values
-    // - Sort terms by their length
-
-    for (var k in terms) {
-        if (! terms[k].length) {
-            delete terms[k];
-        }
-        else {
-            var unique = _.uniqBy(terms[k], s => string.forComparison(s));
-            terms[k]   = _.sortBy(unique, "length");
-        }
-    }
-
-
-    this.body = {
-      "cui"      : _.get(cuiResult, "cui") || null,
-      "pref"     : pref,
-      "terms"    : terms,
-      "uncheck"  : []
-    };
-
-
-    // For logging
-    this.pref_term = pref;
-    yield next;
+    ctx.body = grouped;
 };

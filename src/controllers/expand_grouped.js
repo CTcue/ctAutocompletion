@@ -1,104 +1,18 @@
 
-/** Usage
-
-  curl -X POST -H "Content-Type: application/json" -d '{
-      "query": "C1306459"
-  }' "http://localhost:4080/expand-grouped"
-
-*/
-
-
-const config  = require('../config/config.js');
-
 const _ = require("lodash");
-const string = require("../lib/string");
 const queryHelper = require("../lib/queryHelper");
 
-const elastic = require('elasticsearch');
-const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": 'localhost',
-      "auth": config.elastic_shield
-    }
-  ]
-});
 
-const language_map = {
-    "DUT" : "dutch",
-    "ENG" : "english"
-};
+module.exports = async function expandGrouped(ctx) {
+    const cui = ctx.request.body.query || "";
+    const result = await queryHelper.getTermsByCui(cui, 100);
 
-
-
-module.exports = function *(next) {
-    var cui = this.request.body.query || "";
-
-    var result      = yield queryHelper.getTermsByCui(cui, 100);
-    var pref        = "";
-    var types       = [];
-    var found_terms = [];
-
-    if (result) {
-        types       = result[0];
-        pref        = result[1];
-        found_terms = result[2];
-
-        // Get unique terms per language
-        found_terms = _.uniq( _.sortBy(found_terms, "lang"), s => string.compareFn(s.str) );
+    if (!result || _.isEmpty(result)) {
+        ctx.body = {
+            "pref": "",
+            "terms": []
+        };
     }
 
-
-    // Group terms by label / language
-    var terms = {};
-
-    for (var i=0; i < found_terms.length; i++) {
-        var t = found_terms[i];
-        var key = "custom";
-
-        // Skip two letter abbreviations
-        if (!t["str"] || t["str"].length < 3) {
-            continue;
-        }
-
-        if (t.hasOwnProperty("label")) {
-            key = t["label"].toLowerCase();
-        }
-        else if (t.hasOwnProperty("lang")) {
-            key = language_map[t["lang"]] || "custom";
-        }
-
-
-        if (terms.hasOwnProperty(key)) {
-            terms[key].push(t["str"]);
-        }
-        else {
-            terms[key] = [ t["str"] ];
-        }
-    }
-
-    // - Remove empty key/values
-    // - Sort terms by their length
-    for (var k in terms) {
-        if (! terms[k].length) {
-            delete terms[k];
-        }
-        else {
-            var unique = _.uniqBy(terms[k], s => string.forComparison(s));
-            terms[k]   = _.sortBy(unique, "length");
-        }
-    }
-
-
-    this.body = {
-      "pref"     : pref,
-      "terms"    : terms,
-      "uncheck"  : []
-    };
-
-
-    // For logging
-    this.pref_term = pref;
-
-    yield next;
+    ctx.body = queryHelper.groupTerms(result);
 };
