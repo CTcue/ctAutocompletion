@@ -13,16 +13,22 @@
         </li>
 
         <li ng-repeat="item in data track by $index">
-            <div class="autosuggest-item full noselect" ng-click="expand($event, item);" ng-class="{ active: item.clicked }">
-                <span class="full capitalized">
-                    <span class="large left">
-                        {{ item.str | limitTo:45 }}{{ item.str.length > 45 ? '...' : ''}}
+            <div class="autosuggest-item full noselect" ng-class="{ active: item.clicked }">
+                <div class="full">
+                    <span class="large left" ng-click="expand($event, item);" style="width: 90%;">
+                        <span class="large left">
+                            {{ item.str | limitTo:45 }}{{ item.str.length > 45 ? '...' : ''}}
+                        </span>
+
+                        <small class="small right cui">
+                            {{ item.cui }}
+                        </small>
                     </span>
 
-                    <small class="small right cui">
-                        {{ item.cui }}
-                    </small>
-                </span>
+                    <span ng-click="copyItem($event, item);" class="right" title="Copy CUI to clipboard">
+                        <i class="icon-clipboard"></i>
+                    </span>
+                </div>
 
                 <small class="full">
                     {{ item.pref | limitTo: 45 }}{{ item.pref.length > 45 ? '...' : ''}}

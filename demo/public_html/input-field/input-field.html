@@ -2,7 +2,7 @@
     <input type="text" placeholder="Zoeken..." ng-model="obj[field]" ng-change="suggest(obj[field])" ng-model-options="{ updateOn: 'blur keyup', debounce: 220 }"
         autocomplete="off" autofocus>
 
-    <div class="empty-state" ng-if="!obj[field] || !obj[field].length">
+    <div class="empty-state" ng-if="showEmptyState && (!obj[field] || !obj[field].length)">
         <div class="empty-search-icon"></div>
 
         <div>

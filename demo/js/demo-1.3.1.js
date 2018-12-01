@@ -22,7 +22,23 @@ angular.module("CTcue:ctAutocompletion")
     $scope.toCompute = {};
     $scope.computations = [];
 
-    $rootScope.$on("add-to-cart", function(event, data) {
+    $scope.addNewTerm = false;
+    $scope.editTerm   = false;
+
+    $scope.Term = {};
+
+    $scope.rows = [
+        {
+            "cui": "C0001969",
+            "lang": "DUT",
+            "sources": "ICPC2ICD10DUT",
+            "types": "T048|DISO",
+            "pref": "alcoholintoxicatie",
+            "synonyms": ["Alcohol Gebruik", "Alcoholabuses", "Meer dingen", "Helemaal huilen", "ben je gekkie", "Alcohol Gebruik", "Alcoholabuses", "Meer dingen", "Helemaal huilen", "ben je gekkie", "Alcohol Gebruik", "Alcoholabuses", "Meer dingen", "Helemaal huilen", "ben je gekkie" ]
+        }
+    ];
+
+    $rootScope.$on("add-to-cart", function($event, data) {
         if (_.has($scope.toCompute, data.key)) {
             _.unset($scope.toCompute, data.key);
         }
@@ -67,12 +83,65 @@ angular.module("CTcue:ctAutocompletion")
         return Object.keys($scope.toCompute).length > 0;
     };
 
-    $scope.expand = function($event, item, key) {
+    $scope.deleteRow = function($event, index) {
         $event.preventDefault();
 
-        _.set(item, "visible", !item.visible);
-        $rootScope.$emit("add-to-cart", { item: item, key: key });
-    };
+        $scope.addNewTerm = false;
+        $scope.editTerm = false;
+
+        $scope.rows.splice(index, 1);
+    }
+
+    $scope.editRow = function($event, index) {
+        $event.preventDefault();
+
+        $scope.Term = angular.copy($scope.rows[index]);
+
+        if ($scope.Term) {
+            $scope.editIndex = index;
+            $scope.addNewTerm = false;
+            $scope.editTerm = true;
+        }
+    }
+
+    $scope.showAddTerm = function() {
+        // Defaults
+        $scope.Term = {
+            "cui": "ct-",
+            "lang": "DUT",
+            "sources": ["CTcue"],
+            "types": ["DISO"],
+            "synonyms": []
+        };
+
+        $scope.addNewTerm = true;
+        $scope.editTerm = false;
+    }
+
+    $scope.addTerm = function(Term) {
+        if (!Term) {
+            return;
+        }
+
+        $scope.rows.push(Term);
+    }
+
+    $scope.updateTerm = function(Term) {
+        if (!Term || !Term.index) {
+            return;
+        }
+
+        var editted = angular.copy(Term);
+
+        delete editted.index;
+
+        $scope.rows[Term.index] = editted;
+    }
+
+    $scope.closeModal = function() {
+        $scope.addNewTerm = false;
+        $scope.editTerm = false;
+    }
 
     function getTermValues(selected) {
         var left = selected[0];
@@ -131,6 +200,7 @@ angular
     return {
         restrict: "E",
         scope: {
+            showEmptyState: "@",
             obj: "="
         },
         templateUrl : "public_html/input-field/input-field.html",
@@ -262,6 +332,43 @@ angular
                         $rootScope.$emit("add-to-cart", { item: item, key: item.str + ":" + scope.api });
                     });
             }
+
+            scope.copyItem = function($event, item) {
+                $event.stopPropagation();
+
+                navigator.clipboard.writeText(item.cui)
+                    .then(function() { });
+            }
         }
+    }
+});
+
+angular
+.module("CTcue:ctAutocompletion")
+.directive("resizer", function () {
+    return {
+        restrict: "A",
+        link(scope, element) {
+            element.on("focus input change", () => {
+                const text = element[0].value;
+                const lines = 1 + (text.match(/\n/g) || []).length;
+
+                if (lines > 4) {
+                    element[0].rows = lines;
+                }
+                else {
+                    element[0].rows = 4;
+                }
+            });
+        },
+    };
+});
+
+angular
+.module("CTcue:ctAutocompletion")
+.directive("menu", function() {
+    return {
+        restrict: "E",
+        templateUrl : "public_html/menu.html",
     }
 });

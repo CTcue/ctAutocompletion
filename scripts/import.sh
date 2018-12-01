@@ -8,4 +8,4 @@ SCRIPTDIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 (cd $SCRIPTDIR && node es-mapping.js)
 
 # Read all concepts and bulk upload them to Elasticsearch
-(cd $SCRIPTDIR && less ./output/concepts.txt | node elasticsearch.js $*)
+(cd $SCRIPTDIR && less ./output/*.txt | node elasticsearch.js $*)
