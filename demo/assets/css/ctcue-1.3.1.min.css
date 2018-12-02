@@ -385,6 +385,9 @@ form h3 {
     font-weight: 400
 }
 
+button {
+    cursor: pointer;
+}
 
 label {
     display: block;
@@ -737,6 +740,11 @@ ul li .nested {
     text-align: right;
 }
 
+.concept-form .form-action button {
+    margin: 4px;
+    padding: 3px 6px;
+}
+
 .form-buttons button {
     margin-right: 16px;
     padding: 5px 8px;
@@ -747,11 +755,18 @@ ul li .nested {
     border: 0;
 }
 
-.add-button {
+.add-button, .download-button {
     background: none;
-    border: 1px dotted #5bbfe1;
+    padding: 6px 12px !important;
+}
 
+.add-button {
     color: #5bbfe1;
     min-width: 100px;
-    padding: 6px 12px !important;
+    border: 1px dotted #5bbfe1;
+}
+
+.download-button {
+    border: 0;
+    background: #eee;
 }

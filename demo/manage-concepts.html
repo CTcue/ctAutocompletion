@@ -36,11 +36,18 @@
                             <th>Sources</th>
                             <th>Types</th>
                             <th>Preferred term</th>
-                            <th>Synonyms</th>
+
+                            <th>
+                                <span class="left">Synonyms</span>
+
+                                <button class="right download-button" ng-click="download();">
+                                    <i class="icon-download"></i>
+                                </button>
+                            </th>
 
                             <th class="actions">
                                 <button class="right add-button" ng-click="showAddTerm();">
-                                    Add term
+                                    + Concept
                                 </button>
                             </th>
                         <tr>
@@ -78,8 +85,18 @@
 
                         <div class="full add-top">
                             <div class="small left">
-                                <label>CUI</label>
-                                <input type="text" ng-model="Term.cui">
+                                <div class="large left">
+                                    <label>CUI</label>
+                                    <input type="text" ng-model="Term.cui">
+                                </div>
+
+                                <div class="tiny left form-action">
+                                    <label>&nbsp;</label>
+
+                                    <button ng-click="createId(Term);">
+                                        <i class="icon-restore"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="tiny left">

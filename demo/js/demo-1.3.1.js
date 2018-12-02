@@ -24,19 +24,20 @@ angular.module("CTcue:ctAutocompletion")
 
     $scope.addNewTerm = false;
     $scope.editTerm   = false;
+    $scope.editIndex  = null;
 
     $scope.Term = {};
+    $scope.rows = [];
 
-    $scope.rows = [
-        {
-            "cui": "C0001969",
-            "lang": "DUT",
-            "sources": "ICPC2ICD10DUT",
-            "types": "T048|DISO",
-            "pref": "alcoholintoxicatie",
-            "synonyms": ["Alcohol Gebruik", "Alcoholabuses", "Meer dingen", "Helemaal huilen", "ben je gekkie", "Alcohol Gebruik", "Alcoholabuses", "Meer dingen", "Helemaal huilen", "ben je gekkie", "Alcohol Gebruik", "Alcoholabuses", "Meer dingen", "Helemaal huilen", "ben je gekkie" ]
+    try {
+        var saved = localStorage.getItem("ct-autocompletion-rows");
+
+        if (saved !== null) {
+            $scope.rows = JSON.parse(saved);
         }
-    ];
+    }
+    catch (err) {}
+
 
     $rootScope.$on("add-to-cart", function($event, data) {
         if (_.has($scope.toCompute, data.key)) {
@@ -45,6 +46,11 @@ angular.module("CTcue:ctAutocompletion")
         else {
             $scope.toCompute[data.key] = data.item;
         }
+    });
+
+    $rootScope.$on("concepts-update", function($event, data) {
+        // Autosave to localStorage
+        localStorage.setItem("ct-autocompletion-rows", JSON.stringify($scope.rows));
     });
 
     $scope.computeDifferences = function(selected) {
@@ -83,13 +89,61 @@ angular.module("CTcue:ctAutocompletion")
         return Object.keys($scope.toCompute).length > 0;
     };
 
+    $scope.download = function() {
+        var output = "";
+
+        for (let i = 0; i < $scope.rows.length; i++) {
+            var Term = $scope.rows[i];
+            var tmp = [];
+
+            tmp.push(multiValue(Term.cui));
+            tmp.push(multiValue(Term.lang));
+            tmp.push(multiValue(Term.sources));
+            tmp.push(multiValue(Term.types));
+            tmp.push(multiValue(Term.pref));
+            tmp.push(multiValue(Term.synonyms));
+
+            output += tmp.join("\t") + "\n";
+        }
+
+        var link = document.createElement("a");
+        var data = "text/plain;charset=utf-8," + encodeURIComponent(output);
+
+        link.download = "custom-concepts.tsv";
+        link.href = "data:" + data;
+        link.click();
+    }
+
+    function multiValue(s) {
+        if (Array.isArray(s)) {
+            return s.join("|");
+        }
+
+        return s;
+    }
+
+    $scope.createId = function(Term) {
+        if (!Term) {
+            return;
+        }
+
+        if (Term.pref && Term.pref.length) {
+            Term.cui = "ct-" + hashy((Term.lang||"DUT") + Term.pref);
+        }
+        else {
+            Term.cui = "ct-" + new Date().valueOf();
+        }
+    };
+
     $scope.deleteRow = function($event, index) {
         $event.preventDefault();
 
         $scope.addNewTerm = false;
         $scope.editTerm = false;
+        $scope.editIndex = null;
 
         $scope.rows.splice(index, 1);
+        $rootScope.$emit("concepts-update", null);
     }
 
     $scope.editRow = function($event, index) {
@@ -105,7 +159,7 @@ angular.module("CTcue:ctAutocompletion")
     }
 
     $scope.showAddTerm = function() {
-        // Defaults
+        // Default values
         $scope.Term = {
             "cui": "ct-",
             "lang": "DUT",
@@ -114,6 +168,7 @@ angular.module("CTcue:ctAutocompletion")
             "synonyms": []
         };
 
+        $scope.editIndex = null;
         $scope.addNewTerm = true;
         $scope.editTerm = false;
     }
@@ -124,24 +179,23 @@ angular.module("CTcue:ctAutocompletion")
         }
 
         $scope.rows.push(Term);
+        $rootScope.$emit("concepts-update", Term);
     }
 
     $scope.updateTerm = function(Term) {
-        if (!Term || !Term.index) {
+        if (!Term || $scope.editIndex === null) {
             return;
         }
 
-        var editted = angular.copy(Term);
-
-        delete editted.index;
-
-        $scope.rows[Term.index] = editted;
+        $scope.rows[$scope.editIndex] = angular.copy(Term);
+        $rootScope.$emit("concepts-update", Term);
     }
 
     $scope.closeModal = function() {
         $scope.addNewTerm = false;
         $scope.editTerm = false;
     }
+
 
     function getTermValues(selected) {
         var left = selected[0];
@@ -165,6 +219,22 @@ angular.module("CTcue:ctAutocompletion")
             .replace(/[^a-z0-9 ]/gi, " ")
             .replace(/\s+/g, " ")
             .trim();
+    }
+
+    function hashy(text) {
+        var hash = 0, i, chr;
+
+        if (text.length === 0) {
+            return hash;
+        }
+
+        for (i = 0; i < text.length; i++) {
+            chr = text.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+
+        return hash;
     }
 }
 ]);
