@@ -1667,17 +1667,15 @@ koa-is-json@^1.0.0:
   resolved "https://registry.yarnpkg.com/koa-is-json/-/koa-is-json-1.0.0.tgz#273c07edcdcb8df6a2c1ab7d59ee76491451ec14"
   integrity sha1-JzwH7c3Ljfaiwat9We52SRRR7BQ=
 
-koa-router@7.4.0:
-  version "7.4.0"
-  resolved "https://registry.yarnpkg.com/koa-router/-/koa-router-7.4.0.tgz#aee1f7adc02d5cb31d7d67465c9eacc825e8c5e0"
-  integrity sha512-IWhaDXeAnfDBEpWS6hkGdZ1ablgr6Q6pGdXCyK38RbzuH4LkUOpPqPw+3f8l8aTDrQmBQ7xJc0bs2yV4dzcO+g==
+koa-router@5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/koa-router/-/koa-router-5.4.0.tgz#2c4e67b0126b97263fdf24493ab2efb4c4c661c3"
+  integrity sha1-LE5nsBJrlyY/3yRJOrLvtMTGYcM=
   dependencies:
-    debug "^3.1.0"
+    debug "^2.2.0"
     http-errors "^1.3.1"
-    koa-compose "^3.0.0"
     methods "^1.0.1"
     path-to-regexp "^1.1.1"
-    urijs "^1.19.0"
 
 koa@2.7.0:
   version "2.7.0"
@@ -1919,10 +1917,10 @@ minimist@0.0.8:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
   integrity sha1-hX/Kv8M5fSYluCKCYuhqp6ARsF0=
 
-minimist@^1.1.0, minimist@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
-  integrity sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=
+minimist@^1.1.0, minimist@^1.2.0, minimist@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.3.tgz#3db5c0765545ab8637be71f333a104a965a9ca3f"
+  integrity sha512-+bMdgqjMN/Z77a6NlY/I3U5LlRDbnmaAk6lDveAPKwSpcPM4tKAuYsvYF8xjhOPXhOYGe/73vVLVez5PW+jqhw==
 
 minimist@~0.0.1:
   version "0.0.10"
@@ -3156,11 +3154,6 @@ uri-js@^4.2.2:
   integrity sha512-KY9Frmirql91X2Qgjry0Wd4Y+YTdrdZheS8TFwvkbLWf/G5KNJDCh6pKL5OZctEW4+0Baa5idK2ZQuELRwPznQ==
   dependencies:
     punycode "^2.1.0"
-
-urijs@^1.19.0:
-  version "1.19.1"
-  resolved "https://registry.yarnpkg.com/urijs/-/urijs-1.19.1.tgz#5b0ff530c0cbde8386f6342235ba5ca6e995d25a"
-  integrity sha512-xVrGVi94ueCJNrBSTjWqjvtgvl3cyOTThp2zaMaFNGp3F542TR6sM3f2o8RqZl+AwteClSVmoCyt0ka4RjQOQg==
 
 urix@^0.1.0:
   version "0.1.0"
