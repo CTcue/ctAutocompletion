@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
             bulk.append({
                 "_index": "dbc_zorgproduct",
-                "_type": "diagnosis",
+                "_type": "_doc",
 
                 "label"     : row["DIAGNOSE_OMSCHRIJVING"],
                 "code"      : row["DIAGNOSE_CD"],
