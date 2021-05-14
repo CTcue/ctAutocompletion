@@ -2,14 +2,10 @@
 const _ = require("lodash");
 const config  = require("../config/config.js");
 
-const elastic = require("elasticsearch");
+const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": "localhost",
-      "auth": config.elasticsearch.auth
-    }
-  ]
+    "node": config.elasticsearch.host,
+    "auth": config.elasticsearch.auth
 });
 
 

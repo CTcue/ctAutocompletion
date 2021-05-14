@@ -7,10 +7,12 @@ let config = {
     "port" : 4080,
 
     "elasticsearch": {
-        "version": "5.4",
-        "host"   : "localhost",
-        "port"   : 9200,
-        "auth"   : ""
+        "version": "7.12",
+        "host"   : "http://localhost:9200",
+        "auth"   : {
+            "username": "elastic",
+            "password": "changeme"
+        }
     },
 
     "mongodb": {

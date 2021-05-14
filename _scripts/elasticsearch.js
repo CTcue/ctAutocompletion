@@ -4,20 +4,18 @@ const _        = require("lodash");
 const argv     = require("minimist")(process.argv.slice(2));
 const split2   = require("split2");
 const through2 = require("through2");
+const config = require("../config/config");
+const elastic = require("@elastic/elasticsearch");
 
-const elastic = require("elasticsearch");
+
 const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": "localhost",
-      "auth": config.elasticsearch.auth
-    }
-  ]
+    "node": config.elasticsearch.host,
+    "auth": config.elasticsearch.auth
 });
 const ElasticsearchBulkIndexStream = require("elasticsearch-writable-stream");
 
 const index = argv.index || "autocomplete";
-const type  = argv.type  || "records";
+const type  = argv.type  || "_doc";
 
 
 /////
@@ -33,7 +31,6 @@ var buildRecords = through2({ "objectMode": true }, function(chunk, enc, callbac
     var line = chunk.toString().trim();
 
     // (CUI, LAT, SAB, TYPES, PREF, TERMS)
-
     if (line && line.length) {
         var parts = line.split("\t");
 

@@ -7,19 +7,14 @@
 
 */
 
-const config = require("../../config/config.js");
+const config = require("../../config/config");
 
 const _ = require("lodash");
 const string = require("../../lib/string");
-
-const elastic = require("elasticsearch");
+const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": "localhost",
-      "auth": config.elasticsearch.auth
-    }
-  ],
+    "node": config.elasticsearch.host,
+    "auth": config.elasticsearch.auth
 });
 
 
@@ -29,7 +24,6 @@ const source = ["cui", "str", "pref"];
 module.exports = function *() {
     var body = this.request.body;
     var query = _.deburr(body.query);
-
 
     // Search for suggestions in Elasticsearch
     var exactMatches = yield findExact(query);
@@ -113,7 +107,6 @@ function findExact(query) {
 
 function findMatches(query) {
     var queryObj = {};
-
     queryObj["index"] = "autocomplete";
     queryObj["body"] =  {
         "_source": source,
@@ -138,7 +131,6 @@ function findMatches(query) {
 
 function spellingMatches(query) {
     var queryObj = {};
-
     queryObj["index"] = "autocomplete";
     queryObj["body"] =  {
         "_source": source,
@@ -162,16 +154,17 @@ function spellingMatches(query) {
 
 function getResults (queryObj) {
     return function(callback) {
-        elasticClient.search(queryObj, function(err, res) {
+        elasticClient.search(queryObj, function(err, esRes) {
             if (err) {
-                console.erorr("[ERROR elastic]", err);
+                console.error("[ERROR elastic]", err);
                 return callback(false, { "error": true, "took": 10, "hits": []})
             }
 
+            var res = esRes.body;
             var hits = res.hits;
             var result = [];
 
-            if (hits && hits.total > 0) {
+            if (hits && hits.total.value > 0) {
                 result = hits.hits.map(function(hit) {
                     return hit["_source"];
                 });

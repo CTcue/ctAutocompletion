@@ -13,14 +13,10 @@ const _ = require("lodash");
 const string = require("../lib/string");
 const queryHelper = require("../lib/queryHelper");
 
-const elastic = require("elasticsearch");
+const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": "localhost",
-      "auth": config.elasticsearch.auth
-    }
-  ]
+    "node": config.elasticsearch.host,
+    "auth": config.elasticsearch.auth
 });
 
 const language_map = {
@@ -60,12 +56,12 @@ module.exports = function *(next) {
     };
 
     var cuiResult = yield function(callback) {
-        elasticClient.search(queryObj, function(err, resp) {
+        elasticClient.search(queryObj, function(err, esRes) {
             if (err) {
                 callback(false, false);
             }
 
-            callback(false, _.get(resp, "hits.hits.0._source") || false);
+            callback(false, _.get(esRes.body, "hits.hits.0._source") || false);
         });
     };
 

@@ -33,52 +33,44 @@
     },
 
     "mappings" : {
-        "records": {
-            "_all" : {
-                "enabled" : false
+        "properties": {
+            "cui": {
+                 "type": "text",
+                 "index" : true
             },
 
-            "properties": {
-                "cui": {
-                     "type": "string",
-                     "index" : "not_analyzed"
-                },
+            "str": {
+                "type": "text",
+                "analyzer": "autocomplete"
+            },
 
-                "str": {
-                    "type": "string",
-                    "analyzer": "autocomplete",
-                    "search_analyzer": "standard"
-                },
+            "exact": {
+                "type": "text",
+                "analyzer": "folding"
+            },
 
-                "exact": {
-                    "type": "string",
-                    "analyzer": "folding",
-                    "search_analyzer": "keyword"
-                },
+            "pref": {
+                 "type": "text",
+                 "index" : true
+            },
 
-                "pref": {
-                     "type": "string",
-                     "index" : "not_analyzed"
-                },
+            "source": {
+                 "type": "text",
+                 "index" : true
+            },
 
-                "source": {
-                     "type": "string",
-                     "index" : "not_analyzed"
-                },
+            "lang": {
+                 "type": "text",
+                 "index" : true
+            },
 
-                "lang": {
-                     "type": "string",
-                     "index" : "not_analyzed"
-                },
+            "types": {
+                 "type": "text",
+                 "index" : true
+            },
 
-                "types": {
-                     "type": "string",
-                     "index" : "not_analyzed"
-                },
-
-                "votes": {
-                      "type": "integer"
-                }
+            "votes": {
+                  "type": "integer"
             }
         }
     }

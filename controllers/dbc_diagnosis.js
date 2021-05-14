@@ -2,14 +2,10 @@
 const _ = require("lodash");
 const config  = require("../config/config.js");
 
-const elastic = require("elasticsearch");
+const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": "localhost",
-      "auth": config.elasticsearch.auth
-    }
-  ]
+    "node": config.elasticsearch.host,
+    "auth": config.elasticsearch.auth
 });
 
 
@@ -25,7 +21,7 @@ module.exports = function *() {
     var result = yield function(callback) {
         elasticClient.search({
           "index" : "dbc_zorgproduct",
-          "type": "diagnosis",
+          "type": "_doc",
           "size": 500,
 
           "body" : {
@@ -36,9 +32,10 @@ module.exports = function *() {
                }
           }
         },
-        function(err, resp) {
-            if (resp && !!resp.hits && resp.hits.total > 0) {
-                var hits = resp.hits.hits;
+        function(err, esRes) {
+            var res = esRes.body;
+            if (res && !!res.hits && res.hits.total > 0) {
+                var hits = res.hits.hits;
                 var sources = hits.map(function(s) {
                     return {
                         "label"  : s["_source"]["label"],

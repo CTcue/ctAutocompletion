@@ -15,34 +15,28 @@
     },
 
     "mappings" : {
-        "records": {
-            "_all" : {
-                "enabled" : false
-            },
-
-            "properties": {
+      "properties": {
                 "diagnose": {
-                    "type": "string"
+                    "type": "text"
                 },
 
                 "code": {
-                    "type": "string",
+                    "type": "text",
                     "analyzer": "folding",
                     "search_analyzer": "keyword"
                 },
 
                 "product_code": {
-                    "type": "string",
+                    "type": "text",
                     "analyzer": "folding",
                     "search_analyzer": "keyword"
                 },
 
                 "specialism": {
-                    "type": "string",
+                    "type": "text",
                     "analyzer": "folding",
                     "search_analyzer": "keyword"
                 }
             }
-        }
     }
 }

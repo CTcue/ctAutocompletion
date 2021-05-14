@@ -5,14 +5,10 @@ const config  = require("../config/config.js");
 
 const _ = require("lodash");
 
-const elastic = require("elasticsearch");
+const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
-  "host": [
-    {
-      "host": "localhost",
-      "auth": config.elasticsearch.auth
-    }
-  ],
+    "node": config.elasticsearch.host,
+    "auth": config.elasticsearch.auth
 });
 
 const source = ["cui", "str", "exact", "pref","types"];
@@ -67,7 +63,7 @@ function findExact(query) {
             "body"  : elastic_query
         };
 
-        elasticClient.search(queryObj, function(err, res) {
+        elasticClient.search(queryObj, function(err, esRes) {
             if (err) {
                 return callback(false, {
                     "took": 0,
@@ -76,6 +72,7 @@ function findExact(query) {
                 })
             }
 
+            var res = esRes.body;
             var hits = res.hits;
             var result = [];
 

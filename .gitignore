@@ -21,3 +21,4 @@ node_modules
 uploads/
 package-lock.json
 local_*
+.idea/

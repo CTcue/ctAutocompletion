@@ -7,7 +7,8 @@ set -e
 
 
 # Clear elasticsearch
-python clear_elasticsearch.py --src AUTOCOMPLETE $*
+python3.8 clear_elasticsearch.py --src AUTOCOMPLETE $*
+#python3.8 clear_elasticsearch.py --src DBC $*
 
 # Install script dependencies
 npm install
