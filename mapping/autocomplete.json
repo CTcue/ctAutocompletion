@@ -1,26 +1,26 @@
 {
-    "settings" : {
-        "number_of_shards"   : 1,
-        "number_of_replicas" : 0,
-
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
         "analysis": {
             "filter": {
                 "autocomplete_filter": {
-                    "type"     : "edge_ngram",
-                    "min_gram" : 1,
-                    "max_gram" : 20
+                    "type": "edge_ngram",
+                    "min_gram": 1,
+                    "max_gram": 20
                 }
             },
-
             "analyzer": {
                 "folding": {
                     "type": "custom",
                     "tokenizer": "keyword",
-                    "filter": [ "lowercase", "asciifolding" ]
+                    "filter": [
+                        "lowercase",
+                        "asciifolding"
+                    ]
                 },
-
                 "autocomplete": {
-                    "type":      "custom",
+                    "type": "custom",
                     "tokenizer": "standard",
                     "filter": [
                         "lowercase",
@@ -31,46 +31,33 @@
             }
         }
     },
-
-    "mappings" : {
+    "mappings": {
         "properties": {
             "cui": {
-                 "type": "text",
-                 "index" : true
+                "type": "keyword"
             },
-
             "str": {
                 "type": "text",
                 "analyzer": "autocomplete"
             },
-
             "exact": {
                 "type": "text",
                 "analyzer": "folding"
             },
-
             "pref": {
-                 "type": "text",
-                 "index" : true
+                "type": "text"
             },
-
             "source": {
-                 "type": "text",
-                 "index" : true
+                "type": "text",
+                "index": false
             },
-
             "lang": {
-                 "type": "text",
-                 "index" : true
+                "type": "text",
+                "index": false
             },
-
             "types": {
-                 "type": "text",
-                 "index" : true
-            },
-
-            "votes": {
-                  "type": "integer"
+                "type": "text",
+                "index": false
             }
         }
     }

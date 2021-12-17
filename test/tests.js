@@ -63,11 +63,17 @@ describe("test autocomplete queries", function () {
                 const body = res.body;
                 expect(body.hits.length).toBeGreaterThan(0);
 
+                const cuis = body.hits.map((h) => { return h.cui });
+                const terms = body.hits.map((h) => { return h.str.toLowerCase() });
+
+                expect(cuis.join("\n")).toContain("C0020538");
+                expect(terms.join("\n")).toContain("hypertensie");
+
                 done();
             });
     });
 
-    it ("can autocomplete with single letter query", function(done) {
+    it("can autocomplete with single letter query", function(done) {
         agent
             .post("/v2/autocomplete")
             .send({ "query": "a" })
@@ -81,7 +87,7 @@ describe("test autocomplete queries", function () {
             });
     });
 
-    it ("can autocomplete with multiple partial phrases", function(done) {
+    it("can autocomplete with multiple partial phrases", function(done) {
         agent
             .post("/v2/autocomplete")
             .send({ "query": "anky spon" })
@@ -91,17 +97,22 @@ describe("test autocomplete queries", function () {
                 const body = res.body;
                 expect(body.hits.length).toBeGreaterThan(0);
 
+                const terms = body.hits.map((h) => { return h.str.toLowerCase() });
+                expect(terms.join("\n")).toContain("ankylosing spondylitis")
+
                 done();
             });
     });
 
-    it ("can expand a term to obtain synonyms (by CUI)", function(done) {
+    it("can expand a term to obtain synonyms (by CUI)", function(done) {
         agent
             .post("/expand")
-            .send({ "query" : "C0003090" })
+            .send({ "query": "C0020538" }) // Hypertension
             .end(function(err, res) {
-                expect(200, res.status);
-                // TODO: console.log
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.terms.length).toBeGreaterThan(1);
 
                 done();
             });

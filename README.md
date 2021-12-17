@@ -11,15 +11,23 @@ Find relevant UMLS terms based on user input. The autocompletion algorithm prior
 
 ```
 yarn install
-
-pip install -r requirements.txt
 ```
 
-* Either obtain a copy of our processed `output` directory or create your own `concepts.txt` file
+* Either obtain a copy of our processed `output` directory or create your own file
     * `ai-data > synonym-files > autocompletion_concepts.txt`
     * See below [for an example of the file format](#format-concepts)
-* Put the `output` directory in `ctAutocompletion/_scripts/`
-* Finally, run `bash ./_scripts/bulkUpload.sh`
+
+* Put the `output` directory in `./scripts/` so you have a `./scripts/output/concepts.txt`
+
+* To get an elasticsearch index with terms:
+
+```
+cd scripts
+
+bash import.sh
+```
+
+> It will take a few minutes to upload all the terms to the index
 
 ## Running demo
 

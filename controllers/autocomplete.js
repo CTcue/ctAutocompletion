@@ -32,7 +32,6 @@ module.exports = function *() {
         exactHits =  _.uniqBy(exactMatches.hits, s => s["pref"].trim().replace("-", " ").toLowerCase());
     }
 
-
     // If no matches -> attempt spelling fixes
     var closeMatches = yield findMatches(query);
     var misspelledMatches = { "hits": [] };
