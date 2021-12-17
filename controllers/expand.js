@@ -7,118 +7,114 @@
 
 */
 
-const config  = require("../config/config.js");
-
+const _ = require("lodash");
+const config = require("../config/config.js");
 const string = require("../lib/string");
 
-const _ = require("lodash");
 const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
     "node": config.elasticsearch.host,
     "auth": config.elasticsearch.auth
 });
 
+module.exports = function* () {
+    var body = this.request.body;
+    var cui = _.get(body, "query") || null;
+
+    if (!cui) {
+        this.body = { "terms": [] }
+    }
+
+    if (_.isArray(cui)) {
+        var result = yield function (callback) {
+            elasticClient.search({
+                "index": "autocomplete",
+                "size": 1000,
+
+                "sort": ["_doc"],
+                "_source": ["cui", "pref", "str"],
+
+                "body": {
+                    "query": {
+                        "terms": {
+                            "cui": _.filter(cui)
+                        }
+                    }
+                }
+            },
+                function (err, resp) {
+                    if (resp && !!resp.hits && resp.hits.total > 0) {
+                        callback(false, resp.hits.hits);
+                    }
+                    else {
+                        callback(err, []);
+                    }
+                });
+        };
+
+        if (result && result.length > 0) {
+            var terms = {};
+
+            result.forEach(function (s) {
+                var key = s._source.cui;
+
+                // Filter long terms (hacky for now)
+                if (s._source.str.length > 30) {
+                    return;
+                }
+
+                if (terms.hasOwnProperty(s._source.cui)) {
+                    terms[key].push(s._source.str);
+                }
+                else {
+                    terms[key] = [s._source.str]
+                }
+            });
 
 
-module.exports = function *() {
-  var body = this.request.body;
-  var cui  = _.get(body, "query") || null;
+            for (var k in terms) {
+                terms[k] = _.uniqBy(terms[k], string.compareFn);
+            }
 
-  if (!cui) {
-      this.body = { "terms": [] }
-  }
+            return this.body = terms;
+        }
 
-  if (_.isArray(cui)) {
-      var result = yield function(callback) {
-          elasticClient.search({
-              "index" : "autocomplete",
-              "size": 1000,
+    }
+    else {
+        var result = yield function (callback) {
+            elasticClient.search({
+                "index": "autocomplete",
+                "size": 100,
 
-              "sort": ["_doc"],
-              "_source": ["cui", "pref", "str"],
+                "sort": ["_doc"],
+                "_source": ["str"],
 
-              "body" : {
-                  "query" : {
-                      "terms" : {
-                          "cui" : _.filter(cui)
-                      }
-                  }
-              }
-          },
-          function(err, resp) {
-              if (resp && !!resp.hits && resp.hits.total > 0) {
-                  callback(false, resp.hits.hits);
-              }
-              else {
-                  callback(err, []);
-              }
-          });
-      };
+                "body": {
+                    "query": {
+                        "term": {
+                            "cui": this.request.body.query
+                        }
+                    }
+                }
+            },
+                function (err, resp) {
+                    if (resp && !!resp.hits && resp.hits.total > 0) {
+                        callback(false, resp.hits.hits);
+                    }
+                    else {
+                        callback(err, []);
+                    }
+                });
+        };
 
-      if (result && result.length > 0) {
-          var terms = {};
+        if (result && result.length > 0) {
+            var terms = result.map(s => s._source.str);
 
-          result.forEach(function(s) {
-              var key = s._source.cui;
+            return this.body = {
+                "terms": _.uniqBy(terms, string.compareFn),
+            };
+        }
+    }
 
-              // Filter long terms (hacky for now)
-              if (s._source.str.length > 30) {
-                  return;
-              }
-
-              if (terms.hasOwnProperty(s._source.cui)) {
-                  terms[key].push(s._source.str);
-              }
-              else {
-                  terms[key] = [s._source.str]
-              }
-          });
-
-
-          for (var k in terms) {
-              terms[k] = _.uniqBy(terms[k], string.compareFn);
-          }
-
-          return this.body = terms;
-      }
-
-  }
-  else {
-      var result = yield function(callback) {
-          elasticClient.search({
-              "index" : "autocomplete",
-              "size": 100,
-
-              "sort": ["_doc"],
-              "_source": ["str"],
-
-              "body" : {
-                  "query" : {
-                      "term" : {
-                          "cui" : this.request.body.query
-                       }
-                   }
-              }
-          },
-          function(err, resp) {
-              if (resp && !!resp.hits && resp.hits.total > 0) {
-                  callback(false, resp.hits.hits);
-              }
-              else {
-                  callback(err, []);
-              }
-          });
-      };
-
-      if (result && result.length > 0) {
-          var terms = result.map(s => s._source.str);
-
-          return this.body = {
-              "terms" : _.uniqBy(terms, string.compareFn),
-          };
-      }
-  }
-
-
-  this.body = { "terms": [] }
+    this.body = { "terms": [] };
 };

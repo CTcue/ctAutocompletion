@@ -24,6 +24,7 @@ const language_map = {
     "ENG" : "english"
 };
 
+/** @deprecated */
 module.exports = function *(next) {
     var body = this.request.body;
 
@@ -140,5 +141,6 @@ module.exports = function *(next) {
 
     // For logging
     this.pref_term = pref;
+
     yield next;
 };

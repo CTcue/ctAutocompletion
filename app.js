@@ -34,21 +34,25 @@ app.use(bodyParser);
 /////
 // API
 
-const autocompletion = require('./controllers/autocompletion/v2.js');
-
-const term_lookup      = require('./controllers/term_lookup.js');
-const expandGrouped    = require('./controllers/expand_grouped.js');
-const expandByString   = require('./controllers/expand_by_string.js');
-
 router['get']('/', function *() {
     this.body = {
         "version" : version
     };
 });
 
+const autocompletion = require('./controllers/autocomplete.js');
 router['post']('/v2/autocomplete', extractUserId, autocompletion);
-router['post']('/term_lookup', term_lookup);
+
+const expand = require('./controllers/expand.js');
+router['post']('/expand', extractUserId, expand);
+
+/////
+// V2 end-points (deprecated)
+
+const expandGrouped    = require('./controllers/expand_grouped.js');
 router['post']('/expand-grouped', extractUserId, expandGrouped);
+
+const expandByString   = require('./controllers/expand_by_string.js');
 router['post']('/expand-by-string', extractUserId, expandByString);
 
 const port = process.env.PORT || config.port;

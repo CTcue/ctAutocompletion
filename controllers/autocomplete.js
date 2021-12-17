@@ -3,7 +3,7 @@
 
     curl -X POST -H "Content-Type: application/json" -d "{
         "query": "myo inf"
-    }" "http://localhost:4080/autocomplete"
+    }" "http://localhost:4080/v2/autocomplete"
 
 */
 

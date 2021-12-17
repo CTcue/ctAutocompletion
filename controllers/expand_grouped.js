@@ -18,6 +18,7 @@ const language_map = {
     "ENG" : "english"
 };
 
+/** @deprecated */
 module.exports = function *(next) {
     var cui = this.request.body.query || "";
 
