@@ -26,24 +26,22 @@ const language_map = {
 
 /** @deprecated */
 module.exports = function *(next) {
-    var body = this.request.body;
-
-    var term = _.get(body, "query") || null;
+    const body = this.request.body;
+    const term = _.get(body, "query") || null;
 
     if (!term || term.length < 3) {
         this.body = null;
         return;
     }
 
-
     // Exact term is indexed without dashes
-    var wantedTerm = term
+    const wantedTerm = term
         .replace(/-/g, " ")
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
 
-    var queryObj = {
+    const queryObj = {
         "index" : "autocomplete",
         "size"  : 1,
 
@@ -56,7 +54,7 @@ module.exports = function *(next) {
         }
     };
 
-    var cuiResult = yield function(callback) {
+    const cuiResult = yield function(callback) {
         elasticClient.search(queryObj, function(err, esRes) {
             if (err) {
                 callback(false, false);
@@ -66,16 +64,14 @@ module.exports = function *(next) {
         });
     };
 
-
     if (!cuiResult) {
         this.body = null;
         return;
     }
 
-
-    var result      = yield queryHelper.getTermsByCui(_.get(cuiResult, "cui"));
-    var pref        = "";
-    var found_terms = [];
+    const result      = yield queryHelper.getTermsByCui(_.get(cuiResult, "cui"));
+    const pref        = "";
+    const found_terms = [];
 
     if (result) {
         types       = result[0];
@@ -88,14 +84,14 @@ module.exports = function *(next) {
 
 
     // Group terms by label / language
-    var terms = {
+    const terms = {
         "custom"   : [],
         "suggested": []
     };
 
-    for (var i=0; i < found_terms.length; i++) {
-        var t = found_terms[i];
-        var key = "custom";
+    for (let i=0; i < found_terms.length; i++) {
+        const t = found_terms[i];
+        let key = "custom";
 
         // Skip two letter abbreviations
         if (!t["str"] || t["str"].length < 3) {
@@ -121,16 +117,15 @@ module.exports = function *(next) {
     // - Remove empty key/values
     // - Sort terms by their length
 
-    for (var k in terms) {
-        if (! terms[k].length) {
+    for (let k in terms) {
+        if (!terms[k].length) {
             delete terms[k];
         }
         else {
-            var unique = _.uniqBy(terms[k], s => string.forComparison(s));
-            terms[k]   = _.sortBy(unique, "length");
+            const unique = _.uniqBy(terms[k], s => string.forComparison(s));
+            terms[k] = _.sortBy(unique, "length");
         }
     }
-
 
     this.body = {
       "cui"      : _.get(cuiResult, "cui") || null,

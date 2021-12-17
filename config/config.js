@@ -15,10 +15,6 @@ let config = {
         }
     },
 
-    "mongodb": {
-        "path" : "mongodb://localhost/umls"
-    },
-
     "api_token": "API_TOKEN"
 };
 

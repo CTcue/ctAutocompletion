@@ -1,6 +1,0 @@
-{
-    "moduleFileExtensions": ["js", "json"],
-    "testRegex": "test/e2e/.*\\.js$",
-    "testPathIgnorePatterns": ["/node_modules/"],
-    "testEnvironment": "node"
-}

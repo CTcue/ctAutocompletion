@@ -7,19 +7,17 @@
 
 */
 
-const config = require("../../config/config");
-
 const _ = require("lodash");
-const string = require("../../lib/string");
+const config = require("../config/config");
+const string = require("../lib/string");
+
 const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
     "node": config.elasticsearch.host,
     "auth": config.elasticsearch.auth
 });
 
-
 const source = ["cui", "str", "pref"];
-
 
 module.exports = function *() {
     var body = this.request.body;
@@ -57,10 +55,8 @@ module.exports = function *() {
     };
 };
 
-
 // Groups by CUI and strips "pref" if it"s exactly the same as str
 function reducePayload(terms) {
-
     var result = [];
     var grouped = _.groupBy(terms, "cui");
 
@@ -83,7 +79,6 @@ function reducePayload(terms) {
 
     return result;
 }
-
 
 function findExact(query) {
     // Exact term is indexed without dashes
@@ -127,8 +122,6 @@ function findMatches(query) {
     return getResults(queryObj);
 }
 
-
-
 function spellingMatches(query) {
     var queryObj = {};
     queryObj["index"] = "autocomplete";
@@ -150,7 +143,6 @@ function spellingMatches(query) {
 
     return getResults(queryObj);
 }
-
 
 function getResults (queryObj) {
     return function(callback) {
@@ -178,14 +170,11 @@ function getResults (queryObj) {
     }
 }
 
-
-
 // Add custom terms if there is a certain pattern:
 // - Gleason score 5
 // - Diabetes mellitus type 2
 // - Diabetes mellitus type II
 // - etc.
-
 function generateTerms(unique, strings) {
     var generated = _.map(strings, string.replaceAppendix);
 
