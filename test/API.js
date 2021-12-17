@@ -11,27 +11,6 @@ var assert  = require('assert');
 
 
 describe('API', function () {
-
-  it ('GET "/"', function(done) {
-    request
-      .get('/')
-      .end(function(err, res) {
-          assert.equal(200, res.status);
-          done();
-      });
-  });
-
-
-  it ('POST "/autocomplete" is outdated', function(done) {
-    request
-      .post('/autocomplete')
-      .end(function(err, res) {
-          assert.equal(400, res.status);
-          done();
-      });
-  });
-
-
   it ('POST "/v1/autocomplete" with empty body', function(done) {
     request
       .post('/v1/autocomplete')

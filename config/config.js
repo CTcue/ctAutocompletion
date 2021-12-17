@@ -7,7 +7,7 @@ let config = {
     "port" : 4080,
 
     "elasticsearch": {
-        "version": "7.12",
+        "version": "7.x",
         "host"   : "http://localhost:9200",
         "auth"   : {
             "username": "elastic",

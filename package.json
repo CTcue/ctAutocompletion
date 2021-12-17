@@ -4,9 +4,11 @@
   "description": "Autocompletion and relevant synonyms from UMLS",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
+    "start": "node app.js",
+    "dev": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
     "serve": "(cd demo/ && http-server -s -p 4040 -o)",
-    "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
+    "test": "set PORT=4088 && mocha -R spec --recursive ./test",
+    "e2e": "cross-env NODE_ENV=e2e && jest --config=jest-e2e.json --runInBand"
   },
   "repository": {
     "type": "git",
@@ -37,6 +39,8 @@
     "through2": "3.0.1"
   },
   "devDependencies": {
+    "cross-env": "5.2.0",
+    "jest": "23.6.0",
     "http-server": "0.12.3",
     "mocha": "8.3.2",
     "nodemon": "1.19.1",
