@@ -13,7 +13,7 @@ const elasticClient = new elastic.Client({
 });
 const ElasticsearchBulkIndexStream = require("elasticsearch-writable-stream");
 
-const index = argv.index || "autocomplete";
+const index = argv.index || config.elasticsearch.index || "autocomplete";
 const type = argv.type || "_doc";
 
 function stamp() {
@@ -71,7 +71,6 @@ const buildRecords = through2({ "objectMode": true }, function (chunk, enc, call
 
     callback();
 });
-
 
 const elasticStream = new ElasticsearchBulkIndexStream(elasticClient, {
     "highWaterMark": 5000,

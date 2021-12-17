@@ -27,7 +27,7 @@ module.exports = function* () {
 
     const result = yield function (callback) {
         elasticClient.search({
-            "index": "autocomplete",
+            "index": config.elasticsearch.index,
             "size": 100,
 
             "sort": ["_doc"],

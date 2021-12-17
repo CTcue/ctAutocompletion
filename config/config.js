@@ -12,7 +12,8 @@ let config = {
         "auth"   : {
             "username": "elastic",
             "password": "changeme"
-        }
+        },
+        "index": "autocomplete"
     },
 
     "api_token": "API_TOKEN"

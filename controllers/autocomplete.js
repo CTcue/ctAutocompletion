@@ -17,47 +17,97 @@ const elasticClient = new elastic.Client({
     "auth": config.elasticsearch.auth
 });
 
-const source = ["cui", "str", "pref"];
-
 module.exports = function *() {
+    const start = Date.now();
     const body = this.request.body;
-    const query = _.deburr(body.query);
 
-    // Search for suggestions in Elasticsearch
-    const exactMatches = yield findExact(query);
+    // Limit to N characters input;
+    const clean = _.deburr(body.query).trim().slice(0, 42);
 
-    let exactHits = [];
+    if (!clean) {
+        this.body = {
+            "took": Math.ceil(Date.now() - start),
+            "hits": []
+        };
 
-    // Filter exact hits for uniqueness
-    if (exactMatches.hits.length) {
-        exactHits =  _.uniqBy(exactMatches.hits, s => s["pref"].trim().replace("-", " ").toLowerCase());
+        return;
     }
 
-    // If no matches -> attempt spelling fixes
-    const closeMatches = yield findMatches(query);
-    const misspelledMatches = { "hits": [] };
+    const matchQuery = {
+        "index": config.elasticsearch.index,
+        "size" : 20,
 
-    if (!closeMatches.hits.length || (query.length > 4 && closeMatches.hits.length < 4)) {
-        misspelledMatches = yield spellingMatches(query);
-    }
+        "body": {
+            "_source": { "includes": ["cui", "str", "pref"] },
 
-    // Combine suggestions
-    const allMatches = [].concat(exactHits, closeMatches.hits, misspelledMatches.hits);
+            "query": {
+                "bool": {
+                    "should": [
+                        {
+                            "term" : {
+                                "exact": {
+                                    "value": clean.toLowerCase(),
+                                    "boost": 5
+                                }
+                            }
+                        },
 
-    // Also check for common appendixes (STADIUM, STAGE, etc.)
-    const just_str = allMatches.map(s => s["str"].toLowerCase());
-    const unique = generateTerms(allMatches, just_str);
+                        // {
+                        //     "match_phrase": {
+                        //         "str": {
+                        //             "query": clean
+                        //         }
+                        //     }
+                        // },
+
+                        // {
+                        //     "exists": {
+                        //         "field": "pref"
+                        //     }
+                        // }
+
+                        // {
+                        //     "match_phrase": {
+                        //         "pref": {
+                        //             "query": clean,
+                        //             "slop": 2
+                        //         }
+                        //     }
+                        // },
+
+                        {
+                            "match" : {
+                                "str": {
+                                    "query" : clean,
+                                    "operator" : "AND",
+                                    // "fuzziness": 3,
+                                    // "prefix_length": 2,
+                                    // "max_expansions": 30
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    };
+
+    const results = yield getResults(matchQuery);
+    const allMatches = results.hits || [];
+
+    // const just_str = allMatches.map(s => s["str"].toLowerCase());
+    // const unique = generateTerms(allMatches, just_str);
 
     this.body = {
-        "took" : (exactMatches.took || 10) + (closeMatches.took || 20),
-        "hits" : reducePayload(unique)
+        "took": Math.ceil(Date.now() - start),
+        "hits" : reducePayload(allMatches)
     };
 };
 
 // Groups by CUI and strips "pref" if it"s exactly the same as str
-function reducePayload(terms) {
+function reducePayload(hits) {
     const result = [];
-    const grouped = _.groupBy(terms, "cui");
+    const grouped = _.groupBy(hits, "cui");
 
     for (var cui in grouped) {
         var tmp = grouped[cui][0];
@@ -79,75 +129,14 @@ function reducePayload(terms) {
     return result;
 }
 
-function findExact(query) {
-    // Exact term is indexed without dashes
-    var wantedTerm = string.removeDashes(query);
-
-    var queryObj = {
-        "index": "autocomplete",
-        "size" : 4,
-        "body": {
-            "_source": source,
-            "query": {
-                "term" : {
-                    "exact" : wantedTerm
-                }
-            }
-        }
-    };
-
-    return getResults(queryObj);
-}
-
-function findMatches(query) {
-    var queryObj = {};
-    queryObj["index"] = "autocomplete";
-    queryObj["body"] =  {
-        "_source": source,
-        "size": 14,
-        "query": {
-            "bool" : {
-                "must": [
-                    {
-                        "match_phrase" : {
-                            "str" : query.trim()
-                        }
-                    }
-                ]
-            }
-        }
-    };
-
-    return getResults(queryObj);
-}
-
-function spellingMatches(query) {
-    var queryObj = {};
-    queryObj["index"] = "autocomplete";
-    queryObj["body"] =  {
-        "_source": source,
-        "size": 5,
-        "query": {
-            "match" : {
-                "str" : {
-                    "query" : query.trim(),
-                    "fuzziness": "AUTO",
-                    "operator" : "AND",
-                    "prefix_length"   : 2,
-                    "max_expansions"  : 10
-                }
-            }
-        }
-    };
-
-    return getResults(queryObj);
-}
-
 function getResults (queryObj) {
     return function(callback) {
         elasticClient.search(queryObj, function(err, esRes) {
             if (err) {
-                console.error("[ERROR elastic]", err);
+                if (err.meta && err.meta.body) {
+                    console.error(err.meta.body);
+                }
+
                 return callback(false, { "error": true, "took": 10, "hits": []})
             }
 

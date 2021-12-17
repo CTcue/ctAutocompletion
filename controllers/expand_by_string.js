@@ -42,7 +42,7 @@ module.exports = function *(next) {
         .toLowerCase();
 
     const queryObj = {
-        "index" : "autocomplete",
+        "index" : config.elasticsearch.index,
         "size"  : 1,
 
         "body": {

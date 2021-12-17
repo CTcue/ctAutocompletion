@@ -9,27 +9,33 @@ const elasticClient = new elastic.Client({
     "auth": config.elasticsearch.auth
 });
 
+async function createIndexMapping() {
+    const index = config.elasticsearch.index || "autocomplete";
 
-async function createIndexMapping(indexName = "autocomplete") {
     try {
-        await elasticClient.indices.delete({ index: indexName });
+        await elasticClient.indices.delete({ index: index });
     } catch (err) {}
 
     try {
         const indexSettings = {
-            index: indexName,
+            index: index,
             body: ES_MAPPING
         };
 
         await elasticClient.indices.create(indexSettings);
     } catch (err) {
-        // tslint:disable-next-line:no-console
-        console.error("[Could not create ES index]", err.meta.body);
+        if (err.meta && err.meta.body) {
+            console.error(JSON.stringify(err.meta.body, null, 4));
+        }
+        else {
+            console.error("[Could not create ES index]");
+            console.error(err);
+        }
     }
 };
 
 if (require.main === module) {
-    createIndexMapping("autocomplete");
+    createIndexMapping();
 
     console.info("Generated autocomplete mapping:");
     console.info("http://localhost:9200/autocomplete/_search?pretty");

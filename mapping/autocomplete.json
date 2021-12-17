@@ -79,7 +79,7 @@
                 "autocomplete_filter": {
                     "type": "edge_ngram",
                     "min_gram": 1,
-                    "max_gram": 20
+                    "max_gram": 10
                 }
             },
             "normalizer": {
@@ -134,7 +134,8 @@
             "exact": {
                 "type": "keyword",
                 "normalizer": "raw_clean",
-                "ignore_above": 40
+                "ignore_above": 40,
+                "boost": 3
             },
             "pref": {
                 "type": "text"
