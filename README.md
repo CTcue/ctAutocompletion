@@ -15,17 +15,17 @@ npm install
 pip install -r requirements.txt
 ```
 
-* Obtain a copy of our processed `output` directory:
-    * Either download (the private) `output` directory from our [https://zoomholding.stackstorage.com/](https://zoomholding.stackstorage.com/)
-    * Otherwise, download UMLS and run the pre-process scripts
-
+* Either obtain a copy of our processed `output` directory or create your own `concepts.txt` file
+    * `ai-data > synonym-files > autocompletion_concepts.txt`
+    * See below [for an example of the file format](#format-concepts)
 * Put the `output` directory in `ctAutocompletion/_scripts/`
 * Finally, run `bash ./_scripts/bulkUpload.sh`
 
+## Running demo
 
-#### Running the Demo
+To compare autocompletion results (side by side) with another instance of synonyms.
 
-Open a terminal and run:
+For the main app, open a terminal and run:
 
 ```
 npm start
