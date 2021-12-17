@@ -5,13 +5,11 @@ set -e
 # Usage:
 #   bash bulkUpload.sh --elastic username:password
 
-
-# Clear elasticsearch
+# Remove current data from the index
 python3.8 clear_elasticsearch.py --src AUTOCOMPLETE $*
-#python3.8 clear_elasticsearch.py --src DBC $*
 
 # Install script dependencies
-npm install
+yarn install
 
-# Bulk insert documents into ES / Neo4j
+# Bulk insert documents into Elasticsearch
 less ./output/concepts.txt | node elasticsearch.js $*

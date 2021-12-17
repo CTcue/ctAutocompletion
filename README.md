@@ -5,60 +5,40 @@ Find relevant UMLS terms based on user input. The autocompletion algorithm prior
 
 ## Installation
 
-* Make sure you have NodeJS (>5.x) and Elasticsearch (>2.x) installed
-  * Check if elasticsearch running
+* Make sure you have NodeJS (latest LTS) and Elasticsearch (7.x) installed
 
 * In this directory install the dependencies with:
-    * Run `npm install`
-    * Run `pip install -r requirements.txt`
 
-* Obtain a copy of our processed `output` directory:
-    * Either download (the private) `output` directory from our [https://zoomholding.stackstorage.com/](https://zoomholding.stackstorage.com/)
-    * Otherwise, download UMLS and run the pre-process scripts
+```
+yarn install
 
+pip install -r requirements.txt
+```
+
+* Either obtain a copy of our processed `output` directory or create your own `concepts.txt` file
+    * `ai-data > synonym-files > autocompletion_concepts.txt`
+    * See below [for an example of the file format](#format-concepts)
 * Put the `output` directory in `ctAutocompletion/_scripts/`
 * Finally, run `bash ./_scripts/bulkUpload.sh`
 
+## Running demo
 
-#### Running the Demo
+To compare autocompletion results (side by side) with another instance of synonyms.
 
-Open a terminal and inside this directory run:
-
-```
-npm start
-```
-
-* Open another terminal to serve the demo application and inside this directory run:
+For the main app, open a terminal and run:
 
 ```
-npm run serve
+yarn start
+```
+
+* Open another terminal to serve the demo application run:
+
+```
+yarn run serve
 ```
 
 > The ctAutocompletion API will be running on `http://localhost:4080` and the demo application will be available on `http://localhost:4040`
 
-
-###### Notes
-
-* Make sure elasticsearch is running:
-    * Check your directory `~/elasticsearch-[version]/bin`
-    * Start the service with `./elasticsearch`  (or click the .bat)
-
-* Neo4j is only required to obtain sibling/child/brand information about concepts
-
-
-## Is it working?
-
-If the app is running, you could use the following python script to send a test query:
-
-```
-import requests
-
-url = "http://localhost:4080/expand-grouped"
-
-response = requests.request("POST", url, json={ "query": "C0202117" })
-
-print(response.text)
-```
 
 ## API
 
@@ -241,8 +221,17 @@ Where the `/:code` used is a DBC specialty code.
 ]
 ```
 
+## Format concepts
+
+You can add your own concepts via a tab separated file (concepts.txt), that contains the cui, language, source, type, preferred term and synonyms:
+
+CUI (id) | Language | Source | Type | Preferred term | Synonyms |
+-------- | -------- | ------ | ---- | -------------- | ---------- |
+C0001969 |   DUT    | `ICPC2ICD10DUT` | `T048|DISO` | alcoholintoxicatie | `Alcohol Gebruik|Alcoholabuses` |
+C0011860 |   DUT    | `MSHDUT|ICD10DUT|MDRDUT` | ` DISO|T047` | Diabetes Mellitus Type 2 | `Diabetes Mellitus Type 2|Niet-insuline-afhankelijke Diabetes Mellitus|DM2`
+
 ## Contributing
 
-You can run unit tests with `npm test`.
+You can run unit tests with `yarn test`.
 
 If you feel something is missing, you can open an issue stating the problem sentence and desired result. If code is unclear give us a @mention. Pull requests are welcome.

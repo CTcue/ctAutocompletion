@@ -1,10 +1,9 @@
 {
   "name": "ct-autocompletion",
-  "version": "0.1.1",
-  "description": "Relevant UMLS terms based on user input",
+  "version": "1.0.0",
+  "description": "Autocompletion and relevant synonyms from UMLS",
   "main": "app.js",
   "scripts": {
-    "prestart": "npm install --silent",
     "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
     "serve": "(cd demo/ && http-server -s -p 4040 -o)",
     "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
