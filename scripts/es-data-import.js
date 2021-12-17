@@ -48,15 +48,19 @@ const buildRecords = through2({ "objectMode": true }, function (chunk, enc, call
     const pref = parts[4]
     const terms = parts[5].split("|");
 
-    for (var i = 0; i < terms.length; i++) {
+    for (const term of terms) {
+        if (!term.length || term.length > 42) {
+            continue;
+        }
+
         this.push({
             "index": index,
             "type": type,
 
             "body": {
                 "cui": cui,
-                "str": terms[i],
-                "exact": terms[i].replace("-", " ").toLowerCase(),
+                "str": term,
+                "exact": term.replace("-", " ").toLowerCase(),
                 "lang": lat,
                 "source": sab,
                 "pref": pref,

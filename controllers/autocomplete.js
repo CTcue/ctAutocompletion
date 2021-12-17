@@ -20,12 +20,13 @@ const elasticClient = new elastic.Client({
 const source = ["cui", "str", "pref"];
 
 module.exports = function *() {
-    var body = this.request.body;
-    var query = _.deburr(body.query);
+    const body = this.request.body;
+    const query = _.deburr(body.query);
 
     // Search for suggestions in Elasticsearch
-    var exactMatches = yield findExact(query);
-    var exactHits = [];
+    const exactMatches = yield findExact(query);
+
+    let exactHits = [];
 
     // Filter exact hits for uniqueness
     if (exactMatches.hits.length) {
@@ -33,20 +34,19 @@ module.exports = function *() {
     }
 
     // If no matches -> attempt spelling fixes
-    var closeMatches = yield findMatches(query);
-    var misspelledMatches = { "hits": [] };
+    const closeMatches = yield findMatches(query);
+    const misspelledMatches = { "hits": [] };
 
     if (!closeMatches.hits.length || (query.length > 4 && closeMatches.hits.length < 4)) {
         misspelledMatches = yield spellingMatches(query);
     }
 
     // Combine suggestions
-    var allMatches = [].concat(exactHits, closeMatches.hits, misspelledMatches.hits);
+    const allMatches = [].concat(exactHits, closeMatches.hits, misspelledMatches.hits);
 
     // Also check for common appendixes (STADIUM, STAGE, etc.)
-    var just_str = allMatches.map(s => s["str"].toLowerCase());
-    var unique = generateTerms(allMatches, just_str);
-
+    const just_str = allMatches.map(s => s["str"].toLowerCase());
+    const unique = generateTerms(allMatches, just_str);
 
     this.body = {
         "took" : (exactMatches.took || 10) + (closeMatches.took || 20),
@@ -56,8 +56,8 @@ module.exports = function *() {
 
 // Groups by CUI and strips "pref" if it"s exactly the same as str
 function reducePayload(terms) {
-    var result = [];
-    var grouped = _.groupBy(terms, "cui");
+    const result = [];
+    const grouped = _.groupBy(terms, "cui");
 
     for (var cui in grouped) {
         var tmp = grouped[cui][0];

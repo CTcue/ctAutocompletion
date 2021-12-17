@@ -24,7 +24,7 @@ async function createIndexMapping(indexName = "autocomplete") {
         await elasticClient.indices.create(indexSettings);
     } catch (err) {
         // tslint:disable-next-line:no-console
-        console.error("[Could not create ES index]", err);
+        console.error("[Could not create ES index]", err.meta.body);
     }
 };
 
