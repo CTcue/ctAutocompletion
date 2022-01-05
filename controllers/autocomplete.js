@@ -1,11 +1,8 @@
 
-/** Usage
-
-    curl -X POST -H "Content-Type: application/json" -d "{
-        "query": "myo inf"
-    }" "http://localhost:4080/v2/autocomplete"
-
-*/
+/**
+ * Usage
+ *   curl -X POST -H "Content-Type: application/json" -d '{"query": "myo inf"}' http://localhost:4080/v2/autocomplete
+ */
 
 const _ = require("lodash");
 const config = require("../config/config");
@@ -16,6 +13,8 @@ const elasticClient = new elastic.Client({
     "node": config.elasticsearch.host,
     "auth": config.elasticsearch.auth
 });
+
+const source = ["cui", "str", "pref", "source", "lang", "types"];
 
 module.exports = function *() {
     const start = Date.now();
@@ -33,59 +32,110 @@ module.exports = function *() {
         return;
     }
 
+    // Exact term is indexed without dashes
+    const exactSearch = clean
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+
     const matchQuery = {
         "index": config.elasticsearch.index,
-        "size" : 20,
+        "size" : 24,
+        "sort": ["_score"],
+
+        // "explain": true,
 
         "body": {
-            "_source": { "includes": ["cui", "str", "pref"] },
+            "_source": { "includes": source },
 
             "query": {
-                "bool": {
-                    "should": [
+                "function_score" : {
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "term" : {
+                                        "exact": {
+                                            "value": exactSearch
+                                        }
+                                    }
+                                },
+
+                                {
+                                    "match_phrase": {
+                                        "str": {
+                                            "query": clean
+                                        }
+                                    }
+                                },
+
+                                // {
+                                //     "match" : {
+                                //         "str": {
+                                //             "query": clean,
+                                //             "fuzziness": "AUTO",
+                                //             "operator": "AND",
+                                //             "prefix_length": 2,
+                                //             "max_expansions": 10
+                                //         }
+                                //     }
+                                // }
+                            ]
+                        }
+                    },
+
+                    // "boost": 5,
+                    "boost_mode": "sum",
+                    // "score_mode": "max",
+
+                    "functions": [
                         {
-                            "term" : {
-                                "exact": {
-                                    "value": clean.toLowerCase(),
-                                    "boost": 5
+                            "filter": {
+                                "exists": {
+                                    "field": "pref"
                                 }
-                            }
+                            },
+                            "weight": 1
                         },
 
                         // {
-                        //     "match_phrase": {
-                        //         "str": {
-                        //             "query": clean
+                        //     "filter": {
+                        //         "terms": {
+                        //             "source": ["ICD10", "ICD10DUT"]
                         //         }
-                        //     }
+                        //     },
+                        //     "weight": 3
                         // },
 
                         // {
-                        //     "exists": {
-                        //         "field": "pref"
-                        //     }
+                        //     "filter": {
+                        //         "terms": {
+                        //             "source": ["MSHDUT", "MDRDUT"]
+                        //         }
+                        //     },
+                        //     "weight": 2
+                        // },
+
+                        // {
+                        //     "filter": {
+                        //         "terms": {
+                        //             "source": ["SNOMEDCT_US"]
+                        //         }
+                        //     },
+                        //     "weight": 2
+                        // },
+
+                        // {
+                        //     "filter": {
+                        //         "terms": {
+                        //             "types": [
+                        //                 "DISO"
+                        //             ]
+                        //         }
+                        //     },
+                        //     "weight": 3
                         // }
-
-                        // {
-                        //     "match_phrase": {
-                        //         "pref": {
-                        //             "query": clean,
-                        //             "slop": 2
-                        //         }
-                        //     }
-                        // },
-
-                        {
-                            "match" : {
-                                "str": {
-                                    "query" : clean,
-                                    "operator" : "AND",
-                                    // "fuzziness": 3,
-                                    // "prefix_length": 2,
-                                    // "max_expansions": 30
-                                }
-                            }
-                        }
                     ]
                 }
             }
@@ -95,8 +145,11 @@ module.exports = function *() {
     const results = yield getResults(matchQuery);
     const allMatches = results.hits || [];
 
-    // const just_str = allMatches.map(s => s["str"].toLowerCase());
-    // const unique = generateTerms(allMatches, just_str);
+    // console.log("=====")
+    // console.log("INPUT", clean)
+    // for (const m of allMatches) {
+    //     console.log(m)
+    // }
 
     this.body = {
         "took": Math.ceil(Date.now() - start),
@@ -134,19 +187,25 @@ function getResults (queryObj) {
         elasticClient.search(queryObj, function(err, esRes) {
             if (err) {
                 if (err.meta && err.meta.body) {
-                    console.error(err.meta.body);
+                    console.error(JSON.stringify(err.meta.body, null, 2));
                 }
 
                 return callback(false, { "error": true, "took": 10, "hits": []})
             }
 
-            var res = esRes.body;
-            var hits = res.hits;
-            var result = [];
+            const res = esRes.body;
+            const hits = res.hits;
+
+            let result = [];
+
+            // console.log(JSON.stringify(res, null, 4))
 
             if (hits && hits.total.value > 0) {
                 result = hits.hits.map(function(hit) {
-                    return hit["_source"];
+                    return {
+                        ...hit["_source"],
+                        score: hit._score
+                    }
                 });
             }
 
@@ -156,29 +215,4 @@ function getResults (queryObj) {
             });
         });
     }
-}
-
-// Add custom terms if there is a certain pattern:
-// - Gleason score 5
-// - Diabetes mellitus type 2
-// - Diabetes mellitus type II
-// - etc.
-function generateTerms(unique, strings) {
-    var generated = _.map(strings, string.replaceAppendix);
-
-    var to_add = _.uniq(_.filter(generated, function(s) {
-        return !_.includes(strings, s);
-    }));
-
-
-    var added = [];
-    for (var i=0; i < to_add.length; i++) {
-        added.push({
-            "str"      : to_add[i],
-            "pref"     : "",
-            "cui"      : "generated",
-        });
-    }
-
-    return [].concat(added, unique);
 }

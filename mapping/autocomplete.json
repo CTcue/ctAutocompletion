@@ -2,6 +2,19 @@
     "settings": {
         "number_of_shards": 1,
         "number_of_replicas": 0,
+
+
+        "index": {
+            "similarity": {
+                "scripted_tfidf": {
+                    "type": "scripted",
+                    "script": {
+                    "source": "double tf = Math.sqrt(doc.freq); double norm = 1/Math.sqrt(doc.length); return query.boost * tf * norm;"
+                    }
+                }
+            }
+        },
+
         "analysis": {
             "char_filter": {
                 "ignore_quotes": {
@@ -79,7 +92,7 @@
                 "autocomplete_filter": {
                     "type": "edge_ngram",
                     "min_gram": 1,
-                    "max_gram": 10
+                    "max_gram": 20
                 }
             },
             "normalizer": {
@@ -88,21 +101,6 @@
                     "filter": [
                         "uppercase",
                         "asciifolding"
-                    ]
-                },
-                "raw_clean": {
-                    "type": "custom",
-                    "filter": [
-                        "lowercase",
-                        "asciifolding"
-                    ],
-                    "char_filter": [
-                        "ignore_quotes",
-                        "skip_brackets",
-                        "trim_minimal_punctuation",
-                        "remove_floating_dashes",
-                        "reduce_whitespace",
-                        "trim_whitespace"
                     ]
                 }
             },
@@ -115,10 +113,17 @@
                         "asciifolding",
                         "autocomplete_filter"
                     ]
+                },
+
+                "folding" : {
+                    "filter" : [ "lowercase", "asciifolding" ],
+                    "type" : "custom",
+                    "tokenizer" : "keyword"
                 }
             }
         }
     },
+
     "mappings": {
         "dynamic": "strict",
         "properties": {
@@ -129,28 +134,29 @@
             "str": {
                 "type": "text",
                 "analyzer": "autocomplete",
-                "search_analyzer": "standard"
+                "search_analyzer": "standard",
+                "similarity" : "scripted_tfidf"
             },
             "exact": {
-                "type": "keyword",
-                "normalizer": "raw_clean",
-                "ignore_above": 40,
-                "boost": 3
+                "type": "text",
+                "analyzer": "folding",
+                "search_analyzer": "keyword",
+                "similarity" : "scripted_tfidf"
             },
             "pref": {
                 "type": "text"
             },
             "source": {
-                "type": "text",
-                "index": false
+                "type": "keyword",
+                "normalizer": "uppercase"
             },
             "lang": {
-                "type": "text",
-                "index": false
+                "type": "keyword",
+                "normalizer": "uppercase"
             },
             "types": {
-                "type": "text",
-                "index": false
+                "type": "keyword",
+                "normalizer": "uppercase"
             }
         }
     }

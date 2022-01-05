@@ -1,10 +1,7 @@
 
-/** Usage
-
-  curl -X POST -H "Content-Type: application/json" -d "{
-      "query": "C1306459"
-  }" "http://localhost:4080/expand"
-
+/**
+ * Usage:
+ *   curl -X POST -H "Content-Type: application/json" -d '{"query":"C1306459"}' http://localhost:4080/expand
 */
 
 const _ = require("lodash");

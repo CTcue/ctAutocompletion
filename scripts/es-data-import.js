@@ -64,7 +64,7 @@ const buildRecords = through2({ "objectMode": true }, function (chunk, enc, call
                 "lang": lat,
                 "source": sab,
                 "pref": pref,
-                "types": types
+                "types": _.uniq(types)
             }
         });
     }
