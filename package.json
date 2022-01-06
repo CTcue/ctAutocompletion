@@ -22,20 +22,20 @@
     "synonyms"
   ],
   "dependencies": {
-    "@elastic/elasticsearch": "7",
-    "elasticsearch-writable-stream": "2.0.1",
     "koa": "2.7.0",
-    "@koa/cors": "3.1.0",
     "koa-router": "5.4.0",
+    "@koa/cors": "3.1.0",
+    "@elastic/elasticsearch": "7",
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "jest": "23.6.0",
+    "jest": "27.4.7",
     "http-server": "14.0.0",
     "nodemon": "2.0.15",
     "supertest": "6.1.6",
     "split2": "4.1.0",
-    "through2": "4.0.2"
+    "through2": "4.0.2",
+    "elasticsearch-writable-stream": "2.0.1"
   },
   "license": "Proprietary",
   "private": true
