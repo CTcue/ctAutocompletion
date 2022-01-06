@@ -1,10 +1,13 @@
 
 const _ = require("lodash");
 
-
 let config = {
     "host" : "localhost",
     "port" : 4080,
+
+    "autocomplete": {
+        "size": 24
+    },
 
     "elasticsearch": {
         "version": "7.x",

@@ -43,12 +43,10 @@ module.exports = function *() {
 
     const matchQuery = {
         "index": config.elasticsearch.index,
-        "size" : 24,
+        "size" : config.autocomplete.size || 20,
         "sort": ["_score"],
-
         "body": {
             "_source": { "includes": source },
-
             "query": {
                 "bool": {
                     "must": [

@@ -2,17 +2,9 @@
 
 set -e
 
-#
-# Usage:
-#
-#   bash import.sh --elastic username:password
-#
-#
-# Note:
-#
-#   Make sure you added the latest synonyms
-#   in the `./output` directory
-#
+# Before you import:
+# * Add your file `./output/concepts.txt`
+# * Add elasticsearch credentials in `./config/local_config.json` (optional)
 
 SCRIPTDIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 

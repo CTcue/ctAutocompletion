@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const _ = require("lodash");
-const argv = require("minimist")(process.argv.slice(2));
 const split2 = require("split2");
 const through2 = require("through2");
 const elastic = require("@elastic/elasticsearch");
@@ -13,8 +12,7 @@ const elasticClient = new elastic.Client({
 });
 const ElasticsearchBulkIndexStream = require("elasticsearch-writable-stream");
 
-const index = argv.index || config.elasticsearch.index || "autocomplete";
-const type = argv.type || "_doc";
+const index = config.elasticsearch.index || "autocomplete";
 
 function stamp() {
     return new Date().toISOString()
@@ -55,7 +53,7 @@ const buildRecords = through2({ "objectMode": true }, function (chunk, enc, call
 
         this.push({
             "index": index,
-            "type": type,
+            "type": "_doc",
 
             "body": {
                 "cui": cui,
