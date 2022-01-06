@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "jest": "23.6.0",
-    "http-server": "0.12.3",
+    "http-server": "14.0.0",
     "nodemon": "2.0.15",
     "supertest": "6.1.6",
     "split2": "4.1.0",
