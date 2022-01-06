@@ -53,6 +53,20 @@ describe("test autocomplete queries", function () {
             });
     });
 
+    it("can autocomplete with single letter query", function(done) {
+        agent
+            .post("/v2/autocomplete")
+            .send({ "query": "a" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.hits.length).toBeGreaterThan(0);
+
+                done();
+            });
+    });
+
     it("should be able to make autocompletion requests (hypertension)", function(done) {
         agent
             .post("/v2/autocomplete")
@@ -73,21 +87,86 @@ describe("test autocomplete queries", function () {
             });
     });
 
-    it("can autocomplete with single letter query", function(done) {
+    it("should be able to make autocompletion requests (hoofdpijn)", function(done) {
         agent
             .post("/v2/autocomplete")
-            .send({ "query": "a" })
+            .send({ "query": "hoofd" })
             .end(function(err, res) {
                 expect(res.status).toBe(200);
 
                 const body = res.body;
                 expect(body.hits.length).toBeGreaterThan(0);
 
+                const cuis = body.hits.map((h) => { return h.cui });
+                const terms = body.hits.map((h) => { return h.str.toLowerCase() });
+
+                expect(cuis.join("\n")).toContain("C0018681");
+                expect(terms.join("\n")).toContain("hoofdpijn");
+
                 done();
             });
     });
 
-    it("can autocomplete with multiple partial phrases", function(done) {
+    it("should be able to make autocompletion requests (carcinoom)", function(done) {
+        agent
+            .post("/v2/autocomplete")
+            .send({ "query": "carc" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.hits.length).toBeGreaterThan(0);
+
+                const cuis = body.hits.map((h) => { return h.cui });
+                const terms = body.hits.map((h) => { return h.str.toLowerCase() });
+
+                expect(cuis.join("\n")).toContain("C0006826");
+                expect(terms.join("\n")).toContain("carcinoom");
+
+                done();
+            });
+    });
+
+    it("should be able to make autocompletion requests (ECOG score)", function(done) {
+        agent
+            .post("/v2/autocomplete")
+            .send({ "query": "ecog" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.hits.length).toBeGreaterThan(0);
+
+                const terms = body.hits.map((h) => { return h.str.toLowerCase() });
+
+                expect(terms.join("\n")).toContain("ecog");
+                expect(terms.join("\n")).toContain("ecog score");
+
+                done();
+            });
+    });
+
+    it("should be able to make autocompletion requests (diabetes)", function(done) {
+        agent
+            .post("/v2/autocomplete")
+            .send({ "query": "diab" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.hits.length).toBeGreaterThan(0);
+
+                const cuis = body.hits.map((h) => { return h.cui });
+                const terms = body.hits.map((h) => { return h.str.toLowerCase() });
+
+                expect(cuis.join("\n")).toContain("C0011849");
+                expect(terms.join("\n")).toContain("diabetes");
+
+                done();
+            });
+    });
+
+    it("can autocomplete with multiple partial phrases (ankylosing spondylitis)", function(done) {
         agent
             .post("/v2/autocomplete")
             .send({ "query": "anky spon" })
@@ -104,6 +183,26 @@ describe("test autocomplete queries", function () {
             });
     });
 
+    it("can autocomplete with multiple partial phrases (LVEF)", function(done) {
+        agent
+            .post("/v2/autocomplete")
+            .send({ "query": "linker ve" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.hits.length).toBeGreaterThan(0);
+
+                const cuis = body.hits.map((h) => { return h.cui });
+                const terms = body.hits.map((h) => { return h.str.toLowerCase() });
+
+                expect(cuis.join("\n")).toContain("C0428772");
+                expect(terms.join("\n")).toContain("linker ventriculaire ejectiefractie")
+
+                done();
+            });
+    });
+
     it("can expand a term to obtain synonyms (by CUI)", function(done) {
         agent
             .post("/expand")
@@ -114,51 +213,11 @@ describe("test autocomplete queries", function () {
                 const body = res.body;
                 expect(body.terms.length).toBeGreaterThan(1);
 
+                const terms = body.terms.join("\n").toLowerCase();
+                expect(terms).toContain("hypertension");
+                expect(terms).toContain("hoge bloeddruk");
+
                 done();
             });
-    });
-});
-
-describe("verify string replacement functions", function () {
-    const stringLib = require("../lib/string.js");
-
-    it("Should replace numbers", function () {
-        const clean = stringLib.replaceAppendix("Gleason Score 7");
-        expect("Gleason Score").toBe(clean);
-    });
-
-    it("Should replace numbers", function () {
-        const clean = stringLib.replaceAppendix(" Gleason Score 77 ");
-        expect("Gleason Score").toBe(clean);
-    });
-
-    it("Should replace 'type + num'", function () {
-        const clean = stringLib.replaceAppendix("Diabetes mellitus type 2");
-        expect("Diabetes mellitus").toBe(clean);
-    });
-
-    it("Should replace 'type + roman'", function () {
-        const clean = stringLib.replaceAppendix("Diabetes mellitus type II");
-        expect("Diabetes mellitus").toBe(clean);
-    });
-
-    it("Should replace 'stage + roman'", function () {
-        const clean = stringLib.replaceAppendix("Carcinoma stage II");
-        expect("Carcinoma").toBe(clean);
-    });
-
-    it("Should replace 'stage + roman'", function () {
-        const clean = stringLib.replaceAppendix("Carcinoma stage IV");
-        expect("Carcinoma").toBe(clean);
-    });
-
-    it("Should replace 'stadum + num'", function () {
-        const clean = stringLib.replaceAppendix("Carcinoma stadium 0");
-        expect("Carcinoma").toBe(clean);
-    });
-
-    it("Should replace 'phase + num'", function () {
-        const clean = stringLib.replaceAppendix("Carcinoma phase 0");
-        expect("Carcinoma").toBe(clean);
     });
 });

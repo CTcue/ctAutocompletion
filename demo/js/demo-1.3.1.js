@@ -142,7 +142,6 @@ angular
 
             scope.API = {
                 "server" : "https://ctcue.com/umls",
-
                 "local"  : "http://localhost:4080"
             };
 

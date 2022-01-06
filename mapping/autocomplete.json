@@ -3,10 +3,9 @@
         "number_of_shards": 1,
         "number_of_replicas": 0,
 
-
         "index": {
             "similarity": {
-                "scripted_tfidf": {
+                "scripted_tf": {
                     "type": "scripted",
                     "script": {
                     "source": "double tf = Math.sqrt(doc.freq); double norm = 1/Math.sqrt(doc.length); return query.boost * tf * norm;"
@@ -14,80 +13,7 @@
                 }
             }
         },
-
         "analysis": {
-            "char_filter": {
-                "ignore_quotes": {
-                    "type": "mapping",
-                    "mappings": [
-                        "\u0091=>",
-                        "\u0092=>",
-                        "\"=>",
-                        "'=>",
-                        "“=>",
-                        "”=>",
-                        "‘=>",
-                        "’=>",
-                        "`=>"
-                    ]
-                },
-                "replace_symbols": {
-                    "type": "mapping",
-                    "mappings": [
-                        "\\u00B7=> ",
-                        "\\u00A0=> ",
-                        "\\u1680=> ",
-                        "\\u180E=> ",
-                        "\\u2000=> ",
-                        "\\u2001=> ",
-                        "\\u2002=> ",
-                        "\\u2003=> ",
-                        "\\u2004=> ",
-                        "\\u2005=> ",
-                        "\\u2006=> ",
-                        "\\u2007=> ",
-                        "\\u2008=> ",
-                        "\\u2009=> ",
-                        "\\u200A=> ",
-                        "\\u202F=> ",
-                        "\\u205F=> ",
-                        "\\u3000=> ",
-                        "\\u0009=> ",
-                        "\\u200B=>",
-                        "\\uFEFF=>"
-                    ]
-                },
-                "remove_punctuation": {
-                    "pattern": "\\p{Punct}+",
-                    "type": "pattern_replace",
-                    "replacement": " "
-                },
-                "reduce_whitespace": {
-                    "pattern": "\\p{Space}+",
-                    "type": "pattern_replace",
-                    "replacement": " "
-                },
-                "skip_brackets": {
-                    "pattern": "[\\(\\)\\[\\]{}@#$*<>]",
-                    "type": "pattern_replace",
-                    "replacement": " "
-                },
-                "trim_minimal_punctuation": {
-                    "type": "pattern_replace",
-                    "pattern": "(\\p{Alnum}+)([,!?;/\\_]|\\.-)",
-                    "replacement": "$1 "
-                },
-                "trim_whitespace": {
-                    "pattern": "^\\s+|\\s+$",
-                    "type": "pattern_replace",
-                    "replacement": ""
-                },
-                "remove_floating_dashes": {
-                    "type": "pattern_replace",
-                    "pattern": "\\s+-+\\s+",
-                    "replacement": " "
-                }
-            },
             "filter": {
                 "autocomplete_filter": {
                     "type": "edge_ngram",
@@ -135,13 +61,13 @@
                 "type": "text",
                 "analyzer": "autocomplete",
                 "search_analyzer": "standard",
-                "similarity" : "scripted_tfidf"
+                "similarity" : "scripted_tf"
             },
             "exact": {
                 "type": "text",
                 "analyzer": "folding",
                 "search_analyzer": "keyword",
-                "similarity" : "scripted_tfidf"
+                "similarity" : "scripted_tf"
             },
             "pref": {
                 "type": "text"

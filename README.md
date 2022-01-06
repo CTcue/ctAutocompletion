@@ -1,12 +1,15 @@
 ctAutocompletion
 ================
 
-Find relevant UMLS terms based on user input. The autocompletion algorithm prioritizes exact matches, and if non are found it prefers prefix matches. You can also send multiple words and for each separate term it does a prefix lookup, so you can send queries like `anky spondy` or `maj dep dis`.
+Finds relevant medical terms and their synonyms using Elasticsearch.
+
+* Optimized for the medical domain
+* Prioritizes exact and/or prefix matches.
+* Fallback fuzzy search
 
 ## Installation
 
 * Make sure you have NodeJS (latest LTS) and Elasticsearch (7.x) installed
-
 * In this directory install the dependencies with:
 
 ```
@@ -47,6 +50,14 @@ yarn run serve
 
 > The ctAutocompletion API will be running on `http://localhost:4080` and the demo application will be available on `http://localhost:4040`
 
+
+## Testing
+
+* Make sure elasticsearch is running and has an `autocomplete` index
+
+```
+yarn run test
+```
 
 ## API
 
@@ -183,6 +194,6 @@ C0011860 |   DUT    | `MSHDUT|ICD10DUT|MDRDUT` | ` DISO|T047` | Diabetes Mellitu
 
 ## Contributing
 
-You can run unit tests with `yarn test`.
+You can run tests with `yarn run test`.
 
 If you feel something is missing, you can open an issue stating the problem sentence and desired result. If code is unclear give us a @mention. Pull requests are welcome.

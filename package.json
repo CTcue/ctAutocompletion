@@ -1,7 +1,7 @@
 {
   "name": "ct-autocompletion",
   "version": "1.0.0",
-  "description": "Autocompletion and relevant synonyms from UMLS",
+  "description": "Provides medical autocompletion and relevant synonyms",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -14,9 +14,9 @@
     "url": "git@github.com:CTcue/ctAutocompletion.git"
   },
   "keywords": [
-    "umls",
-    "suggestions",
-    "autocompletion"
+    "autocomplete",
+    "autocompletion",
+    "synonyms"
   ],
   "dependencies": {
     "@elastic/elasticsearch": "7",

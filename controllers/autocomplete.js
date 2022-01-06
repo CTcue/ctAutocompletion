@@ -6,7 +6,6 @@
 
 const _ = require("lodash");
 const config = require("../config/config");
-const string = require("../lib/string");
 
 const elastic = require("@elastic/elasticsearch");
 const elasticClient = new elastic.Client({
@@ -14,14 +13,17 @@ const elasticClient = new elastic.Client({
     "auth": config.elasticsearch.auth
 });
 
-const source = ["cui", "str", "pref", "source", "lang", "types"];
+const source = ["cui", "str", "pref"];
 
 module.exports = function *() {
     const start = Date.now();
     const body = this.request.body;
 
     // Limit to N characters input;
-    const clean = _.deburr(body.query).trim().slice(0, 42);
+    const clean = _.deburr(body.query)
+        .trim()
+        .slice(0, 42)
+        .trim();
 
     if (!clean) {
         this.body = {
@@ -32,7 +34,7 @@ module.exports = function *() {
         return;
     }
 
-    // Exact term is indexed without dashes
+    // The `exact` term is indexed without dashes
     const exactSearch = clean
         .replace(/-/g, " ")
         .replace(/\s+/g, " ")
@@ -44,98 +46,53 @@ module.exports = function *() {
         "size" : 24,
         "sort": ["_score"],
 
-        // "explain": true,
-
         "body": {
             "_source": { "includes": source },
 
             "query": {
-                "function_score" : {
-                    "query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "term" : {
-                                        "exact": {
-                                            "value": exactSearch
-                                        }
-                                    }
-                                },
-
-                                {
-                                    "match_phrase": {
-                                        "str": {
-                                            "query": clean
-                                        }
-                                    }
-                                },
-
-                                // {
-                                //     "match" : {
-                                //         "str": {
-                                //             "query": clean,
-                                //             "fuzziness": "AUTO",
-                                //             "operator": "AND",
-                                //             "prefix_length": 2,
-                                //             "max_expansions": 10
-                                //         }
-                                //     }
-                                // }
-                            ]
-                        }
-                    },
-
-                    // "boost": 5,
-                    "boost_mode": "sum",
-                    // "score_mode": "max",
-
-                    "functions": [
+                "bool": {
+                    "must": [
                         {
-                            "filter": {
-                                "exists": {
-                                    "field": "pref"
+                            "match_phrase": {
+                                "str": {
+                                    "query": clean
                                 }
-                            },
-                            "weight": 1
+                            }
+                        }
+                    ],
+
+                    "should": [
+                        {
+                            "term" : {
+                                "exact": {
+                                    "value": exactSearch,
+                                    "boost": 10
+                                }
+                            }
                         },
 
-                        // {
-                        //     "filter": {
-                        //         "terms": {
-                        //             "source": ["ICD10", "ICD10DUT"]
-                        //         }
-                        //     },
-                        //     "weight": 3
-                        // },
+                        // Boost terms that start with what the user typed
+                        {
+                            "prefix" : {
+                                "exact": {
+                                    "value": _.first(exactSearch.split(" ")) || ""
+                                }
+                            }
+                        },
 
-                        // {
-                        //     "filter": {
-                        //         "terms": {
-                        //             "source": ["MSHDUT", "MDRDUT"]
-                        //         }
-                        //     },
-                        //     "weight": 2
-                        // },
+                        {
+                            "terms": {
+                                "types": ["DISO"],
+                                "boost": 0.5
+                            }
+                        },
 
-                        // {
-                        //     "filter": {
-                        //         "terms": {
-                        //             "source": ["SNOMEDCT_US"]
-                        //         }
-                        //     },
-                        //     "weight": 2
-                        // },
-
-                        // {
-                        //     "filter": {
-                        //         "terms": {
-                        //             "types": [
-                        //                 "DISO"
-                        //             ]
-                        //         }
-                        //     },
-                        //     "weight": 3
-                        // }
+                        {
+                            "terms": {
+                                "types": ["PROC", "PHYS"],
+                                "boost": 0.1
+                            }
+                        }
                     ]
                 }
             }
@@ -145,16 +102,45 @@ module.exports = function *() {
     const results = yield getResults(matchQuery);
     const allMatches = results.hits || [];
 
-    // console.log("=====")
-    // console.log("INPUT", clean)
-    // for (const m of allMatches) {
-    //     console.log(m)
-    // }
+    // Search allowing spelling mistakes (CPU intensive)
+    if (!allMatches.length || allMatches.length < 4) {
+        const fuzzyQuery = {
+            "index": config.elasticsearch.index,
+            "size" : 5,
+            "sort": ["_score"],
 
-    this.body = {
-        "took": Math.ceil(Date.now() - start),
-        "hits" : reducePayload(allMatches)
-    };
+            "body": {
+                "_source": { "includes": source },
+
+                "query": {
+                    "match" : {
+                        "str": {
+                            "query": clean,
+                            "fuzziness": "AUTO",
+                            "operator": "AND",
+                            "prefix_length": 2,
+                            "max_expansions": 10
+                        }
+                    }
+                }
+
+            }
+        };
+
+        const results = yield getResults(fuzzyQuery);
+        const spellingMatches = results.hits || [];
+
+        this.body = {
+            "took": Math.ceil(Date.now() - start),
+            "hits" : reducePayload(allMatches.concat(spellingMatches))
+        };
+    }
+    else {
+        this.body = {
+            "took": Math.ceil(Date.now() - start),
+            "hits" : reducePayload(allMatches)
+        };
+    }
 };
 
 // Groups by CUI and strips "pref" if it"s exactly the same as str
@@ -197,8 +183,6 @@ function getResults (queryObj) {
             const hits = res.hits;
 
             let result = [];
-
-            // console.log(JSON.stringify(res, null, 4))
 
             if (hits && hits.total.value > 0) {
                 result = hits.hits.map(function(hit) {
