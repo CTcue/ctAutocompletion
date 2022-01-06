@@ -5,8 +5,7 @@ const config = require('./config/config');
 const koa = require('koa');
 const app = module.exports = new koa();
 const router = require('koa-router')();
-const cors = require('koa-cors');
-
+const cors = require("@koa/cors");
 
 /////
 // Middleware
@@ -14,21 +13,7 @@ const cors = require('koa-cors');
 const bodyParser    = require('./middleware/parse');
 const extractUserId = require("./middleware/extractUser");
 
-app.use(cors({
-    "headers" : [
-        "Content-Type",
-        "Authorization",
-        "Access-Control-Allow-Credentials",
-        "If-Modified-Since",
-        "Cache-Control",
-        "Pragma",
-        "x-user",
-        "x-token",
-        "umls-u-token",
-        "umls-c-token"
-    ]
-}));
-
+app.use(cors());
 app.use(bodyParser);
 
 /////
