@@ -17,9 +17,8 @@
     "node": ">=14.17"
   },
   "keywords": [
-    "autocomplete",
     "autocompletion",
-    "synonyms"
+    "medical synonyms"
   ],
   "dependencies": {
     "koa": "2.7.0",

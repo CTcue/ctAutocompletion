@@ -1,9 +1,6 @@
 lib-cov
-2015AA/
-data/
-additional_terms/
 tmp/
-output/
+output/*.txt
 *.rrf
 *.RRF
 *.pyc
@@ -20,7 +17,6 @@ output/
 pids
 npm-debug.log*
 node_modules
-uploads/
 package-lock.json
 local_*
 local*
