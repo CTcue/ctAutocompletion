@@ -1,48 +1,50 @@
-
 const version = require("./package").version;
-const config = require('./config/config');
+const config = require("./config/config");
 
-const koa = require('koa');
-const app = module.exports = new koa();
-const router = require('koa-router')();
+const router = require("koa-router")();
+const koaBody = require("koa-body");
 const cors = require("@koa/cors");
 
-/////
-// Middleware
-
-const bodyParser    = require('./middleware/parse');
-const extractUserId = require("./middleware/extractUser");
+const koa = require("koa");
+const app = module.exports = new koa();
 
 app.use(cors());
-app.use(bodyParser);
+app.use(koaBody({ jsonLimit: "4kb" }));
 
-/////
-// API
+app.use(async (ctx, next) => {
+    try {
+        await next();
+    }
+    catch (err) {
+        console.error(err);
 
-router['get']('/', function *() {
-    this.body = {
-        "version" : version
-    };
+        ctx.status = err.status || 500;
+        ctx.body = {
+            "error": "500:SERVER_ERROR",
+            "error-details": "Sorry, this request resulted in an error!"
+        };
+    }
 });
 
-const autocompletion = require('./controllers/autocomplete.js');
-router['post']('/v2/autocomplete', extractUserId, autocompletion);
+router["get"]("/", async function(ctx) {
+    ctx.body = { "version": version };
+});
 
-const expand = require('./controllers/expand.js');
-router['post']('/expand', extractUserId, expand);
+const autocompletion = require("./controllers/autocomplete.js");
+router["post"]("/v2/autocomplete", autocompletion);
 
-/////
-// V2 end-points (deprecated)
+const expand = require("./controllers/expand.js");
+router["post"]("/expand", expand);
 
-const expandGrouped    = require('./controllers/expand_grouped.js');
-router['post']('/expand-grouped', extractUserId, expandGrouped);
+const expandGrouped = require("./controllers/expand_grouped.js");
+router["post"]("/expand-grouped", expandGrouped);
 
-const expandByString   = require('./controllers/expand_by_string.js');
-router['post']('/expand-by-string', extractUserId, expandByString);
+const expandByString = require("./controllers/expand_by_string.js");
+router["post"]("/expand-by-string", expandByString);
 
 const port = process.env.PORT || config.port;
 
 app.use(router.routes());
 app.listen(port);
 
-console.info('listening on port %d', port);
+console.info("listening on port %d", port);

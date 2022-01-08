@@ -15,18 +15,18 @@ const elasticClient = new elastic.Client({
 
 const source = ["cui", "str", "pref"];
 
-module.exports = function *() {
+module.exports = async function(ctx) {
     const start = Date.now();
-    const body = this.request.body;
+    const body = ctx.request.body;
 
     // Limit to N characters input;
-    const clean = _.deburr(body.query)
+    const clean = _.deburr(String(body.query))
         .trim()
         .slice(0, 42)
         .trim();
 
     if (!clean) {
-        this.body = {
+        ctx.body = {
             "took": Math.ceil(Date.now() - start),
             "hits": []
         };
@@ -41,7 +41,7 @@ module.exports = function *() {
         .trim()
         .toLowerCase();
 
-    const matchQuery = {
+    const query = {
         "index": config.elasticsearch.index,
         "size" : config.autocomplete.size || 20,
         "sort": ["_score"],
@@ -97,11 +97,11 @@ module.exports = function *() {
         }
     };
 
-    const results = yield getResults(matchQuery);
-    const allMatches = results.hits || [];
+    const response = await elasticClient.search(query);
+    const hits = getResponseSources(response.body || {});
 
     // Search allowing spelling mistakes (CPU intensive)
-    if (!allMatches.length || allMatches.length < 4) {
+    if (!hits.length || hits.length < 4) {
         const fuzzyQuery = {
             "index": config.elasticsearch.index,
             "size" : 5,
@@ -125,33 +125,38 @@ module.exports = function *() {
             }
         };
 
-        const results = yield getResults(fuzzyQuery);
-        const spellingMatches = results.hits || [];
+        const responseFuzzy = await elasticClient.search(fuzzyQuery);
+        const fuzzy = getResponseSources(responseFuzzy.body || {});
 
-        this.body = {
-            "took": Math.ceil(Date.now() - start),
-            "hits" : reducePayload(allMatches.concat(spellingMatches))
-        };
+        hits.push(...fuzzy);
     }
-    else {
-        this.body = {
-            "took": Math.ceil(Date.now() - start),
-            "hits" : reducePayload(allMatches)
-        };
-    }
+
+    ctx.body = {
+        took: Math.ceil(Date.now() - start),
+        hits: reducePayload(hits)
+    };
 };
 
-// Groups by CUI and strips "pref" if it"s exactly the same as str
-function reducePayload(hits) {
+function getResponseSources(response = {}) {
+    return _.get(response, "hits.hits", []).map(r => {
+        return _.get(r, "_source", {});
+    });
+}
+
+// Groups by CUI and strips 'pref' if it's exactly the same as str
+const uniqueFn = (s) => s["pref"].trim().replace("-", " ").toLowerCase();
+
+function reducePayload(hits = []) {
     const result = [];
     const grouped = _.groupBy(hits, "cui");
 
-    for (var cui in grouped) {
-        var tmp = grouped[cui][0];
+
+    for (const cui in grouped) {
+        const tmp = grouped[cui][0];
 
         if (grouped[cui].length > 1) {
-            tmp.pref = _.uniqBy(grouped[cui].map(s => s["pref"].trim().replace("-", " ").toLowerCase())).join(", ");
-
+            const mapped = grouped[cui].map(uniqueFn);
+            tmp.pref = _.uniqBy(mapped).join(", ");
             result.push(tmp)
         }
         else {
@@ -166,35 +171,35 @@ function reducePayload(hits) {
     return result;
 }
 
-function getResults (queryObj) {
-    return function(callback) {
-        elasticClient.search(queryObj, function(err, esRes) {
-            if (err) {
-                if (err.meta && err.meta.body) {
-                    console.error(JSON.stringify(err.meta.body, null, 2));
-                }
+// function getResults (queryObj) {
+//     return function(callback) {
+//         elasticClient.search(queryObj, function(err, esRes) {
+//             if (err) {
+//                 if (err.meta && err.meta.body) {
+//                     console.error(JSON.stringify(err.meta.body, null, 2));
+//                 }
 
-                return callback(false, { "error": true, "took": 10, "hits": []})
-            }
+//                 return callback(false, { "error": true, "took": 10, "hits": []})
+//             }
 
-            const res = esRes.body;
-            const hits = res.hits;
+//             const res = esRes.body;
+//             const hits = res.hits;
 
-            let result = [];
+//             let result = [];
 
-            if (hits && hits.total.value > 0) {
-                result = hits.hits.map(function(hit) {
-                    return {
-                        ...hit["_source"],
-                        score: hit._score
-                    }
-                });
-            }
+//             if (hits && hits.total.value > 0) {
+//                 result = hits.hits.map(function(hit) {
+//                     return {
+//                         ...hit["_source"],
+//                         score: hit._score
+//                     }
+//                 });
+//             }
 
-            callback(err, {
-                "took": res.took,
-                "hits": result,
-            });
-        });
-    }
-}
+//             callback(err, {
+//                 "took": res.took,
+//                 "hits": result,
+//             });
+//         });
+//     }
+// }

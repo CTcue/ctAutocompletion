@@ -33,12 +33,6 @@ describe("test autocomplete queries", function () {
             .expect(413, done);
     });
 
-    it("should not allow requests with an empty body", function(done) {
-        agent
-            .post("/v2/autocomplete")
-            .expect(400, done);
-    });
-
     it("should allow requests without a search query", function(done) {
         agent
             .post("/v2/autocomplete")
@@ -216,6 +210,103 @@ describe("test autocomplete queries", function () {
                 const terms = body.terms.join("\n").toLowerCase();
                 expect(terms).toContain("hypertension");
                 expect(terms).toContain("hoge bloeddruk");
+
+                done();
+            });
+    });
+
+    it("can expand a term to obtain synonyms (does not error on empty input)", function(done) {
+        agent
+            .post("/expand-grouped")
+            .send({ "query": "" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.terms).toStrictEqual({});
+
+                done();
+            });
+    });
+
+    it("can expand a term to obtain synonyms (does not error on invalid input)", function(done) {
+        agent
+            .post("/expand-grouped")
+            .send({ "query": "XXX" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.terms).toStrictEqual({});
+
+                done();
+            });
+    });
+
+    it("can expand a term to obtain synonyms (grouped)", function(done) {
+        agent
+            .post("/expand-grouped")
+            .send({ "query": "C1306459" }) // Malignant neoplasm
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.terms["english"].length).toBeGreaterThan(1);
+
+                const terms = body.terms["english"].join("\n").toLowerCase();
+                expect(terms).toContain("cancer");
+                expect(terms).toContain("malignancy");
+
+                done();
+            });
+    });
+
+    it("can expand a term to obtain synonyms (does not error on empty input)", function(done) {
+        agent
+            .post("/expand-by-string")
+            .send({ "query": "" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.cui).toBe("");
+                expect(body.terms).toStrictEqual({});
+
+                done();
+            });
+    });
+
+    it("can expand a term to obtain synonyms (does not error on invalid input)", function(done) {
+        agent
+            .post("/expand-by-string")
+            .send({ "query": "XXX" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+                expect(body.cui).toBe("");
+                expect(body.terms).toStrictEqual({});
+
+                done();
+            });
+    });
+
+    it("can expand a term to obtain synonyms (by string)", function(done) {
+        agent
+            .post("/expand-by-string")
+            .send({ "query": "Diabetes Mellitus" })
+            .end(function(err, res) {
+                expect(res.status).toBe(200);
+
+                const body = res.body;
+
+                expect(body.cui).toBe("C0011849");
+                expect(body.terms["dutch"].length).toBeGreaterThan(1);
+                expect(body.terms["english"].length).toBeGreaterThan(1);
+
+                const terms = body.terms["english"].join("\n").toLowerCase();
+                expect(terms).toContain("diabetes");
+                expect(terms).toContain("niddm");
 
                 done();
             });

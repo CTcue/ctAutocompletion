@@ -21,8 +21,9 @@
     "medical synonyms"
   ],
   "dependencies": {
-    "koa": "2.7.0",
-    "koa-router": "5.4.0",
+    "koa": "2.13.4",
+    "koa-router": "10.1.1",
+    "koa-body": "4.2.0",
     "@koa/cors": "3.1.0",
     "@elastic/elasticsearch": "7",
     "lodash": "4.17.21"
