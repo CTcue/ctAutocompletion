@@ -1,47 +1,41 @@
 {
   "name": "ct-autocompletion",
-  "version": "0.1.1",
-  "description": "Relevant UMLS terms based on user input",
+  "version": "1.0.0",
+  "description": "Provides medical autocompletion and relevant synonyms",
   "main": "app.js",
   "scripts": {
-    "prestart": "npm install --silent",
-    "start": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
+    "start": "node app.js",
+    "dev": "nodemon --harmony --ignore _scripts/ --ignore scripts/ app.js",
     "serve": "(cd demo/ && http-server -s -p 4040 -o)",
-    "test": "set PORT=4088 && mocha --harmony -R spec --recursive ./test"
+    "test": "jest --config=jest.json --runInBand"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:CTcue/ctAutocompletion.git"
   },
+  "engines": {
+    "node": ">=14.17"
+  },
   "keywords": [
-    "umls",
-    "suggestions",
-    "autocompletion"
+    "autocompletion",
+    "medical synonyms"
   ],
   "dependencies": {
-    "cheerio": "^0.22.0",
-    "co-monk": "1.0.0",
-    "elasticsearch": "16.3.0",
-    "elasticsearch-writable-stream": "^2.0.1",
-    "koa": "2.7.0",
-    "koa-cors": "0.0.16",
-    "koa-router": "5.4.0",
-    "lodash": "^4.17.21",
-    "minimist": "^1.2.3",
-    "moment": "^2.24.0",
-    "mongodb": "^3.2.7",
-    "monk": "7.0.0",
-    "neo4j": "^2.0.0-RC2",
-    "neo4j-batch-index-stream": "0.0.1",
-    "request": "^2.88.0",
-    "split2": "^3.1.1",
-    "through2": "^3.0.1"
+    "koa": "2.13.4",
+    "koa-router": "10.1.1",
+    "koa-body": "4.2.0",
+    "@koa/cors": "3.1.0",
+    "@elastic/elasticsearch": "7",
+    "lodash": "4.17.21"
   },
   "devDependencies": {
-    "supertest": "*",
-    "mocha": "*",
-    "nodemon": "1.19.1",
-    "http-server": "0.11.1"
+    "jest": "27.4.7",
+    "http-server": "14.0.0",
+    "nodemon": "2.0.15",
+    "supertest": "6.1.6",
+    "split2": "4.1.0",
+    "through2": "4.0.2",
+    "elasticsearch-writable-stream": "2.0.1"
   },
   "license": "Proprietary",
   "private": true

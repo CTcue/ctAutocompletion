@@ -1,0 +1,89 @@
+{
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+
+        "index": {
+            "similarity": {
+                "scripted_tf": {
+                    "type": "scripted",
+                    "script": {
+                    "source": "double tf = Math.sqrt(doc.freq); double norm = 1/Math.sqrt(doc.length); return query.boost * tf * norm;"
+                    }
+                }
+            }
+        },
+        "analysis": {
+            "filter": {
+                "autocomplete_filter": {
+                    "type": "edge_ngram",
+                    "min_gram": 1,
+                    "max_gram": 20
+                }
+            },
+            "normalizer": {
+                "uppercase": {
+                    "type": "custom",
+                    "filter": [
+                        "uppercase",
+                        "asciifolding"
+                    ]
+                }
+            },
+            "analyzer": {
+                "autocomplete": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "autocomplete_filter"
+                    ]
+                },
+
+                "folding" : {
+                    "filter" : [ "lowercase", "asciifolding" ],
+                    "type" : "custom",
+                    "tokenizer" : "keyword"
+                }
+            }
+        }
+    },
+
+    "mappings": {
+        "dynamic": "strict",
+        "properties": {
+            "cui": {
+                "type": "keyword",
+                "normalizer": "uppercase"
+            },
+            "str": {
+                "type": "text",
+                "analyzer": "autocomplete",
+                "search_analyzer": "standard",
+                "similarity" : "scripted_tf"
+            },
+            "exact": {
+                "type": "text",
+                "analyzer": "folding",
+                "search_analyzer": "keyword",
+                "similarity" : "scripted_tf"
+            },
+            "pref": {
+                "type": "text"
+            },
+            "source": {
+                "type": "keyword",
+                "normalizer": "uppercase"
+            },
+            "lang": {
+                "type": "keyword",
+                "normalizer": "uppercase"
+            },
+            "types": {
+                "type": "keyword",
+                "normalizer": "uppercase"
+            }
+        }
+    }
+}

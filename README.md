@@ -1,56 +1,71 @@
 ctAutocompletion
 ================
 
-Find relevant UMLS terms based on user input. The autocompletion algorithm prioritizes exact matches, and if non are found it prefers prefix matches. You can also send multiple words and for each separate term it does a prefix lookup, so you can send queries like `anky spondy` or `maj dep dis`.
+Finds relevant medical terms and their synonyms using Elasticsearch.
+
+* Optimized for the medical domain
+* Prioritizes exact and/or prefix matches.
+* Fallback fuzzy search
 
 ## Installation
 
-* Make sure you have NodeJS (latest LTS) and Elasticsearch (7.x) installed
-
-* In this directory install the dependencies with:
-
-```
-npm install
-
-pip install -r requirements.txt
-```
-
-* Obtain a copy of our processed `output` directory:
-    * Either download (the private) `output` directory from our [https://zoomholding.stackstorage.com/](https://zoomholding.stackstorage.com/)
-    * Otherwise, download UMLS and run the pre-process scripts
-
-* Put the `output` directory in `ctAutocompletion/_scripts/`
-* Finally, run `bash ./_scripts/bulkUpload.sh`
-
-
-#### Running the Demo
-
-Open a terminal and run:
+* Make sure you have NodeJS (latest LTS) and Elasticsearch (7.x) installed and running
+* Install the dependencies with:
 
 ```
-npm start
+yarn install
+```
+
+* Either obtain a copy of our processed `output/` directory or create your own file
+    * `AI-data > synonym-files > autocompletion_concepts.txt`
+    * See below [for an example of the file format](#format-concepts)
+* Add the file to `./scripts/output/` so you have `./scripts/output/concepts.txt`
+* To import terms into elasticsearch run:
+
+```
+bash ./script/import.sh
+```
+
+> It will take a minute to upload the terms to the index
+
+## Local demo
+
+To compare autocompletion results (side by side) with another instance of synonyms.
+
+For the main app, open a terminal and run:
+
+```
+yarn start
 ```
 
 * Open another terminal to serve the demo application run:
 
 ```
-npm run serve
+yarn run serve
 ```
 
 > The ctAutocompletion API will be running on `http://localhost:4080` and the demo application will be available on `http://localhost:4040`
 
 
+## Tests
+
+* Make sure elasticsearch is running and has an `autocomplete` index
+* Run:
+
+```
+yarn test
+```
+
 ## API
 
-Response and Request bodies are always in JSON.
+Response and request bodies are in JSON.
 
 Type | URL | Description |
 ---  | ------- | ----- |
-`POST` | `/v2/autocomplete` | Find terms and suggestions by partial input |
-`POST` | `/term_lookup`     | Find an exact term
-`POST` | `/expand-grouped`  | Get all synonyms from a CUI
+`POST` | `/v2/autocomplete`  | Find terms and suggestions by partial input |
+`POST` | `/expand`           | Find an exact term
+`POST` | `/expand-grouped`   | Get all synonyms from a CUI (concept identifier)
 `POST` | `/expand-by-string` | Get all synonyms based on a term
-`GET`  | `/dbc/:code`       | List all diagnosis for a DBC specialty code
 
 
 #### `POST http://localhost:4080/v2/autocomplete`
@@ -62,6 +77,7 @@ Type | URL | Description |
 ```
 
 ```
+response
 {
     "took": 11,
     "hits": [
@@ -86,33 +102,6 @@ Type | URL | Description |
 }
 ```
 
-#### `POST http://localhost:4080/term_lookup`
-
-```
-{
-    "query": "LDL"
-}
-```
-
-```
-{
-    "took": 0,
-    "hits": [
-        {
-            "str": "ldl",
-            "types": [
-                "CHEM",
-                "T123",
-                "T109"
-            ],
-            "cui": "C0023823",
-            "pref": "Low-Density Lipoproteins",
-            "exact": "ldl"
-        }
-    ]
-}
-```
-
 #### `POST http://localhost:4080/expand-grouped`
 
 ```
@@ -122,6 +111,7 @@ Type | URL | Description |
 ```
 
 ```
+response
 {
     "category": "keyword",
     "pref": "Primary malignant neoplasm",
@@ -150,6 +140,7 @@ Type | URL | Description |
 ```
 
 ```
+response
 {
     "cui": "C0038013",
     "pref": "Ziekte van Marie-Strümpell",
@@ -189,49 +180,17 @@ Type | URL | Description |
 }
 ```
 
-
-#### `GET http://localhost:4080/dbc/0320`
-
-Where the `/:code` used is a DBC specialty code.
-
-```
-[
-    {
-        "label": "Traject",
-        "number": "000"
-    },
-    {
-        "label": "geen aanwijzingen voor cardiale afwijkingen",
-        "number": "01"
-    },
-    {
-        "label": "PODB, mogelijk AP",
-        "number": "02"
-    },
-    {
-        "label": "AP, nog geen ischemie aangetoond",
-        "number": "03"
-    },
-    {
-        "label": "AP, ischemie aangetoond",
-        "number": "04"
-    },
-
-    ...
-]
-```
-
 ## Format concepts
 
 You can add your own concepts via a tab separated file (concepts.txt), that contains the cui, language, source, type, preferred term and synonyms:
 
-CUI (id) | Language | Source | Type | Preferred term | Synonyms |
+CUI (concept identifier) | Language | Source | Type | Preferred term | Synonyms |
 -------- | -------- | ------ | ---- | -------------- | ---------- |
 C0001969 |   DUT    | `ICPC2ICD10DUT` | `T048|DISO` | alcoholintoxicatie | `Alcohol Gebruik|Alcoholabuses` |
 C0011860 |   DUT    | `MSHDUT|ICD10DUT|MDRDUT` | ` DISO|T047` | Diabetes Mellitus Type 2 | `Diabetes Mellitus Type 2|Niet-insuline-afhankelijke Diabetes Mellitus|DM2`
 
 ## Contributing
 
-You can run unit tests with `npm test`.
+You can run tests with `yarn test`.
 
 If you feel something is missing, you can open an issue stating the problem sentence and desired result. If code is unclear give us a @mention. Pull requests are welcome.

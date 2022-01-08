@@ -1,20 +1,22 @@
 
 const _ = require("lodash");
 
-
 let config = {
     "host" : "localhost",
     "port" : 4080,
 
-    "elasticsearch": {
-        "version": "5.4",
-        "host"   : "localhost",
-        "port"   : 9200,
-        "auth"   : ""
+    "autocomplete": {
+        "size": 24
     },
 
-    "mongodb": {
-        "path" : "mongodb://localhost/umls"
+    "elasticsearch": {
+        "version": "7.x",
+        "host"   : "http://localhost:9200",
+        "auth"   : {
+            "username": "elastic",
+            "password": "changeme"
+        },
+        "index": "autocomplete"
     },
 
     "api_token": "API_TOKEN"
