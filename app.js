@@ -1,8 +1,8 @@
 const version = require("./package").version;
 const config = require("./config/config");
 
-const router = require("koa-router")();
 const koaBody = require("koa-body");
+const router = require("@koa/router")();
 const cors = require("@koa/cors");
 
 const koa = require("koa");
