@@ -1,0 +1,2 @@
+ingest.geoip.downloader.enabled: false
+xpack.security.enabled: true
