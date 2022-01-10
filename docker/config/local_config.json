@@ -1,0 +1,14 @@
+{
+  "host" : "localhost",
+  "port" : 4080,
+
+  "autocomplete": {
+    "size": 24
+  },
+
+  "elasticsearch": {
+    "version": "7.x",
+    "host"   : "http://elasticsearch-01:9200",
+    "index": "autocomplete"
+  }
+}
