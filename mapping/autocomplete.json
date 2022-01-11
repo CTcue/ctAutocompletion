@@ -8,7 +8,7 @@
                 "scripted_tf": {
                     "type": "scripted",
                     "script": {
-                    "source": "double tf = Math.sqrt(doc.freq); double norm = 1/Math.sqrt(doc.length); return query.boost * tf * norm;"
+                        "source": "double tf = Math.sqrt(doc.freq); double norm = 1/Math.sqrt(doc.length); return query.boost * tf * norm;"
                     }
                 }
             }
