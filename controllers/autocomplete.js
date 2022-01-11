@@ -13,7 +13,7 @@ const elasticClient = new elastic.Client({
     "auth": config.elasticsearch.auth
 });
 
-const source = ["cui", "str", "pref", "label"];
+const source = ["cui", "str", "pref"];
 
 module.exports = async function(ctx) {
     const start = Date.now();
