@@ -23,7 +23,7 @@ yarn install
 * To import terms into elasticsearch run:
 
 ```
-bash ./script/import.sh
+bash ./scripts/import.sh
 ```
 
 > It will take a minute to upload the terms to the index
