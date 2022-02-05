@@ -9,6 +9,11 @@
 ```
 3. Follow instructions below on updating docker versions in production
 
+## Production
+### Updating app config
+1. Add or adjust `config/local_config.json` to reflect configuration
+2. `> docker-compose restart ct-autocomplete`
+
 ### Updating docker-compose.yml
 1. Adjust docker-compose.yml to reflect configuration
 2. ```

@@ -1,4 +1,4 @@
-FROM node:17-alpine
+FROM node:16-alpine
 
 LABEL maintainer="Bernd van der Veen <bernd@ctcue.com>"
 
@@ -29,6 +29,8 @@ RUN yarn install
 
 # Copy all
 COPY --chown=node:node . .
+
+RUN chmod u+x /app/scripts/import.sh
 
 # Setup runtime env
 EXPOSE 4060

@@ -1,2 +1,3 @@
 ingest.geoip.downloader.enabled: false
-xpack.security.enabled: true
+xpack.security.enabled: false
+network.host: 0.0.0.0

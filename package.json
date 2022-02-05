@@ -26,16 +26,16 @@
     "@koa/router": "10.1.1",
     "@koa/cors": "3.1.0",
     "@elastic/elasticsearch": "7",
-    "lodash": "4.17.21"
+    "lodash": "4.17.21",
+    "split2": "4.1.0",
+    "through2": "4.0.2",
+    "elasticsearch-writable-stream": "2.0.1"
   },
   "devDependencies": {
     "jest": "27.4.7",
     "http-server": "14.0.0",
     "nodemon": "2.0.15",
-    "supertest": "6.1.6",
-    "split2": "4.1.0",
-    "through2": "4.0.2",
-    "elasticsearch-writable-stream": "2.0.1"
+    "supertest": "6.1.6"
   },
   "license": "Proprietary",
   "private": true
