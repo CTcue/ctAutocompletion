@@ -38,6 +38,6 @@ if (require.main === module) {
     createIndexMapping();
 
     console.info("Generated autocomplete mapping:");
-    console.info(`http://${config.elasticsearch.host}:9200/autocomplete/_search?pretty`);
+    console.info(`${config.elasticsearch.host}/autocomplete/_search?pretty`);
     console.info("");
 }

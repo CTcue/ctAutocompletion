@@ -27,3 +27,7 @@
    > docker-compose down && docker-compose up -d
    ```
 
+#### Updating concepts data using import.sh
+1. On the host update the `concepts.txt` in /storage/ctAutoocomplete/concepts.txt
+2. Run the `import.sh` script in the container
+`docker exec -it ct-autocomplete sh -c 'cd /app/scripts/ && /app/scripts/import.sh'`
