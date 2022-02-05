@@ -32,7 +32,4 @@ COPY --chown=node:node . .
 
 RUN chmod u+x /app/scripts/import.sh
 
-# Setup runtime env
-EXPOSE 4060
-
 CMD ["node", "app.js"]
