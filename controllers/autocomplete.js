@@ -170,36 +170,3 @@ function reducePayload(hits = []) {
 
     return result;
 }
-
-// function getResults (queryObj) {
-//     return function(callback) {
-//         elasticClient.search(queryObj, function(err, esRes) {
-//             if (err) {
-//                 if (err.meta && err.meta.body) {
-//                     console.error(JSON.stringify(err.meta.body, null, 2));
-//                 }
-
-//                 return callback(false, { "error": true, "took": 10, "hits": []})
-//             }
-
-//             const res = esRes.body;
-//             const hits = res.hits;
-
-//             let result = [];
-
-//             if (hits && hits.total.value > 0) {
-//                 result = hits.hits.map(function(hit) {
-//                     return {
-//                         ...hit["_source"],
-//                         score: hit._score
-//                     }
-//                 });
-//             }
-
-//             callback(err, {
-//                 "took": res.took,
-//                 "hits": result,
-//             });
-//         });
-//     }
-// }
