@@ -239,7 +239,7 @@ angular
                     return;
                 }
 
-                if (!item.cui || item.cui === "generated" || !_.startsWith(item.cui, "C")) {
+                if (!item.cui || item.cui === "generated") {
                     _.set(item, "clicked", true);
                     _.set(item, "visible", true);
                     _.set(item, "error", true);

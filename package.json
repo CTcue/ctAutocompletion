@@ -32,10 +32,10 @@
     "elasticsearch-writable-stream": "2.0.1"
   },
   "devDependencies": {
-    "jest": "27.4.7",
-    "http-server": "14.0.0",
+    "jest": "27.5.1",
+    "http-server": "14.1.0",
     "nodemon": "2.0.15",
-    "supertest": "6.1.6"
+    "supertest": "6.2.2"
   },
   "license": "Proprietary",
   "private": true
