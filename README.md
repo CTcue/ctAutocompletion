@@ -113,10 +113,7 @@ response
 ```
 response
 {
-    "category": "keyword",
-    "pref": "Primary malignant neoplasm",
-    "terms": {
-        "english": [
+    "terms": [
             "Cancer",
             "Malignancy",
             "Tumor, malignant",
@@ -126,8 +123,7 @@ response
             "Malignant tumor morphology",
             "Unclassified tumor, malignant",
             "Malignant neoplasm, primary (morphologic abnormality)"
-        ]
-    }
+    ]
 }
 ```
 
