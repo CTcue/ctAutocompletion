@@ -63,9 +63,9 @@ Response and request bodies are in JSON.
 Type | URL | Description |
 ---  | ------- | ----- |
 `POST` | `/v2/autocomplete`  | Find terms and suggestions by partial input |
-`POST` | `/expand`           | Find an exact term
-`POST` | `/expand-grouped`   | Get all synonyms from a CUI (concept identifier)
-`POST` | `/expand-by-string` | Get all synonyms based on a term
+`POST` | `/expand`           | Get all synonyms based on a CUI (concept identifier)
+`POST` | `/expand-grouped`   | Deprecated: Get synonyms from a CUI (concept identifier)
+`POST` | `/expand-by-string` | Deprecated: Get synonyms based on a synonym
 
 
 #### `POST http://localhost:4080/v2/autocomplete`
@@ -102,7 +102,7 @@ response
 }
 ```
 
-#### `POST http://localhost:4080/expand-grouped`
+#### `POST http://localhost:4080/expand`
 
 ```
 {
