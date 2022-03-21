@@ -180,10 +180,10 @@ response
 
 You can add your own concepts via a tab separated file (concepts.txt), that contains the cui, language, source, type, preferred term and synonyms:
 
-CUI (concept identifier) | Language | Source | Type | Preferred term | Synonyms |
--------- | -------- | ------ | ---- | -------------- | ---------- |
-C0001969 |   DUT    | `ICPC2ICD10DUT` | `T048|DISO` | alcoholintoxicatie | `Alcohol Gebruik|Alcoholabuses` |
-C0011860 |   DUT    | `MSHDUT|ICD10DUT|MDRDUT` | ` DISO|T047` | Diabetes Mellitus Type 2 | `Diabetes Mellitus Type 2|Niet-insuline-afhankelijke Diabetes Mellitus|DM2`
+CUI (concept identifier) | Language | Source                   | Type        | Preferred term           | Synonyms
+------------------------ | -------- | ------------------------ | ----------- | ------------------------ | ---------- 
+C0001969                 |   DUT    | `ICPC2ICD10DUT`          | `T048\|DISO` | alcoholintoxicatie       | `Alcohol Gebruik\|Alcoholabuses`
+C0011860                 |   DUT    | `MSHDUT\|ICD10DUT\|MDRDUT` | `DISO\|T047` | Diabetes Mellitus Type 2 | `Diabetes Mellitus Type 2\|Niet-insuline-afhankelijke Diabetes Mellitus\|DM2`
 
 ## Contributing
 
