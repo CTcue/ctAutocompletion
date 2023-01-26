@@ -35,15 +35,7 @@
                 </div>
 
                 <div class="full" ng-show="item.expanded">
-                    <div class="full" ng-show="item.expanded.terms.dutch && item.expanded.terms.dutch.length > 0">
-                        <b class="full">NL</b>
-                        <pre>{{ item.expanded.terms.dutch | json }}</pre>
-                    </div>
-
-                    <div class="full add-top" ng-show="item.expanded.terms.english && item.expanded.terms.english.length > 0">
-                        <b class="full">EN</b>
-                        <pre>{{ item.expanded.terms.english | json }}</pre>
-                    </div>
+                    <pre>{{ item.expanded.terms | json }}</pre>
                 </div>
             </div>
         </li>
